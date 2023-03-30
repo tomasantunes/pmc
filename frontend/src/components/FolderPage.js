@@ -12,7 +12,6 @@ window.bootstrap = require('bootstrap');
 export default function FolderPage() {
   const id = useParams().id;
 
-  console.log(id);
   return (
     <>
       <Sidebar />
