@@ -1,4 +1,5 @@
 import React from 'react';
+import { useParams } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import TasksPage from './TasksPage';
 import $ from 'jquery';
@@ -8,10 +9,13 @@ window.$ = $;
 global.jQuery = $;
 window.bootstrap = require('bootstrap');
 
-export default function Home() {
+export default function FolderPage() {
+  const id = useParams('id');
+
   return (
     <>
       <Sidebar />
+      <TasksPage folder_id={id} />
     </>
   )
 }
