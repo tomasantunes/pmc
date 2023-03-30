@@ -17,7 +17,7 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.get("/", function(req, res) {
-  res.send("PMC");
+  res.redirect("/home");
 });
 
 app.use(express.static(path.resolve(__dirname) + '/frontend/build'));

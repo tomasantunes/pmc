@@ -1,0 +1,45 @@
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 300px;
+    background-color: #154775;
+    color: white;
+    min-height: 100vh;
+    padding: 25px;
+}
+
+.menu {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+
+.menu li {
+    margin: 15px 0;
+}
+
+.menu li a, .menu li a:visited, .menu li a:active, .menu li a:hover, .menu li a:focus {
+    color: white;
+    text-decoration: none;
+}
+
+.tasks {
+    width: 500px;
+    margin: 0 auto;
+}
+
+.page {
+    margin-left: 300px;
+    padding: 25px;
+}
+
+input[type=checkbox] {
+    width: 35px;
+    height: 35px;
+    vertical-align: middle;
+}
+
+tbody {
+    font-size: 24px;
+}
