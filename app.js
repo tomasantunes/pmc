@@ -3,6 +3,8 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
+var mysql = require('mysql2');
+var secretConfig = require('./secret-config');
 
 var app = express();
 
@@ -16,6 +18,50 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+var con = mysql.createPool({
+  connectionLimit : 90,
+  connectTimeout: 1000000,
+  host: secretConfig.DB_HOST,
+  user: secretConfig.DB_USER,
+  password: secretConfig.DB_PASSWORD,
+  database: secretConfig.DB_NAME,
+});
+
+app.get("/api/get-folders", (req, res) => {
+  var sql = "SELECT * FROM folders";
+  con.query(sql, function (err, result) {
+    if (err) {
+      console.log(err);
+      res.json({status: "NOK", error: err.message});
+    }
+    res.json({status: "OK", data: result});
+  });
+});
+
+app.get("/api/get-tasks-from-folder", (req, res) => {
+  var folder_id = req.query.folder_id;
+  var sql = "SELECT * FROM tasks WHERE folder_id = ?";
+  con.query(sql, [folder_id], function (err, result) {
+    if (err) {
+      console.log(err);
+      res.json({status: "NOK", error: err.message});
+    }
+    res.json({status: "OK", data: result});
+  });
+});
+
+app.post("/api/add-folder", (req, res) => {
+  var name = req.body.name;
+  var sql = "INSERT INTO folders (name) VALUES (?)";
+  con.query(sql, [name], function (err, result) {
+    if (err) {
+      console.log(err);
+      res.json({status: "NOK", error: err.message});
+    }
+    res.json({status: "OK", data: "Folder has been added successfully."});
+  });
+});
+
 app.get("/", function(req, res) {
   res.redirect("/home");
 });
@@ -23,6 +69,10 @@ app.get("/", function(req, res) {
 app.use(express.static(path.resolve(__dirname) + '/frontend/build'));
 
 app.get('/home', (req, res) => {
+  res.sendFile(path.resolve(__dirname) + '/frontend/build/index.html');
+});
+
+app.get('/folder/:id', (req, res) => {
   res.sendFile(path.resolve(__dirname) + '/frontend/build/index.html');
 });
 

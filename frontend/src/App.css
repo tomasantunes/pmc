@@ -43,3 +43,12 @@ input[type=checkbox] {
 tbody {
     font-size: 24px;
 }
+
+.close {
+    font-size: 24px;
+    font-weight: bold;
+    color: #555;
+    outline: none;
+    border: none;
+    background-color: transparent;
+}
