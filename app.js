@@ -62,6 +62,32 @@ app.post("/api/add-folder", (req, res) => {
   });
 });
 
+app.post("/api/update-task-done", (req, res) => {
+  var task_id = req.body.task_id;
+  var is_done = req.body.is_done;
+  var sql = "UPDATE tasks SET is_done = ? WHERE id = ?";
+  con.query(sql, [is_done, task_id], function (err, result) {
+    if (err) {
+      console.log(err);
+      res.json({status: "NOK", error: err.message});
+    }
+    res.json({status: "OK", data: "Task has been updated successfully."});
+  });
+});
+
+app.post("/api/add-task", (req, res) => {
+  var folder_id = req.body.folder_id;
+  var description = req.body.description;
+  var sql = "INSERT INTO tasks (folder_id, description, is_done) VALUES (?, ?, 0)";
+  con.query(sql, [folder_id, description], function (err, result) {
+    if (err) {
+      console.log(err);
+      res.json({status: "NOK", error: err.message});
+    }
+    res.json({status: "OK", data: "Task has been added successfully."});
+  });
+});
+
 app.get("/", function(req, res) {
   res.redirect("/home");
 });
