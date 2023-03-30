@@ -2,6 +2,11 @@ import React, {useState, useEffect} from 'react';
 import axios from 'axios';
 import config from '../config';
 import $ from 'jquery';
+import {
+  SortableContainer,
+  SortableElement,
+  arrayMove
+} from "react-sortable-hoc";
 
 window.jQuery = $;
 window.$ = $;
@@ -9,8 +14,40 @@ global.jQuery = $;
 window.bootstrap = require('bootstrap');
 var bootprompt = require('bootprompt');
 
+function TRow(props) {
+  return (
+    <tr {...props}>
+      <td><input type="checkbox" checked={props.is_done} onChange={(e) => { props.updateTaskDone(e, props.task_id); }} /></td>
+      <td>{props.description}</td>
+      <td></td>
+    </tr>
+  )
+}
+
+const SortableTRow = SortableElement(TRow);
+
+function TBody(props) {
+  return (
+    <tbody {...props} className="table-group-divider">
+      {props.data.map((task, i) => {
+        return (
+          <SortableTRow key={task.id} index={i} task_id={task.id} description={task.description} is_done={task.is_done} updateTaskDone={props.updateTaskDone} />
+        )
+      })}
+    </tbody>
+  )
+}
+
+const SortableTBody = SortableContainer(TBody);
+
 export default function Tasks({folder_id}) {
   const [tasks, setTasks] = useState([]);
+
+  const handleSort = ({ oldIndex, newIndex }) => {
+    setTasks(prevState => (
+      arrayMove(prevState, oldIndex, newIndex)
+    ));
+  };
 
   function loadTasks() {
     setTasks([]);
@@ -86,17 +123,7 @@ export default function Tasks({folder_id}) {
                   <th style={{width: "20%"}}>Actions</th>
               </tr>
           </thead>
-          <tbody className="table-group-divider">
-            {tasks.map((task) => {
-              return (
-                <tr>
-                    <td><input type="checkbox" checked={task.is_done} onChange={(e) => { updateTaskDone(e, task.id); }} /></td>
-                    <td>{task.description}</td>
-                    <td></td>
-                </tr>
-              )
-            })}
-          </tbody>
+          <SortableTBody data={tasks} onSortEnd={handleSort} updateTaskDone={updateTaskDone} />
       </table>
     </>
   )
