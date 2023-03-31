@@ -8,6 +8,7 @@ window.jQuery = $;
 window.$ = $;
 global.jQuery = $;
 window.bootstrap = require('bootstrap');
+var bootprompt = require('bootprompt');
 
 export default function TasksPage({folder_id}) {
   const [folder, setFolder] = useState({});
@@ -30,13 +31,41 @@ export default function TasksPage({folder_id}) {
 
   }
 
+  function submitEditFolderName(name) {
+    axios.post(config.BASE_URL + "/api/edit-folder-name", {
+      folder_id: folder_id,
+      name: name
+    })
+    .then(function(response) {
+      if (response.data.status === "OK") {
+        getFolderInfo(folder_id);
+      }
+    })
+    .catch(function(err) {
+      console.log(err);
+      alert("Error: " + err.message);
+    });
+  }
+
+  function openEditFolderName() {
+    bootprompt.prompt({
+      title: "Edit Folder Name",
+      value: folder.name
+    }, (result) => {
+      if (result == null) {
+        return;
+      }
+      submitEditFolderName(result);
+    });
+  }
+
   useEffect(() => {
     getFolderInfo(folder_id);
   }, []);
   return (
     <div className="page">
         <div style={{textAlign: "center"}}>
-            <h3>{folder.name}</h3>
+            <h3>{folder.name}<a href="#" className="edit-folder-name-btn" onClick={openEditFolderName}><i class="fa-solid fa-pencil"></i></a></h3>
         </div>
         <Tasks folder_id={folder_id} />
     </div>
