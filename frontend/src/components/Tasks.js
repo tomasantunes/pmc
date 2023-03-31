@@ -18,7 +18,7 @@ function TRow(props) {
   return (
     <tr {...props}>
       <td><input type="checkbox" checked={props.is_done} onChange={(e) => { props.updateTaskDone(e, props.task_id); }} /></td>
-      <td>{props.description}</td>
+      <td className={props.is_done ? "strikethrough" : ""}>{props.description}</td>
       <td></td>
     </tr>
   )
@@ -29,9 +29,9 @@ const SortableTRow = SortableElement(TRow);
 function TBody(props) {
   return (
     <tbody {...props} className="table-group-divider">
-      {props.data.map((task, i) => {
+      {props.data.map((task) => {
         return (
-          <SortableTRow key={task.id} index={i} task_id={task.id} description={task.description} is_done={task.is_done} updateTaskDone={props.updateTaskDone} />
+          <SortableTRow key={task.id} index={task.sort_index} task_id={task.id} description={task.description} is_done={task.is_done} updateTaskDone={props.updateTaskDone} />
         )
       })}
     </tbody>
@@ -44,10 +44,31 @@ export default function Tasks({folder_id}) {
   const [tasks, setTasks] = useState([]);
 
   const handleSort = ({ oldIndex, newIndex }) => {
-    setTasks(prevState => (
-      arrayMove(prevState, oldIndex, newIndex)
-    ));
+    setTasks(prevState => {
+      var new_arr = arrayMove(prevState, oldIndex, newIndex);
+      updateSortIndex(new_arr);
+      return new_arr;
+    });
   };
+
+  function updateSortIndex(new_arr) {
+    for (var i in new_arr) {
+      var task = new_arr[i];
+      axios.post(config.BASE_URL + "/api/handle-sort", {task_id: task.id, sort_index: i})
+      .then(function(response) {
+        if (response.data.status == "OK") {
+          console.log("Sort index has been updated.");
+        }
+        else {
+          alert(response.data.error);
+        }
+      })
+      .catch(function(err) {
+        console.log(err);
+        alert(err.message);
+      });
+    }
+  }
 
   function loadTasks() {
     setTasks([]);
@@ -83,7 +104,7 @@ export default function Tasks({folder_id}) {
   }
 
   function submitAddTask(description) {
-    axios.post(config.BASE_URL + "/api/add-task", {folder_id: folder_id, description: description})
+    axios.post(config.BASE_URL + "/api/add-task", {folder_id: folder_id, description: description, sort_index: tasks.length})
     .then(function(response) {
       if (response.data.status == "OK") {
         loadTasks();
