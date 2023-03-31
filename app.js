@@ -114,6 +114,18 @@ app.post("/api/handle-sort", (req, res) => {
   });
 });
 
+app.get("/api/get-task", (req, res) => {
+  var task_id = req.query.task_id;
+  var sql = "SELECT * FROM tasks WHERE id = ?";
+  con.query(sql, [task_id], function (err, result) {
+    if (err) {
+      console.log(err);
+      res.json({status: "NOK", error: err.message});
+    }
+    res.json({status: "OK", data: result[0]});
+  });
+});
+
 app.post("/api/edit-task", (req, res) => {
   var task_id = req.body.task_id;
   var description = req.body.description;
