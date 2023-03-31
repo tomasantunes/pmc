@@ -29,9 +29,9 @@ const SortableTRow = SortableElement(TRow);
 function TBody(props) {
   return (
     <tbody {...props} className="table-group-divider">
-      {props.data.map((task) => {
+      {props.data.map((task, i) => {
         return (
-          <SortableTRow key={task.id} index={task.sort_index} task_id={task.id} description={task.description} is_done={task.is_done} updateTaskDone={props.updateTaskDone} />
+          <SortableTRow key={task.id} index={i} task_id={task.id} description={task.description} is_done={task.is_done} updateTaskDone={props.updateTaskDone} />
         )
       })}
     </tbody>
