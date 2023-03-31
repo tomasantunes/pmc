@@ -19,7 +19,17 @@ function TRow(props) {
     <tr {...props}>
       <td><input type="checkbox" checked={props.is_done} onChange={(e) => { props.updateTaskDone(e, props.task_id); }} /></td>
       <td className={props.is_done ? "strikethrough" : ""}>{props.description}</td>
-      <td></td>
+      <td>
+      <div class="dropdown">
+        <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+          Actions
+        </button>
+        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+          <li><a class="dropdown-item" href="#" onClick={() => { props.openEditTask(props.task_id) }}>Edit</a></li>
+          <li><a class="dropdown-item" href="#" onClick={() => { props.deleteTask(props.task_id) }}>Delete</a></li>
+        </ul>
+      </div>
+      </td>
     </tr>
   )
 }
@@ -31,7 +41,7 @@ function TBody(props) {
     <tbody {...props} className="table-group-divider">
       {props.data.map((task, i) => {
         return (
-          <SortableTRow key={task.id} index={i} task_id={task.id} description={task.description} is_done={task.is_done} updateTaskDone={props.updateTaskDone} />
+          <SortableTRow key={task.id} index={i} task_id={task.id} description={task.description} is_done={task.is_done} updateTaskDone={props.updateTaskDone} openEditTask={props.openEditTask} deleteTask={props.deleteTask} />
         )
       })}
     </tbody>
@@ -68,6 +78,13 @@ export default function Tasks({folder_id}) {
         alert(err.message);
       });
     }
+  }
+
+  function cancelSort(e) {
+    if (e.target.className == "dropdown-item" || e.target.className == "dropdown-menu" || e.target.tagName == "INPUT" || e.target.tagName == "A" || e.target.tagName == "BUTTON") {
+      return true;
+    }
+    return false;
   }
 
   function loadTasks() {
@@ -128,6 +145,70 @@ export default function Tasks({folder_id}) {
     });
   }
 
+  function openEditTask(task_id) {
+    axios.get(config.BASE_URL + "/api/get-task", {params: {task_id: task_id}})
+    .then(function(response) {
+      if (response.data.status == "OK") {
+        var task = response.data.data;
+        bootprompt.prompt({
+          title: "Edit Task",
+          value: task.description
+        }, (result) => {
+          if (result == null) {
+            return;
+          }
+          submitEditTask(task_id, result);
+        });
+      }
+      else {
+        alert(response.data.error);
+      }
+    })
+    .catch(function(err) {
+      console.log(err);
+      alert(err.message);
+    });
+  }
+
+  function submitEditTask(task_id, description) {
+    axios.post(config.BASE_URL + "/api/edit-task", {task_id: task_id, description: description})
+    .then(function(response) {
+      if (response.data.status == "OK") {
+        loadTasks();
+      }
+      else {
+        alert(response.data.error);
+      }
+    })
+    .catch(function(err) {
+      console.log(err);
+      alert(err.message);
+    });
+  }
+
+  function deleteTask(task_id) {
+    bootprompt.confirm({
+      title: "Are you sure?",
+      message: "Are you sure you want to delete this task?"
+    }, (result) => {
+      if (result) {
+        axios.post(config.BASE_URL + "/api/delete-task", {task_id: task_id})
+        .then(function(response) {
+          if (response.data.status == "OK") {
+            loadTasks();
+          }
+          else {
+            alert(response.data.error);
+          }
+        })
+        .catch(function(err) {
+          console.log(err);
+          alert(err.message);
+        });
+      }
+    });
+  }
+
   useEffect(() => {
     loadTasks();
   }, []);
@@ -144,7 +225,7 @@ export default function Tasks({folder_id}) {
                   <th style={{width: "20%"}}>Actions</th>
               </tr>
           </thead>
-          <SortableTBody data={tasks} onSortEnd={handleSort} updateTaskDone={updateTaskDone} />
+          <SortableTBody data={tasks} onSortEnd={handleSort} updateTaskDone={updateTaskDone} openEditTask={openEditTask} deleteTask={deleteTask} shouldCancelStart={cancelSort} />
       </table>
     </>
   )
