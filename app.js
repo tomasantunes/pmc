@@ -38,9 +38,21 @@ app.get("/api/get-folders", (req, res) => {
   });
 });
 
+app.get("/api/get-folder", (req, res) => {
+  var folder_id = req.query.folder_id;
+  var sql = "SELECT * FROM folders WHERE id = ?";
+  con.query(sql, [folder_id], function (err, result) {
+    if (err) {
+      console.log(err);
+      res.json({status: "NOK", error: err.message});
+    }
+    res.json({status: "OK", data: result[0]});
+  });
+});
+
 app.get("/api/get-tasks-from-folder", (req, res) => {
   var folder_id = req.query.folder_id;
-  var sql = "SELECT * FROM tasks WHERE folder_id = ?";
+  var sql = "SELECT * FROM tasks WHERE folder_id = ? ORDER BY sort_index ASC";
   con.query(sql, [folder_id], function (err, result) {
     if (err) {
       console.log(err);
@@ -78,13 +90,52 @@ app.post("/api/update-task-done", (req, res) => {
 app.post("/api/add-task", (req, res) => {
   var folder_id = req.body.folder_id;
   var description = req.body.description;
-  var sql = "INSERT INTO tasks (folder_id, description, is_done) VALUES (?, ?, 0)";
-  con.query(sql, [folder_id, description], function (err, result) {
+  var sort_index = req.body.sort_index;
+  var sql = "INSERT INTO tasks (folder_id, description, is_done, sort_index) VALUES (?, ?, 0, ?)";
+  con.query(sql, [folder_id, description, sort_index], function (err, result) {
     if (err) {
       console.log(err);
       res.json({status: "NOK", error: err.message});
     }
     res.json({status: "OK", data: "Task has been added successfully."});
+  });
+});
+
+app.post("/api/handle-sort", (req, res) => {
+  var task_id = req.body.task_id;
+  var sort_index = req.body.sort_index;
+  var sql = "UPDATE tasks SET sort_index = ? WHERE id = ?";
+  con.query(sql, [sort_index, task_id], function (err, result) {
+    if (err) {
+      console.log(err);
+      res.json({status: "NOK", error: err.message});
+    }
+    res.json({status: "OK", data: "Task has been updated successfully."});
+  });
+});
+
+app.post("/api/edit-task", (req, res) => {
+  var task_id = req.body.task_id;
+  var description = req.body.description;
+  var sql = "UPDATE tasks SET description = ? WHERE id = ?";
+  con.query(sql, [description, task_id], function (err, result) {
+    if (err) {
+      console.log(err);
+      res.json({status: "NOK", error: err.message});
+    }
+    res.json({status: "OK", data: "Task has been updated successfully."});
+  });
+});
+
+app.post("/api/delete-task", (req, res) => {
+  var task_id = req.body.task_id;
+  var sql = "DELETE FROM tasks WHERE id = ?";
+  con.query(sql, [task_id], function (err, result) {
+    if (err) {
+      console.log(err);
+      res.json({status: "NOK", error: err.message});
+    }
+    res.json({status: "OK", data: "Task has been deleted successfully."});
   });
 });
 

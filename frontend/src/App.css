@@ -52,3 +52,7 @@ tbody {
     border: none;
     background-color: transparent;
 }
+
+.strikethrough {
+    text-decoration: line-through;
+}
