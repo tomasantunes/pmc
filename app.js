@@ -50,6 +50,19 @@ app.get("/api/get-folder", (req, res) => {
   });
 });
 
+app.post("/api/edit-folder-name", (req, res) => {
+  var folder_id = req.body.folder_id;
+  var name = req.body.name;
+  var sql = "UPDATE folders SET name = ? WHERE id = ?";
+  con.query(sql, [name, folder_id], function (err, result) {
+    if (err) {
+      console.log(err);
+      res.json({status: "NOK", error: err.message});
+    }
+    res.json({status: "OK", data: "Folder name has been updated successfully."});
+  });
+});
+
 app.get("/api/get-tasks-from-folder", (req, res) => {
   var folder_id = req.query.folder_id;
   var sql = "SELECT * FROM tasks WHERE folder_id = ? ORDER BY sort_index ASC";
