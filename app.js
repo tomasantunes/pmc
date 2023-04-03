@@ -77,8 +77,9 @@ app.get("/api/get-tasks-from-folder", (req, res) => {
 
 app.post("/api/add-folder", (req, res) => {
   var name = req.body.name;
-  var sql = "INSERT INTO folders (name) VALUES (?)";
-  con.query(sql, [name], function (err, result) {
+  var type = req.body.type;
+  var sql = "INSERT INTO folders (name, type) VALUES (?, ?)";
+  con.query(sql, [name, type], function (err, result) {
     if (err) {
       console.log(err);
       res.json({status: "NOK", error: err.message});
