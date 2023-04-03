@@ -87,9 +87,9 @@ export default function Tasks({folder_id}) {
   const [checks, setChecks] = useState([]);
   const [newTask, setNewTask] = useState({
     description: "",
-    folder_id: "",
+    folder_id: folder_id,
     sort_index: 0,
-    task_type: "",
+    task_type: "daily",
     week_day: "",
     month_day: "",
     month: "",
@@ -199,6 +199,23 @@ export default function Tasks({folder_id}) {
     .then(function(response) {
       if (response.data.status == "OK") {
         loadTasks();
+        $(".addTaskModal").modal("hide");
+        setNewTask({
+          description: "",
+          folder_id: folder_id,
+          sort_index: 0,
+          task_type: "daily",
+          week_day: "",
+          month_day: "",
+          month: "",
+        });
+        setSelectedTaskType({value: "daily", label: "Daily"});
+        setSelectedWeekDay({});
+        setSelectedMonthDay({});
+        setSelectedMonth({});
+        setShowWeekDaySelector(false);
+        setShowMonthDaySelector(false);
+        setShowMonthSelector(false);
       }
       else {
         alert(response.data.error);
