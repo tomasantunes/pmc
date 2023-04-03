@@ -1,5 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import Tasks from './Tasks';
+import RecurrentTasks from './RecurrentTasks';
 import $ from 'jquery';
 import axios from 'axios';
 import config from '../config';
@@ -67,7 +68,11 @@ export default function TasksPage({folder_id}) {
         <div style={{textAlign: "center"}}>
             <h3>{folder.name}<a href="#" className="edit-folder-name-btn" onClick={openEditFolderName}><i class="fa-solid fa-pencil"></i></a></h3>
         </div>
-        <Tasks folder_id={folder_id} />
+        {folder.type == "simple" ?
+          <Tasks folder_id={folder_id} />
+        :
+          <RecurrentTasks folder_id={folder_id} />
+        }
     </div>
   )
 }
