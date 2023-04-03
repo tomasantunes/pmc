@@ -7,6 +7,7 @@ import {
   SortableElement,
   arrayMove
 } from "react-sortable-hoc";
+import Select from 'react-select';
 
 window.jQuery = $;
 window.$ = $;
@@ -84,6 +85,63 @@ export default function Tasks({folder_id}) {
   const [days, setDays] = useState([]);
   const [dates, setDates] = useState([]);
   const [checks, setChecks] = useState([]);
+  const [newTask, setNewTask] = useState({
+    description: "",
+    folder_id: "",
+    sort_index: 0,
+    task_type: "",
+    week_day: "",
+    month_day: "",
+    month: "",
+  });
+  const [selectedTaskType, setSelectedTaskType] = useState({value: "daily", label: "Daily"});
+  const [showWeekDaySelector, setShowWeekDaySelector] = useState(false);
+  const [showMonthDaySelector, setShowMonthDaySelector] = useState(false);
+  const [showMonthSelector, setShowMonthSelector] = useState(false);
+  const [selectedWeekDay, setSelectedWeekDay] = useState();
+  const [selectedMonthDay, setSelectedMonthDay] = useState();
+  const [selectedMonth, setSelectedMonth] = useState();
+
+  const taskTypes = [
+    {value: "daily", label: "Daily"},
+    {value: "weekly", label: "Weekly"},
+    {value: "monthly", label: "Monthly"},
+    {value: "yearly", label: "Yearly"},
+    {value: "week_day", label: "Week Day"},
+    {value: "month_day", label: "Month Day"},
+    {value: "year_day", label: "Year Day"},
+  ];
+
+  const weekDays = [
+    {value: 0, label: "Monday"},
+    {value: 1, label: "Tuesday"},
+    {value: 2, label: "Wednesday"},
+    {value: 3, label: "Thursday"},
+    {value: 4, label: "Friday"},
+    {value: 5, label: "Saturday"},
+    {value: 6, label: "Sunday"}
+  ];
+
+  var monthDays = [];
+
+  for (var i = 1; i <= 31; i++) {
+    monthDays.push({value: i, label: i});
+  }
+
+  const months = [
+    {value: 1, label: "January"},
+    {value: 2, label: "February"},
+    {value: 3, label: "March"},
+    {value: 4, label: "April"},
+    {value: 5, label: "May"},
+    {value: 6, label: "June"},
+    {value: 7, label: "July"},
+    {value: 8, label: "August"},
+    {value: 9, label: "September"},
+    {value: 10, label: "October"},
+    {value: 11, label: "November"},
+    {value: 12, label: "December"}
+  ];
 
   const handleSort = ({ oldIndex, newIndex }) => {
     setTasks(prevState => {
@@ -135,8 +193,9 @@ export default function Tasks({folder_id}) {
     });
   }
 
-  function submitAddTask(description) {
-    axios.post(config.BASE_URL + "/api/add-task", {folder_id: folder_id, description: description, sort_index: tasks.length})
+  function submitAddTask(e) {
+    e.preventDefault();
+    axios.post(config.BASE_URL + "/api/add-recurrent-task", newTask)
     .then(function(response) {
       if (response.data.status == "OK") {
         loadTasks();
@@ -152,12 +211,11 @@ export default function Tasks({folder_id}) {
   }
 
   function openAddTask() {
-    bootprompt.prompt("Add Task", (result) => {
-      if (result == null) {
-        return;
-      }
-      submitAddTask(result);
-    });
+    $(".addTaskModal").modal("show");
+  }
+
+  function closeAddTask() {
+    $(".addTaskModal").modal("hide");
   }
 
   function openEditTask(task_id) {
@@ -183,6 +241,45 @@ export default function Tasks({folder_id}) {
       console.log(err);
       alert(err.message);
     });
+  }
+
+  function changeNewTaskDescription(e) {
+    setNewTask({
+      ...newTask,
+      description: e.target.value
+    });
+  }
+
+  function changeNewTaskType(item) {
+    setNewTask({
+      ...newTask,
+      task_type: item.value
+    });
+    setSelectedTaskType(item);
+  }
+
+  function changeWeekDay(item) {
+    setNewTask({
+      ...newTask,
+      week_day: item.value
+    });
+    setSelectedWeekDay(item);
+  }
+
+  function changeMonthDay(item) {
+    setNewTask({
+      ...newTask,
+      month_day: item.value
+    });
+    setSelectedMonthDay(item);
+  }
+
+  function changeMonth(item) {
+    setNewTask({
+      ...newTask,
+      month: item.value
+    });
+    setSelectedMonth(item);
   }
 
   function submitEditTask(task_id, description) {
@@ -312,6 +409,24 @@ export default function Tasks({folder_id}) {
   }, [dates]);
 
   useEffect(() => {
+    if (selectedTaskType.value == "week_day") {
+      setShowWeekDaySelector(true);
+      setShowMonthDaySelector(false);
+      setShowMonthSelector(false);
+    }
+    else if (selectedTaskType.value == "month_day") {
+      setShowWeekDaySelector(false);
+      setShowMonthDaySelector(true);
+      setShowMonthSelector(false);
+    }
+    else if (selectedTaskType.value == "year_day") {
+      setShowWeekDaySelector(false);
+      setShowMonthDaySelector(true);
+      setShowMonthSelector(true);
+    }
+  }, [selectedTaskType]);
+
+  useEffect(() => {
     setDays(getDays());
     setDates(getDates());
   }, []);
@@ -337,6 +452,50 @@ export default function Tasks({folder_id}) {
           </thead>
           <SortableTBody data={tasks} onSortEnd={handleSort} updateTaskDone={updateTaskDone} openEditTask={openEditTask} deleteTask={deleteTask} shouldCancelStart={cancelSort} />
       </table>
+      <div class="modal addTaskModal" tabindex="-1">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Add Task</h5>
+              <button type="button" class="btn-close" onClick={closeAddTask} aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <form onSubmit={submitAddTask}>
+                <div className="form-group py-2">
+                  <label className="control-label">Name</label>
+                  <div>
+                      <input type="text" className="form-control input-lg" name="description" value={newTask.description} onChange={changeNewTaskDescription}/>
+                  </div>
+                </div>
+                <div className="form-group py-2">
+                  <label className="control-label">Type</label>
+                  <Select value={selectedTaskType} options={taskTypes} onChange={changeNewTaskType} />
+                </div>
+                {showWeekDaySelector &&
+                <div className="form-group py-2">
+                  <label className="control-label">Week Day</label>
+                  <Select value={selectedWeekDay} options={weekDays} onChange={changeWeekDay} />
+                </div>}
+                {showMonthDaySelector &&
+                <div className="form-group py-2">
+                  <label className="control-label">Month Day</label>
+                  <Select value={selectedMonthDay} options={monthDays} onChange={changeMonthDay} />
+                </div>} 
+                {showMonthSelector &&
+                <div className="form-group py-2">
+                  <label className="control-label">Month</label>
+                  <Select value={selectedMonth} options={months} onChange={changeMonth} />
+                </div>}
+                <div className="form-group">
+                    <div style={{textAlign: "right"}}>
+                        <button type="submit" className="btn btn-primary">Add</button>
+                    </div>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
     </>
   )
 }
