@@ -29,6 +29,15 @@
     margin: 0 auto;
 }
 
+.recurrent-tasks {
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.recurrent-tasks td, .recurrent-tasks th {
+    text-align: center;
+}
+
 .page {
     margin-left: 300px;
     padding: 25px;
