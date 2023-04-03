@@ -4,6 +4,7 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var mysql = require('mysql2');
+var mysql2 = require('mysql2/promise');
 var secretConfig = require('./secret-config');
 
 var app = express();
@@ -25,6 +26,17 @@ var con = mysql.createPool({
   user: secretConfig.DB_USER,
   password: secretConfig.DB_PASSWORD,
   database: secretConfig.DB_NAME,
+  timezone: 'Europe/Lisbon'
+});
+
+var con2 = mysql2.createPool({
+  connectionLimit : 90,
+  connectTimeout: 1000000,
+  host: secretConfig.DB_HOST,
+  user: secretConfig.DB_USER,
+  password: secretConfig.DB_PASSWORD,
+  database: secretConfig.DB_NAME,
+  timezone: 'Europe/Lisbon'
 });
 
 app.get("/api/get-folders", (req, res) => {
@@ -75,6 +87,35 @@ app.get("/api/get-tasks-from-folder", (req, res) => {
   });
 });
 
+app.get("/api/get-recurrent-tasks", (req, res) => {
+  var folder_id = req.query.folder_id;
+  var dti = req.query.dti;
+  var dtf = req.query.dtf;
+  var sql = "SELECT * FROM tasks WHERE folder_id = ? ORDER BY sort_index ASC";
+  con.query(sql, [folder_id], async function (err, result) {
+    if (err) {
+      console.log(err);
+      res.json({status: "NOK", error: err.message});
+    }
+
+    for (var i in result) {
+      var task_id = result[i].id;
+      var checks = await getTaskChecks(task_id, dti, dtf);
+      result[i].checks = checks;
+    }
+    res.json({status: "OK", data: result});
+  });
+});
+
+async function getTaskChecks(task_id, dti, dtf) {
+  console.log(dti);
+  console.log(dtf);
+  var sql = "SELECT * FROM recurrent_checks WHERE task_id = ? AND date BETWEEN ? AND ?";
+  const [rows, fields] = await con2.execute(sql, [task_id, dti, dtf]);
+  console.log(rows);
+  return rows;
+}
+
 app.post("/api/add-folder", (req, res) => {
   var name = req.body.name;
   var type = req.body.type;
@@ -98,6 +139,39 @@ app.post("/api/update-task-done", (req, res) => {
       res.json({status: "NOK", error: err.message});
     }
     res.json({status: "OK", data: "Task has been updated successfully."});
+  });
+});
+
+app.post("/api/update-recurrent-task-done", (req, res) => {
+  var task_id = req.body.task_id;
+  var is_done = req.body.is_done;
+  var date = req.body.date;
+  var sql = "SELECT * FROM recurrent_checks WHERE task_id = ? AND date = ?";
+  con.query(sql, [task_id, date], function (err, result) {
+    if (err) {
+      console.log(err);
+      res.json({status: "NOK", error: err.message});
+    }
+    if (result.length > 0) {
+      var sql2 = "UPDATE recurrent_checks SET is_done = ? WHERE task_id = ? AND date = ?";
+      con.query(sql2, [is_done, task_id, date], function (err, result) {
+        if (err) {
+          console.log(err);
+          res.json({status: "NOK", error: err.message});
+        }
+        res.json({status: "OK", data: "Task has been updated successfully."});
+      });
+    }
+    else {
+      var sql2 = "INSERT INTO recurrent_checks (task_id, date, is_done) VALUES (?, ?, ?)";
+      con.query(sql2, [task_id, date, is_done], function (err, result) {
+        if (err) {
+          console.log(err);
+          res.json({status: "NOK", error: err.message});
+        }
+        res.json({status: "OK", data: "Task has been updated successfully."});
+      });
+    }
   });
 });
 

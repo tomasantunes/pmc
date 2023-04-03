@@ -15,16 +15,39 @@ window.bootstrap = require('bootstrap');
 var bootprompt = require('bootprompt');
 
 function TRow(props) {
+  const [checks, setChecks] = useState([]);
+
+  function toggleCheck(e, task_id, index) {
+    setChecks((prev) => {
+      var new_checks = prev;
+      new_checks[index] = e.target.checked;
+      return new_checks;
+    }); 
+    props.updateTaskDone(e, props.task_id, index);
+  }
+
+  useEffect(() => {
+    var checks_arr = [];
+    for (var i = 0; i < 7; i++) {
+      if (props.checks.includes(i)) {
+        checks_arr.push(true);
+      }
+      else {
+        checks_arr.push(false);
+      }
+    }
+    setChecks(checks_arr);
+  }, []);
   return (
     <tr {...props}>
       <td>{props.description}</td>
-      <td><input type="checkbox" /></td>
-      <td><input type="checkbox" /></td>
-      <td><input type="checkbox" /></td>
-      <td><input type="checkbox" /></td>
-      <td><input type="checkbox" /></td>
-      <td><input type="checkbox" /></td>
-      <td><input type="checkbox" /></td>
+      <td><input type="checkbox" checked={checks[0]} onChange={(e) => {toggleCheck(e, props.task_id, 0)}} /></td>
+      <td><input type="checkbox" checked={checks[1]} onChange={(e) => {toggleCheck(e, props.task_id, 1)}} /></td>
+      <td><input type="checkbox" checked={checks[2]} onChange={(e) => {toggleCheck(e, props.task_id, 2)}} /></td>
+      <td><input type="checkbox" checked={checks[3]} onChange={(e) => {toggleCheck(e, props.task_id, 3)}} /></td>
+      <td><input type="checkbox" checked={checks[4]} onChange={(e) => {toggleCheck(e, props.task_id, 4)}} /></td>
+      <td><input type="checkbox" checked={checks[5]} onChange={(e) => {toggleCheck(e, props.task_id, 5)}} /></td>
+      <td><input type="checkbox" checked={checks[6]} onChange={(e) => {toggleCheck(e, props.task_id, 6)}} /></td>
       <td>
         <div class="dropdown">
             <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
@@ -47,7 +70,7 @@ function TBody(props) {
     <tbody {...props} className="table-group-divider">
       {props.data.map((task, i) => {
         return (
-          <SortableTRow key={task.id} index={i} task_id={task.id} description={task.description} is_done={task.is_done} updateTaskDone={props.updateTaskDone} openEditTask={props.openEditTask} deleteTask={props.deleteTask} />
+          <SortableTRow key={task.id} index={i} task_id={task.id} description={task.description} checks={task.checks} updateTaskDone={props.updateTaskDone} openEditTask={props.openEditTask} deleteTask={props.deleteTask} />
         )
       })}
     </tbody>
@@ -59,6 +82,8 @@ const SortableTBody = SortableContainer(TBody);
 export default function Tasks({folder_id}) {
   const [tasks, setTasks] = useState([]);
   const [days, setDays] = useState([]);
+  const [dates, setDates] = useState([]);
+  const [checks, setChecks] = useState([]);
 
   const handleSort = ({ oldIndex, newIndex }) => {
     setTasks(prevState => {
@@ -92,23 +117,6 @@ export default function Tasks({folder_id}) {
       return true;
     }
     return false;
-  }
-
-  function loadTasks() {
-    setTasks([]);
-    axios.get(config.BASE_URL + "/api/get-tasks-from-folder", {params: {folder_id: folder_id}})
-    .then(function(response) {
-      if (response.data.status == "OK") {
-        setTasks(response.data.data);
-      }
-      else {
-        alert(response.data.error);
-      }
-    })
-    .catch(function(err) {
-      console.log(err);
-      alert(err.message);
-    });
   }
 
   function updateTaskDone(e, task_id) {
@@ -216,6 +224,56 @@ export default function Tasks({folder_id}) {
     });
   }
 
+  function updateTaskDone(e, task_id, index) {
+    axios.post(config.BASE_URL + "/api/update-recurrent-task-done", {task_id: task_id, is_done: e.target.checked, date: dates[index].toISOString().split('T')[0]})
+    .then(function(response) {
+      if (response.data.status == "OK") {
+        loadTasks();
+      }
+      else {
+        alert(response.data.error);
+      }
+    })
+    .catch(function(err) {
+      console.log(err);
+      alert(err.message);
+    });
+  }
+
+  function compareDates(a, b) {
+    return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+  }
+
+  function loadTasks() {
+    setTasks([]);
+    axios.get(config.BASE_URL + "/api/get-recurrent-tasks", {params: {folder_id: folder_id, dti: dates[0].toISOString().split('T')[0], dtf: dates[6].toISOString().split('T')[0]}})
+    .then(function(response) {
+      if (response.data.status == "OK") {
+        var data = response.data.data;
+        for (var i in data) {
+          var checks = [];
+          for (var j in data[i].checks) {
+            for (var k in dates) {
+              if (compareDates(new Date(data[i].checks[j].date.split("T")[0]), dates[k]) && data[i].checks[j].is_done) {
+                checks.push(Number(k));
+              }
+            }
+          }
+          data[i].checks = checks;
+        }
+        console.log(data);
+        setTasks(data);
+      }
+      else {
+        alert(response.data.error);
+      }
+    })
+    .catch(function(err) {
+      console.log(err);
+      alert(err.message);
+    });
+  }
+
   function addLeadingZeros(n) {
     if (n <= 9) {
       return "0" + n;
@@ -236,9 +294,26 @@ export default function Tasks({folder_id}) {
     return days;
   }
 
+  function getDates() {
+    var dates = [];
+    for (var i = 0; i < 7; i++) {
+      var date = new Date();
+      date.setDate(date.getDate() - (date.getDay() + 6) % 7);
+      date.setDate(date.getDate() + i);
+      dates.push(date);
+    }
+    return dates;
+  }
+
   useEffect(() => {
-    loadTasks();
+    if (dates.length > 0) {
+      loadTasks();
+    }
+  }, [dates]);
+
+  useEffect(() => {
     setDays(getDays());
+    setDates(getDates());
   }, []);
   return (
     <>
