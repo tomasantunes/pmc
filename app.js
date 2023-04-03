@@ -26,7 +26,7 @@ var con = mysql.createPool({
   user: secretConfig.DB_USER,
   password: secretConfig.DB_PASSWORD,
   database: secretConfig.DB_NAME,
-  timezone: 'Europe/Lisbon'
+  timezone: '+00:00'
 });
 
 var con2 = mysql2.createPool({
@@ -36,7 +36,7 @@ var con2 = mysql2.createPool({
   user: secretConfig.DB_USER,
   password: secretConfig.DB_PASSWORD,
   database: secretConfig.DB_NAME,
-  timezone: 'Europe/Lisbon'
+  timezone: '+00:00'
 });
 
 app.get("/api/get-folders", (req, res) => {
