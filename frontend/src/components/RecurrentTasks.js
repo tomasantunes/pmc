@@ -17,6 +17,7 @@ var bootprompt = require('bootprompt');
 
 function TRow(props) {
   const [checks, setChecks] = useState([]);
+  const [checksVisible, setChecksVisible] = useState([]);
 
   function toggleCheck(e, task_id, index) {
     setChecks((prev) => {
@@ -29,6 +30,7 @@ function TRow(props) {
 
   useEffect(() => {
     var checks_arr = [];
+    var checks_visible_arr = [];
     for (var i = 0; i < 7; i++) {
       if (props.checks.includes(i)) {
         checks_arr.push(true);
@@ -36,19 +38,27 @@ function TRow(props) {
       else {
         checks_arr.push(false);
       }
+
+      if (props.checks_visible.includes(i)) {
+        checks_visible_arr.push(true);
+      }
+      else {
+        checks_visible_arr.push(false);
+      }
     }
     setChecks(checks_arr);
+    setChecksVisible(checks_visible_arr);
   }, []);
   return (
     <tr {...props}>
       <td>{props.description}</td>
-      <td><input type="checkbox" checked={checks[0]} onChange={(e) => {toggleCheck(e, props.task_id, 0)}} /></td>
-      <td><input type="checkbox" checked={checks[1]} onChange={(e) => {toggleCheck(e, props.task_id, 1)}} /></td>
-      <td><input type="checkbox" checked={checks[2]} onChange={(e) => {toggleCheck(e, props.task_id, 2)}} /></td>
-      <td><input type="checkbox" checked={checks[3]} onChange={(e) => {toggleCheck(e, props.task_id, 3)}} /></td>
-      <td><input type="checkbox" checked={checks[4]} onChange={(e) => {toggleCheck(e, props.task_id, 4)}} /></td>
-      <td><input type="checkbox" checked={checks[5]} onChange={(e) => {toggleCheck(e, props.task_id, 5)}} /></td>
-      <td><input type="checkbox" checked={checks[6]} onChange={(e) => {toggleCheck(e, props.task_id, 6)}} /></td>
+      <td>{checksVisible[0] && <input type="checkbox" checked={checks[0]} onChange={(e) => {toggleCheck(e, props.task_id, 0)}} />}</td>
+      <td>{checksVisible[1] && <input type="checkbox" checked={checks[1]} onChange={(e) => {toggleCheck(e, props.task_id, 1)}} />}</td>
+      <td>{checksVisible[2] && <input type="checkbox" checked={checks[2]} onChange={(e) => {toggleCheck(e, props.task_id, 2)}} />}</td>
+      <td>{checksVisible[3] && <input type="checkbox" checked={checks[3]} onChange={(e) => {toggleCheck(e, props.task_id, 3)}} />}</td>
+      <td>{checksVisible[4] && <input type="checkbox" checked={checks[4]} onChange={(e) => {toggleCheck(e, props.task_id, 4)}} />}</td>
+      <td>{checksVisible[5] && <input type="checkbox" checked={checks[5]} onChange={(e) => {toggleCheck(e, props.task_id, 5)}} />}</td>
+      <td>{checksVisible[6] && <input type="checkbox" checked={checks[6]} onChange={(e) => {toggleCheck(e, props.task_id, 6)}} />}</td>
       <td>
         <div class="dropdown">
             <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
@@ -71,7 +81,7 @@ function TBody(props) {
     <tbody {...props} className="table-group-divider">
       {props.data.map((task, i) => {
         return (
-          <SortableTRow key={task.id} index={i} task_id={task.id} description={task.description} checks={task.checks} updateTaskDone={props.updateTaskDone} openEditTask={props.openEditTask} deleteTask={props.deleteTask} />
+          <SortableTRow key={task.id} index={i} task_id={task.id} description={task.description} checks={task.checks} checks_visible={task.checks_visible} updateTaskDone={props.updateTaskDone} openEditTask={props.openEditTask} deleteTask={props.deleteTask} />
         )
       })}
     </tbody>
@@ -358,6 +368,56 @@ export default function Tasks({folder_id}) {
     return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
   }
 
+  function getChecksVisible(task) {
+    var checks_visible = [];
+    if (task.type == "daily") {
+      checks_visible = [0, 1, 2, 3, 4, 5, 6];
+    }
+    else if (task.type == "weekly") {
+      checks_visible = [5];
+    }
+    else if (task.type == "monthly") {
+      for (var i in dates) {
+        if (dates[i].getDate() == 1) {
+          checks_visible = [Number(i)];
+        }
+      }
+    }
+    else if (task.type == "yearly") {
+      for (var i in dates) {
+        if (dates[i].getMonth() == 0 && dates[i].getDate() == 1) {
+          checks_visible = [Number(i)];
+        }
+      }
+    }
+    else if (task.type == "week_day") {
+      for (var i in dates) {
+        if (dates[i].getDay() - 1 == task.week_day) {
+          checks_visible = [Number(i)];
+        }
+      }
+    }
+    else if (task.type == "month_day") {
+      for (var i in dates) {
+        if (dates[i].getDate() == task.month_day) {
+          checks_visible = [Number(i)];
+        }
+      }
+    }
+    else if (task.type == "year_day") {
+      for (var i in dates) {
+        console.log(dates[i].getDate());
+        console.log(task.month_day);
+        console.log(dates[i].getMonth());
+        console.log(task.month);
+        if (dates[i].getDate() == task.month_day && dates[i].getMonth() == task.month - 1) {
+          checks_visible = [Number(i)];
+        }
+      }
+    }
+    return checks_visible;
+  }
+
   function loadTasks() {
     setTasks([]);
     axios.get(config.BASE_URL + "/api/get-recurrent-tasks", {params: {folder_id: folder_id, dti: dates[0].toISOString().split('T')[0], dtf: dates[6].toISOString().split('T')[0]}})
@@ -366,6 +426,7 @@ export default function Tasks({folder_id}) {
         var data = response.data.data;
         for (var i in data) {
           var checks = [];
+          var checks_visible = getChecksVisible(data[i]);
           for (var j in data[i].checks) {
             for (var k in dates) {
               if (compareDates(new Date(data[i].checks[j].date.split("T")[0]), dates[k]) && data[i].checks[j].is_done) {
@@ -374,6 +435,7 @@ export default function Tasks({folder_id}) {
             }
           }
           data[i].checks = checks;
+          data[i].checks_visible = checks_visible;
         }
         console.log(data);
         setTasks(data);
