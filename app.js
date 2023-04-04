@@ -26,25 +26,51 @@ app.use(session({
   saveUninitialized: true
 }));
 
-var con = mysql.createPool({
-  connectionLimit : 90,
-  connectTimeout: 1000000,
-  host: secretConfig.DB_HOST,
-  user: secretConfig.DB_USER,
-  password: secretConfig.DB_PASSWORD,
-  database: secretConfig.DB_NAME,
-  timezone: '+00:00'
-});
+var con;
+if (secretConfig.ENVIRONMENT == "WINDOWS") {
+  var con = mysql.createPool({
+    connectionLimit : 90,
+    connectTimeout: 1000000,
+    host: secretConfig.DB_HOST,
+    user: secretConfig.DB_USER,
+    password: secretConfig.DB_PASSWORD,
+    database: secretConfig.DB_NAME,
+    timezone: '+00:00'
+  });
 
-var con2 = mysql2.createPool({
-  connectionLimit : 90,
-  connectTimeout: 1000000,
-  host: secretConfig.DB_HOST,
-  user: secretConfig.DB_USER,
-  password: secretConfig.DB_PASSWORD,
-  database: secretConfig.DB_NAME,
-  timezone: '+00:00'
-});
+  var con2 = mysql2.createPool({
+    connectionLimit : 90,
+    connectTimeout: 1000000,
+    host: secretConfig.DB_HOST,
+    user: secretConfig.DB_USER,
+    password: secretConfig.DB_PASSWORD,
+    database: secretConfig.DB_NAME,
+    timezone: '+00:00'
+  });
+}
+else if (secretConfig.ENVIRONMENT == "UBUNTU") {
+  var con = mysql.createPool({
+    connectionLimit : 90,
+    connectTimeout: 1000000,
+    host: secretConfig.DB_HOST,
+    user: secretConfig.DB_USER,
+    password: secretConfig.DB_PASSWORD,
+    database: secretConfig.DB_NAME,
+    socketPath: '/var/run/mysqld/mysqld.sock',
+    timezone: '+00:00'
+  });
+
+  var con2 = mysql2.createPool({
+    connectionLimit : 90,
+    connectTimeout: 1000000,
+    host: secretConfig.DB_HOST,
+    user: secretConfig.DB_USER,
+    password: secretConfig.DB_PASSWORD,
+    database: secretConfig.DB_NAME,
+    socketPath: '/var/run/mysqld/mysqld.sock',
+    timezone: '+00:00'
+  });
+}
 
 app.get("/api/get-folders", (req, res) => {
   if (!req.session.isLoggedIn) {
@@ -248,15 +274,20 @@ app.get("/api/get-stats", (req, res) => {
           res.json({status: "NOK", error: err.message});
         }
         var today_tasks = getTodayTasks(result3);
-        var sql4 = "SELECT * FROM recurrent_checks WHERE task_id IN (?) AND is_done = 1";
-        con.query(sql4, [today_tasks], function (err4, result4) {
-          if (err) {
-            console.log(err);
-            res.json({status: "NOK", error: err.message});
-          }
-          var today_tasks_done = result4.length;
-          res.json({status: "OK", data: {total_tasks: total_tasks, total_tasks_done: total_tasks_done, recurrent_tasks: today_tasks.length, recurrent_tasks_done: today_tasks_done}});
-        });
+        if (today_tasks.length > 0) {
+          var sql4 = "SELECT * FROM recurrent_checks WHERE task_id IN (?) AND is_done = 1";
+          con.query(sql4, [today_tasks], function (err4, result4) {
+            if (err4) {
+              console.log(err4);
+              res.json({status: "NOK", error: err4.message});
+            }
+            var today_tasks_done = result4.length || 0;
+            res.json({status: "OK", data: {total_tasks: total_tasks, total_tasks_done: total_tasks_done, recurrent_tasks: today_tasks.length, recurrent_tasks_done: today_tasks_done}});
+          });
+        }
+        else {
+          res.json({status: "OK", data: {total_tasks: total_tasks, total_tasks_done: total_tasks_done, recurrent_tasks: 0, recurrent_tasks_done: 0}});
+        }
       });
     });
   });
