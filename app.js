@@ -137,7 +137,7 @@ app.post("/api/add-recurrent-task", (req, res) => {
       res.json({status: "OK", data: "Task has been added successfully."});
     });
   }
-  else if (task_type == "month") {
+  else if (task_type == "year_day") {
     var sql = "INSERT INTO tasks (folder_id, description, type, month_day, month) VALUES (?, ?, ?, ?, ?)";
     con.query(sql, [folder_id, description, task_type, month_day, month], function (err, result) {
       if (err) {
