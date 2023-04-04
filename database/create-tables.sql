@@ -26,7 +26,7 @@ CREATE TABLE recurrent_checks (
 
 ALTER TABLE tasks ADD sort_index INT(11) NOT NULL DEFAULT 0;
 ALTER TABLE folders ADD type VARCHAR(256) NOT NULL DEFAULT 'simple';
-ALTER TABLE tasks ADD type VARCHAR(256) NOT NULL DEFAULT 'everyday';
+ALTER TABLE tasks ADD type VARCHAR(256) NOT NULL DEFAULT 'single';
 ALTER TABLE tasks ADD day_of_week INT(11) DEFAULT NULL;
 ALTER TABLE tasks ADD day_of_month INT(11) DEFAULT NULL;
 ALTER TABLE tasks DROP COLUMN day_of_week;

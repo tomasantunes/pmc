@@ -2,7 +2,8 @@ import React, {useEffect, useState} from 'react';
 import axios from 'axios';
 import config from '../config';
 import $ from 'jquery';
-import Select from 'react-select'
+import Select from 'react-select';
+import {Link, useNavigate} from 'react-router-dom';
 
 window.jQuery = $;
 window.$ = $;
@@ -17,6 +18,7 @@ export default function Sidebar() {
     type: "",
   });
   const [selectedFolderType, setSelectedFolderType] = useState();
+  var navigate = useNavigate();
 
   const folderTypes = [
     { value: 'simple', label: 'Simple' },
@@ -47,6 +49,7 @@ export default function Sidebar() {
       if (response.data.status == "OK") {
         loadFolders();
         closeAddFolder();
+        navigate("/folder/" + response.data.data.insertId)
       }
       else {
         alert(response.data.error);
@@ -94,6 +97,7 @@ export default function Sidebar() {
       <div className="sidebar">
           <h1><b>PMC</b></h1>
           <ul className="menu">
+              <li><Link to="/home">Home</Link></li>
               <li><a href="#" onClick={openAddFolder}>Add Folder</a></li>
               {folders.map((folder) => {
                 return (
