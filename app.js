@@ -6,6 +6,7 @@ var logger = require('morgan');
 var mysql = require('mysql2');
 var mysql2 = require('mysql2/promise');
 var secretConfig = require('./secret-config');
+var session = require('express-session');
 
 var app = express();
 
@@ -18,6 +19,12 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+
+app.use(session({
+  secret: secretConfig.SESSION_KEY,
+  resave: false,
+  saveUninitialized: true
+}));
 
 var con = mysql.createPool({
   connectionLimit : 90,
@@ -40,6 +47,10 @@ var con2 = mysql2.createPool({
 });
 
 app.get("/api/get-folders", (req, res) => {
+  if (!req.session.isLoggedIn) {
+    res.json({status: "NOK", error: "Invalid Authorization."});
+    return;
+  }
   var sql = "SELECT * FROM folders";
   con.query(sql, function (err, result) {
     if (err) {
@@ -51,6 +62,10 @@ app.get("/api/get-folders", (req, res) => {
 });
 
 app.get("/api/get-folder", (req, res) => {
+  if (!req.session.isLoggedIn) {
+    res.json({status: "NOK", error: "Invalid Authorization."});
+    return;
+  }
   var folder_id = req.query.folder_id;
   var sql = "SELECT * FROM folders WHERE id = ?";
   con.query(sql, [folder_id], function (err, result) {
@@ -63,6 +78,10 @@ app.get("/api/get-folder", (req, res) => {
 });
 
 app.post("/api/edit-folder-name", (req, res) => {
+  if (!req.session.isLoggedIn) {
+    res.json({status: "NOK", error: "Invalid Authorization."});
+    return;
+  }
   var folder_id = req.body.folder_id;
   var name = req.body.name;
   var sql = "UPDATE folders SET name = ? WHERE id = ?";
@@ -76,6 +95,10 @@ app.post("/api/edit-folder-name", (req, res) => {
 });
 
 app.get("/api/get-tasks-from-folder", (req, res) => {
+  if (!req.session.isLoggedIn) {
+    res.json({status: "NOK", error: "Invalid Authorization."});
+    return;
+  }
   var folder_id = req.query.folder_id;
   var sql = "SELECT * FROM tasks WHERE folder_id = ? ORDER BY sort_index ASC";
   con.query(sql, [folder_id], function (err, result) {
@@ -88,6 +111,10 @@ app.get("/api/get-tasks-from-folder", (req, res) => {
 });
 
 app.get("/api/get-recurrent-tasks", (req, res) => {
+  if (!req.session.isLoggedIn) {
+    res.json({status: "NOK", error: "Invalid Authorization."});
+    return;
+  }
   var folder_id = req.query.folder_id;
   var dti = req.query.dti;
   var dtf = req.query.dtf;
@@ -108,6 +135,10 @@ app.get("/api/get-recurrent-tasks", (req, res) => {
 });
 
 app.post("/api/add-recurrent-task", (req, res) => {
+  if (!req.session.isLoggedIn) {
+    res.json({status: "NOK", error: "Invalid Authorization."});
+    return;
+  }
   var folder_id = req.body.folder_id;
   var description = req.body.description;
   var time = req.body.time;
@@ -162,8 +193,10 @@ app.post("/api/add-recurrent-task", (req, res) => {
 });
 
 async function getTaskChecks(task_id, dti, dtf) {
-  console.log(dti);
-  console.log(dtf);
+  if (!req.session.isLoggedIn) {
+    res.json({status: "NOK", error: "Invalid Authorization."});
+    return;
+  }
   var sql = "SELECT * FROM recurrent_checks WHERE task_id = ? AND date BETWEEN ? AND ?";
   const [rows, fields] = await con2.execute(sql, [task_id, dti, dtf]);
   console.log(rows);
@@ -171,6 +204,10 @@ async function getTaskChecks(task_id, dti, dtf) {
 }
 
 app.post("/api/add-folder", (req, res) => {
+  if (!req.session.isLoggedIn) {
+    res.json({status: "NOK", error: "Invalid Authorization."});
+    return;
+  }
   var name = req.body.name;
   var type = req.body.type;
   var sql = "INSERT INTO folders (name, type) VALUES (?, ?)";
@@ -184,6 +221,10 @@ app.post("/api/add-folder", (req, res) => {
 });
 
 app.get("/api/get-stats", (req, res) => {
+  if (!req.session.isLoggedIn) {
+    res.json({status: "NOK", error: "Invalid Authorization."});
+    return;
+  }
   var recurrent_types = ["daily", "weekly", "monthly", "yearly", "week_day", "month_day", "year_day"];
 
   var sql = "SELECT COUNT(*) FROM tasks WHERE type='single'";
@@ -274,6 +315,10 @@ function checkIfTaskIsToday(task) {
 }
 
 app.post("/api/update-task-done", (req, res) => {
+  if (!req.session.isLoggedIn) {
+    res.json({status: "NOK", error: "Invalid Authorization."});
+    return;
+  }
   var task_id = req.body.task_id;
   var is_done = req.body.is_done;
   var sql = "UPDATE tasks SET is_done = ? WHERE id = ?";
@@ -287,6 +332,10 @@ app.post("/api/update-task-done", (req, res) => {
 });
 
 app.post("/api/update-recurrent-task-done", (req, res) => {
+  if (!req.session.isLoggedIn) {
+    res.json({status: "NOK", error: "Invalid Authorization."});
+    return;
+  }
   var task_id = req.body.task_id;
   var is_done = req.body.is_done;
   var date = req.body.date;
@@ -320,6 +369,10 @@ app.post("/api/update-recurrent-task-done", (req, res) => {
 });
 
 app.post("/api/add-task", (req, res) => {
+  if (!req.session.isLoggedIn) {
+    res.json({status: "NOK", error: "Invalid Authorization."});
+    return;
+  }
   var folder_id = req.body.folder_id;
   var description = req.body.description;
   var time = req.body.time;
@@ -335,6 +388,10 @@ app.post("/api/add-task", (req, res) => {
 });
 
 app.post("/api/handle-sort", (req, res) => {
+  if (!req.session.isLoggedIn) {
+    res.json({status: "NOK", error: "Invalid Authorization."});
+    return;
+  }
   var task_id = req.body.task_id;
   var sort_index = req.body.sort_index;
   var sql = "UPDATE tasks SET sort_index = ? WHERE id = ?";
@@ -348,6 +405,10 @@ app.post("/api/handle-sort", (req, res) => {
 });
 
 app.get("/api/get-task", (req, res) => {
+  if (!req.session.isLoggedIn) {
+    res.json({status: "NOK", error: "Invalid Authorization."});
+    return;
+  }
   var task_id = req.query.task_id;
   var sql = "SELECT * FROM tasks WHERE id = ?";
   con.query(sql, [task_id], function (err, result) {
@@ -360,6 +421,10 @@ app.get("/api/get-task", (req, res) => {
 });
 
 app.post("/api/edit-task", (req, res) => {
+  if (!req.session.isLoggedIn) {
+    res.json({status: "NOK", error: "Invalid Authorization."});
+    return;
+  }
   var task_id = req.body.task_id;
   var description = req.body.description;
   var sql = "UPDATE tasks SET description = ? WHERE id = ?";
@@ -373,6 +438,10 @@ app.post("/api/edit-task", (req, res) => {
 });
 
 app.post("/api/delete-task", (req, res) => {
+  if (!req.session.isLoggedIn) {
+    res.json({status: "NOK", error: "Invalid Authorization."});
+    return;
+  }
   var task_id = req.body.task_id;
   var sql = "DELETE FROM tasks WHERE id = ?";
   con.query(sql, [task_id], function (err, result) {
@@ -384,18 +453,58 @@ app.post("/api/delete-task", (req, res) => {
   });
 });
 
+app.post("/api/check-login", (req, res) => {
+  var user = req.body.user;
+  var pass = req.body.pass;
+
+  var sql = "SELECT * FROM logins WHERE is_valid = 0 AND created_at > (NOW() - INTERVAL 1 HOUR);";
+
+  con.query(sql, function (err, result) {
+    if (result.length <= 5) {
+      if (user == secretConfig.USER && pass == secretConfig.PASS) {
+        req.session.isLoggedIn = true;
+        var sql2 = "INSERT INTO logins (is_valid) VALUES (1);";
+        con.query(sql2);
+        res.json({status: "OK", data: "Login successful."});
+      }
+      else {
+        var sql2 = "INSERT INTO logins (is_valid) VALUES (0);";
+        con.query(sql2);
+        res.json({status: "NOK", error: "Wrong username/password."});
+      }
+    }
+    else {
+      res.json({status: "NOK", error: "Too many login attempts."});
+    }
+  });
+});
+
 app.get("/", function(req, res) {
   res.redirect("/home");
 });
 
 app.use(express.static(path.resolve(__dirname) + '/frontend/build'));
 
-app.get('/home', (req, res) => {
+app.get('/login', (req, res) => {
   res.sendFile(path.resolve(__dirname) + '/frontend/build/index.html');
 });
 
+app.get('/home', (req, res) => {
+  if(req.session.isLoggedIn) {
+    res.sendFile(path.resolve(__dirname) + '/frontend/build/index.html');
+  }
+  else {
+    res.redirect('/login');
+  }
+});
+
 app.get('/folder/:id', (req, res) => {
-  res.sendFile(path.resolve(__dirname) + '/frontend/build/index.html');
+  if(req.session.isLoggedIn) {
+    res.sendFile(path.resolve(__dirname) + '/frontend/build/index.html');
+  }
+  else {
+    res.redirect('/login');
+  }
 });
 
 // catch 404 and forward to error handler
