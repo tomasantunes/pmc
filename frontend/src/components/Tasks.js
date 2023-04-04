@@ -19,6 +19,7 @@ function TRow(props) {
     <tr {...props}>
       <td><input type="checkbox" checked={props.is_done} onChange={(e) => { props.updateTaskDone(e, props.task_id); }} /></td>
       <td className={props.is_done ? "strikethrough" : ""}>{props.description}</td>
+      <td>{props.time}</td>
       <td>
       <div class="dropdown">
         <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
@@ -41,7 +42,7 @@ function TBody(props) {
     <tbody {...props} className="table-group-divider">
       {props.data.map((task, i) => {
         return (
-          <SortableTRow key={task.id} index={i} task_id={task.id} description={task.description} is_done={task.is_done} updateTaskDone={props.updateTaskDone} openEditTask={props.openEditTask} deleteTask={props.deleteTask} />
+          <SortableTRow key={task.id} index={i} task_id={task.id} description={task.description} time={task.time} is_done={task.is_done} updateTaskDone={props.updateTaskDone} openEditTask={props.openEditTask} deleteTask={props.deleteTask} />
         )
       })}
     </tbody>
@@ -52,6 +53,10 @@ const SortableTBody = SortableContainer(TBody);
 
 export default function Tasks({folder_id}) {
   const [tasks, setTasks] = useState([]);
+  const [newTask, setNewTask] = useState({
+    description: "",
+    time: ""
+  });
 
   const handleSort = ({ oldIndex, newIndex }) => {
     setTasks(prevState => {
@@ -120,11 +125,17 @@ export default function Tasks({folder_id}) {
     });
   }
 
-  function submitAddTask(description) {
-    axios.post(config.BASE_URL + "/api/add-task", {folder_id: folder_id, description: description, sort_index: tasks.length})
+  function submitAddTask(e) {
+    e.preventDefault();
+    axios.post(config.BASE_URL + "/api/add-task", {folder_id: folder_id, description: newTask.description, time: newTask.time, sort_index: tasks.length})
     .then(function(response) {
       if (response.data.status == "OK") {
         loadTasks();
+        setNewTask({
+          description: "",
+          time: ""
+        });
+        closeAddTask();
       }
       else {
         alert(response.data.error);
@@ -137,12 +148,11 @@ export default function Tasks({folder_id}) {
   }
 
   function openAddTask() {
-    bootprompt.prompt("Add Task", (result) => {
-      if (result == null) {
-        return;
-      }
-      submitAddTask(result);
-    });
+    $(".addTaskModal").modal("show");
+  }
+
+  function closeAddTask() {
+    $(".addTaskModal").modal("hide");
   }
 
   function openEditTask(task_id) {
@@ -209,6 +219,20 @@ export default function Tasks({folder_id}) {
     });
   }
 
+  function changeNewTaskDescription(e) {
+    setNewTask({
+      ...newTask,
+      description: e.target.value
+    });
+  }
+
+  function changeNewTaskTime(e) {
+    setNewTask({
+      ...newTask,
+      time: e.target.value
+    });
+  }
+
   useEffect(() => {
     loadTasks();
   }, []);
@@ -221,12 +245,44 @@ export default function Tasks({folder_id}) {
           <thead class="table-dark">
               <tr>
                   <th style={{width: "10%"}}>Done</th>
-                  <th style={{width: "70%"}}>Task</th>
+                  <th style={{width: "50%"}}>Task</th>
+                  <th style={{width: "20%"}}>Time</th>
                   <th style={{width: "20%"}}>Actions</th>
               </tr>
           </thead>
           <SortableTBody data={tasks} onSortEnd={handleSort} updateTaskDone={updateTaskDone} openEditTask={openEditTask} deleteTask={deleteTask} shouldCancelStart={cancelSort} />
       </table>
+      <div class="modal addTaskModal" tabindex="-1">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Add Task</h5>
+              <button type="button" class="btn-close" onClick={closeAddTask} aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <form onSubmit={submitAddTask}>
+                <div className="form-group py-2">
+                  <label className="control-label">Description</label>
+                  <div>
+                      <input type="text" className="form-control input-lg" name="description" value={newTask.description} onChange={changeNewTaskDescription}/>
+                  </div>
+                </div>
+                <div className="form-group py-2">
+                  <label className="control-label">Time</label>
+                  <div>
+                      <input type="text" className="form-control input-lg" name="time" value={newTask.time} onChange={changeNewTaskTime}/>
+                  </div>
+                </div>
+                <div className="form-group">
+                    <div style={{textAlign: "right"}}>
+                        <button type="submit" className="btn btn-primary">Add</button>
+                    </div>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
     </>
   )
 }
