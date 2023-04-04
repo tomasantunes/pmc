@@ -219,10 +219,6 @@ app.post("/api/add-recurrent-task", (req, res) => {
 });
 
 async function getTaskChecks(task_id, dti, dtf) {
-  if (!req.session.isLoggedIn) {
-    res.json({status: "NOK", error: "Invalid Authorization."});
-    return;
-  }
   var sql = "SELECT * FROM recurrent_checks WHERE task_id = ? AND date BETWEEN ? AND ?";
   const [rows, fields] = await con2.execute(sql, [task_id, dti, dtf]);
   console.log(rows);
