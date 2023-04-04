@@ -177,9 +177,99 @@ app.post("/api/add-folder", (req, res) => {
       console.log(err);
       res.json({status: "NOK", error: err.message});
     }
-    res.json({status: "OK", data: "Folder has been added successfully."});
+    res.json({status: "OK", data: {message: "Folder has been added successfully.", insertId: result.insertId}});
   });
 });
+
+app.get("/api/get-stats", (req, res) => {
+  var recurrent_types = ["daily", "weekly", "monthly", "yearly", "week_day", "month_day", "year_day"];
+
+  var sql = "SELECT COUNT(*) FROM tasks WHERE type='single'";
+  con.query(sql, function (err, result) {
+    if (err) {
+      console.log(err);
+      res.json({status: "NOK", error: err.message});
+    }
+    var total_tasks = result[0]["COUNT(*)"];
+    var sql2 = "SELECT COUNT(*) FROM tasks WHERE type='single' AND is_done = 1";
+    con.query(sql2, function (err2, result2) {
+      if (err) {
+        console.log(err);
+        res.json({status: "NOK", error: err.message});
+      }
+      var total_tasks_done = result2[0]["COUNT(*)"];
+      var sql3 = "SELECT * FROM tasks WHERE type IN (?)";
+      con.query(sql3, [recurrent_types], function (err3, result3) {
+        if (err) {
+          console.log(err);
+          res.json({status: "NOK", error: err.message});
+        }
+        var today_tasks = getTodayTasks(result3);
+        var sql4 = "SELECT * FROM recurrent_checks WHERE task_id IN (?) AND is_done = 1";
+        con.query(sql4, [today_tasks], function (err4, result4) {
+          if (err) {
+            console.log(err);
+            res.json({status: "NOK", error: err.message});
+          }
+          var today_tasks_done = result4.length;
+          res.json({status: "OK", data: {total_tasks: total_tasks, total_tasks_done: total_tasks_done, recurrent_tasks: today_tasks.length, recurrent_tasks_done: today_tasks_done}});
+        });
+      });
+    });
+  });
+});
+
+function getTodayTasks(tasks, cb) {
+  var today_tasks = [];
+  for (var i in tasks) {
+    if (checkIfTaskIsToday(tasks[i])) {
+      today_tasks.push(tasks[i].id);
+    }
+  }
+  return today_tasks;
+}
+
+function checkIfTaskIsToday(task) {
+  var today = new Date();
+  var dd = today.getDate();
+  var wd = today.getDay() - 1;
+  var mm = today.getMonth() + 1;
+
+  if (task.type == "daily") {
+    return true;
+  }
+  else if (task.type == "weekly") {
+    if (task.week_day == 5) {
+      return true;
+    }
+  }
+  else if (task.type == "monthly") {
+    if (task.month_day == dd) {
+      return true;
+    }
+  }
+  else if (task.type == "yearly") {
+    if (task.month_day == dd && task.month == mm) {
+      return true;
+    }
+  }
+  else if(task.type == "week_day") {
+    if (task.week_day == wd) {
+      return true;
+    }
+  }
+  else if (task.type == "month_day") {
+    if (task.month_day == dd) {
+      return true;
+    }
+  }
+  else if (task.type == "year_day") {
+    if (task.month_day == dd && task.month == mm) {
+      return true;
+    }
+  }
+  return false;
+}
 
 app.post("/api/update-task-done", (req, res) => {
   var task_id = req.body.task_id;

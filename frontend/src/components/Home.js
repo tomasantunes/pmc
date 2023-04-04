@@ -1,6 +1,6 @@
 import React from 'react';
 import Sidebar from './Sidebar';
-import TasksPage from './TasksPage';
+import Stats from './Stats';
 import $ from 'jquery';
 
 window.jQuery = $;
@@ -12,6 +12,9 @@ export default function Home() {
   return (
     <>
       <Sidebar />
+      <div className="page">
+        <Stats />
+      </div>
     </>
   )
 }
