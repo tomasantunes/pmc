@@ -110,16 +110,18 @@ app.get("/api/get-recurrent-tasks", (req, res) => {
 app.post("/api/add-recurrent-task", (req, res) => {
   var folder_id = req.body.folder_id;
   var description = req.body.description;
+  var time = req.body.time;
   var task_type = req.body.task_type;
   var week_day = req.body.week_day;
   var month_day = req.body.month_day;
   var month = req.body.month;
+  var sort_index = req.body.sort_index;
 
   console.log(task_type);
 
   if (task_type == "week_day") {
-    var sql = "INSERT INTO tasks (folder_id, description, type, week_day) VALUES (?, ?, ?, ?)";
-    con.query(sql, [folder_id, description, task_type, week_day], function (err, result) {
+    var sql = "INSERT INTO tasks (folder_id, description, time, type, week_day, sort_index) VALUES (?, ?, ?, ?, ?, ?)";
+    con.query(sql, [folder_id, description, time, task_type, week_day, sort_index], function (err, result) {
       if (err) {
         console.log(err);
         res.json({status: "NOK", error: err.message});
@@ -128,8 +130,8 @@ app.post("/api/add-recurrent-task", (req, res) => {
     });
   }
   else if (task_type == "month_day") {
-    var sql = "INSERT INTO tasks (folder_id, description, type, month_day) VALUES (?, ?, ?, ?)";
-    con.query(sql, [folder_id, description, task_type, month_day], function (err, result) {
+    var sql = "INSERT INTO tasks (folder_id, description, time, type, month_day, sort_index) VALUES (?, ?, ?, ?, ?, ?)";
+    con.query(sql, [folder_id, description, time, task_type, month_day, sort_index], function (err, result) {
       if (err) {
         console.log(err);
         res.json({status: "NOK", error: err.message});
@@ -138,8 +140,8 @@ app.post("/api/add-recurrent-task", (req, res) => {
     });
   }
   else if (task_type == "year_day") {
-    var sql = "INSERT INTO tasks (folder_id, description, type, month_day, month) VALUES (?, ?, ?, ?, ?)";
-    con.query(sql, [folder_id, description, task_type, month_day, month], function (err, result) {
+    var sql = "INSERT INTO tasks (folder_id, description, time, type, month_day, month, sort_index) VALUES (?, ?, ?, ?, ?, ?, ?)";
+    con.query(sql, [folder_id, description, time, task_type, month_day, month, sort_index], function (err, result) {
       if (err) {
         console.log(err);
         res.json({status: "NOK", error: err.message});
@@ -148,8 +150,8 @@ app.post("/api/add-recurrent-task", (req, res) => {
     });
   }
   else {
-    var sql = "INSERT INTO tasks (folder_id, description, type) VALUES (?, ?, ?)";
-    con.query(sql, [folder_id, description, task_type], function (err, result) {
+    var sql = "INSERT INTO tasks (folder_id, description, time, type, sort_index) VALUES (?, ?, ?, ?, ?)";
+    con.query(sql, [folder_id, description, time, task_type, sort_index], function (err, result) {
       if (err) {
         console.log(err);
         res.json({status: "NOK", error: err.message});
@@ -320,9 +322,10 @@ app.post("/api/update-recurrent-task-done", (req, res) => {
 app.post("/api/add-task", (req, res) => {
   var folder_id = req.body.folder_id;
   var description = req.body.description;
+  var time = req.body.time;
   var sort_index = req.body.sort_index;
-  var sql = "INSERT INTO tasks (folder_id, description, is_done, sort_index) VALUES (?, ?, 0, ?)";
-  con.query(sql, [folder_id, description, sort_index], function (err, result) {
+  var sql = "INSERT INTO tasks (folder_id, description, time, is_done, sort_index) VALUES (?, ?, ?, 0, ?)";
+  con.query(sql, [folder_id, description, time, sort_index], function (err, result) {
     if (err) {
       console.log(err);
       res.json({status: "NOK", error: err.message});

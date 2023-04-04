@@ -52,6 +52,7 @@ function TRow(props) {
   return (
     <tr {...props}>
       <td>{props.description}</td>
+      <td>{props.time}</td>
       <td>{checksVisible[0] && <input type="checkbox" checked={checks[0]} onChange={(e) => {toggleCheck(e, props.task_id, 0)}} />}</td>
       <td>{checksVisible[1] && <input type="checkbox" checked={checks[1]} onChange={(e) => {toggleCheck(e, props.task_id, 1)}} />}</td>
       <td>{checksVisible[2] && <input type="checkbox" checked={checks[2]} onChange={(e) => {toggleCheck(e, props.task_id, 2)}} />}</td>
@@ -81,7 +82,7 @@ function TBody(props) {
     <tbody {...props} className="table-group-divider">
       {props.data.map((task, i) => {
         return (
-          <SortableTRow key={task.id} index={i} task_id={task.id} description={task.description} checks={task.checks} checks_visible={task.checks_visible} updateTaskDone={props.updateTaskDone} openEditTask={props.openEditTask} deleteTask={props.deleteTask} />
+          <SortableTRow key={task.id} index={i} task_id={task.id} description={task.description} time={task.time} checks={task.checks} checks_visible={task.checks_visible} updateTaskDone={props.updateTaskDone} openEditTask={props.openEditTask} deleteTask={props.deleteTask} />
         )
       })}
     </tbody>
@@ -103,6 +104,7 @@ export default function Tasks({folder_id}) {
     week_day: "",
     month_day: "",
     month: "",
+    time: "",
   });
   const [selectedTaskType, setSelectedTaskType] = useState({value: "daily", label: "Daily"});
   const [showWeekDaySelector, setShowWeekDaySelector] = useState(false);
@@ -205,13 +207,14 @@ export default function Tasks({folder_id}) {
 
   function submitAddTask(e) {
     e.preventDefault();
-    axios.post(config.BASE_URL + "/api/add-recurrent-task", newTask)
+    axios.post(config.BASE_URL + "/api/add-recurrent-task", {...newTask, sort_index: tasks.length})
     .then(function(response) {
       if (response.data.status == "OK") {
         loadTasks();
         $(".addTaskModal").modal("hide");
         setNewTask({
           description: "",
+          time: "",
           folder_id: folder_id,
           sort_index: 0,
           task_type: "daily",
@@ -274,6 +277,13 @@ export default function Tasks({folder_id}) {
     setNewTask({
       ...newTask,
       description: e.target.value
+    });
+  }
+
+  function changeNewTaskTime(e) {
+    setNewTask({
+      ...newTask,
+      time: e.target.value
     });
   }
 
@@ -518,14 +528,15 @@ export default function Tasks({folder_id}) {
           <thead class="table-dark">
               <tr>
                   
-                  <th style={{width: "20%"}}>Task</th>
-                  <th style={{width: "10%"}}>Mon <br/>{days[0]}</th>
-                  <th style={{width: "10%"}}>Tue <br/>{days[1]}</th>
-                  <th style={{width: "10%"}}>Wed <br/>{days[2]}</th>
-                  <th style={{width: "10%"}}>Thu <br/>{days[3]}</th>
-                  <th style={{width: "10%"}}>Fri <br/>{days[4]}</th>
-                  <th style={{width: "10%"}}>Sat <br/>{days[5]}</th>
-                  <th style={{width: "10%"}}>Sun <br/>{days[6]}</th>
+                  <th style={{width: "45%"}}>Task</th>
+                  <th style={{width: "10%"}}>Time</th>
+                  <th style={{width: "5%"}}>Mon <br/>{days[0]}</th>
+                  <th style={{width: "5%"}}>Tue <br/>{days[1]}</th>
+                  <th style={{width: "5%"}}>Wed <br/>{days[2]}</th>
+                  <th style={{width: "5%"}}>Thu <br/>{days[3]}</th>
+                  <th style={{width: "5%"}}>Fri <br/>{days[4]}</th>
+                  <th style={{width: "5%"}}>Sat <br/>{days[5]}</th>
+                  <th style={{width: "5%"}}>Sun <br/>{days[6]}</th>
                   <th style={{width: "10%"}}>Actions</th>
               </tr>
           </thead>
@@ -541,9 +552,15 @@ export default function Tasks({folder_id}) {
             <div class="modal-body">
               <form onSubmit={submitAddTask}>
                 <div className="form-group py-2">
-                  <label className="control-label">Name</label>
+                  <label className="control-label">Description</label>
                   <div>
                       <input type="text" className="form-control input-lg" name="description" value={newTask.description} onChange={changeNewTaskDescription}/>
+                  </div>
+                </div>
+                <div className="form-group py-2">
+                  <label className="control-label">Time</label>
+                  <div>
+                      <input type="text" className="form-control input-lg" name="time" value={newTask.time} onChange={changeNewTaskTime}/>
                   </div>
                 </div>
                 <div className="form-group py-2">
