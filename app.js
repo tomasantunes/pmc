@@ -454,8 +454,31 @@ app.post("/api/edit-task", (req, res) => {
   }
   var task_id = req.body.task_id;
   var description = req.body.description;
-  var sql = "UPDATE tasks SET description = ? WHERE id = ?";
-  con.query(sql, [description, task_id], function (err, result) {
+  var time = req.body.time;
+  var sql = "UPDATE tasks SET description = ?, time = ? WHERE id = ?";
+  con.query(sql, [description, time, task_id], function (err, result) {
+    if (err) {
+      console.log(err);
+      res.json({status: "NOK", error: err.message});
+    }
+    res.json({status: "OK", data: "Task has been updated successfully."});
+  });
+});
+
+app.post("/api/edit-recurrent-task", (req, res) => {
+  if (!req.session.isLoggedIn) {
+    res.json({status: "NOK", error: "Invalid Authorization."});
+    return;
+  }
+  var task_id = req.body.task_id;
+  var description = req.body.description;
+  var time = req.body.time;
+  var task_type = req.body.task_type;
+  var week_day = req.body.week_day;
+  var month_day = req.body.month_day;
+  var month = req.body.month;
+  var sql = "UPDATE tasks SET description = ?, time = ?, type = ?, week_day = ?, month_day = ?, month = ? WHERE id = ?";
+  con.query(sql, [description, time, task_type, week_day, month_day, month, task_id], function (err, result) {
     if (err) {
       console.log(err);
       res.json({status: "NOK", error: err.message});

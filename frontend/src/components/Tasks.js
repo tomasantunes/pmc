@@ -57,6 +57,11 @@ export default function Tasks({folder_id}) {
     description: "",
     time: ""
   });
+  const [editTask, setEditTask] = useState({
+    task_id: 0,
+    description: "",
+    time: ""
+  });
 
   const handleSort = ({ oldIndex, newIndex }) => {
     setTasks(prevState => {
@@ -147,6 +152,29 @@ export default function Tasks({folder_id}) {
     });
   }
 
+  function submitEditTask(e) {
+    e.preventDefault();
+    axios.post(config.BASE_URL + "/api/edit-task", editTask)
+    .then(function(response) {
+      if (response.data.status == "OK") {
+        loadTasks();
+        setEditTask({
+          task_id: 0,
+          description: "",
+          time: ""
+        });
+        closeEditTask();
+      }
+      else {
+        alert(response.data.error);
+      }
+    })
+    .catch(function(err) {
+      console.log(err);
+      alert(err.message);
+    });
+  }
+
   function openAddTask() {
     $(".addTaskModal").modal("show");
   }
@@ -160,15 +188,12 @@ export default function Tasks({folder_id}) {
     .then(function(response) {
       if (response.data.status == "OK") {
         var task = response.data.data;
-        bootprompt.prompt({
-          title: "Edit Task",
-          value: task.description
-        }, (result) => {
-          if (result == null) {
-            return;
-          }
-          submitEditTask(task_id, result);
+        setEditTask({
+          task_id: task_id,
+          description: task.description,
+          time: task.time
         });
+        $(".editTaskModal").modal("show");
       }
       else {
         alert(response.data.error);
@@ -180,20 +205,8 @@ export default function Tasks({folder_id}) {
     });
   }
 
-  function submitEditTask(task_id, description) {
-    axios.post(config.BASE_URL + "/api/edit-task", {task_id: task_id, description: description})
-    .then(function(response) {
-      if (response.data.status == "OK") {
-        loadTasks();
-      }
-      else {
-        alert(response.data.error);
-      }
-    })
-    .catch(function(err) {
-      console.log(err);
-      alert(err.message);
-    });
+  function closeEditTask() {
+    $(".editTaskModal").modal("hide");
   }
 
   function deleteTask(task_id) {
@@ -229,6 +242,20 @@ export default function Tasks({folder_id}) {
   function changeNewTaskTime(e) {
     setNewTask({
       ...newTask,
+      time: e.target.value
+    });
+  }
+
+  function changeEditTaskDescription(e) {
+    setEditTask({
+      ...editTask,
+      description: e.target.value
+    });
+  }
+
+  function changeEditTaskTime(e) {
+    setEditTask({
+      ...editTask,
       time: e.target.value
     });
   }
@@ -276,6 +303,37 @@ export default function Tasks({folder_id}) {
                 <div className="form-group">
                     <div style={{textAlign: "right"}}>
                         <button type="submit" className="btn btn-primary">Add</button>
+                    </div>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal editTaskModal" tabindex="-1">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Edit Task</h5>
+              <button type="button" class="btn-close" onClick={closeEditTask} aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <form onSubmit={submitEditTask}>
+                <div className="form-group py-2">
+                  <label className="control-label">Description</label>
+                  <div>
+                      <input type="text" className="form-control input-lg" name="description" value={editTask.description} onChange={changeEditTaskDescription}/>
+                  </div>
+                </div>
+                <div className="form-group py-2">
+                  <label className="control-label">Time</label>
+                  <div>
+                      <input type="text" className="form-control input-lg" name="time" value={editTask.time} onChange={changeEditTaskTime}/>
+                  </div>
+                </div>
+                <div className="form-group">
+                    <div style={{textAlign: "right"}}>
+                        <button type="submit" className="btn btn-primary">Save</button>
                     </div>
                 </div>
               </form>

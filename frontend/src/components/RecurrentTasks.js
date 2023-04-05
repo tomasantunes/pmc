@@ -106,6 +106,15 @@ export default function Tasks({folder_id}) {
     month: "",
     time: "",
   });
+  const [editTask, setEditTask] = useState({
+    task_id: "",
+    description: "",
+    time: "",
+    task_type: "",
+    week_day: "",
+    month_day: "",
+    month: "",
+  });
   const [selectedTaskType, setSelectedTaskType] = useState({value: "daily", label: "Daily"});
   const [showWeekDaySelector, setShowWeekDaySelector] = useState(false);
   const [showMonthDaySelector, setShowMonthDaySelector] = useState(false);
@@ -248,20 +257,42 @@ export default function Tasks({folder_id}) {
     $(".addTaskModal").modal("hide");
   }
 
+  function closeEditTask() {
+    $(".editTaskModal").modal("hide");
+  }
+
   function openEditTask(task_id) {
     axios.get(config.BASE_URL + "/api/get-task", {params: {task_id: task_id}})
     .then(function(response) {
       if (response.data.status == "OK") {
         var task = response.data.data;
-        bootprompt.prompt({
-          title: "Edit Task",
-          value: task.description
-        }, (result) => {
-          if (result == null) {
-            return;
-          }
-          submitEditTask(task_id, result);
+        setEditTask({
+          task_id: task.id,
+          description: task.description,
+          time: task.time,
+          task_type: task.type,
+          week_day: task.week_day,
+          month_day: task.month_day,
+          month: task.month,
         });
+        var taskType = taskTypes.find(item => item.value == task.task_type);
+        setSelectedTaskType(taskType);
+        if (task.task_type == "week_day") {
+          var weekDay = weekDays.find(item => item.value == task.week_day);
+          setSelectedWeekDay(weekDay);
+        }
+        else if (task.task_type == "month_day") {
+          var monthDay = monthDays.find(item => item.value == task.month_day);
+          setSelectedMonthDay(monthDay);
+        }
+        else if (task.task_type == "year_day") {
+          var month = months.find(item => item.value == task.month);
+          setSelectedMonth(month);
+          var monthDay = monthDays.find(item => item.value == task.month_day);
+          setSelectedMonthDay(monthDay);
+        }
+        $(".editTaskModal").modal("show");
+
       }
       else {
         alert(response.data.error);
@@ -319,11 +350,67 @@ export default function Tasks({folder_id}) {
     setSelectedMonth(item);
   }
 
+  function changeEditTaskDescription(e) {
+    setEditTask({
+      ...editTask,
+      description: e.target.value
+    });
+  }
+
+  function changeEditTaskTime(e) {
+    setEditTask({
+      ...editTask,
+      time: e.target.value
+    });
+  }
+
+  function changeEditTaskType(item) {
+    setEditTask({
+      ...editTask,
+      task_type: item.value
+    });
+    setSelectedTaskType(item);
+  }
+
+  function changeEditTaskWeekDay(item) {
+    setEditTask({
+      ...editTask,
+      week_day: item.value
+    });
+    setSelectedWeekDay(item);
+  }
+
+  function changeEditTaskMonthDay(item) {
+    setEditTask({
+      ...editTask,
+      month_day: item.value
+    });
+    setSelectedMonthDay(item);
+  }
+
+  function changeEditTaskMonth(item) {
+    setEditTask({
+      ...editTask,
+      month: item.value
+    });
+    setSelectedMonth(item);
+  }
+
   function submitEditTask(task_id, description) {
-    axios.post(config.BASE_URL + "/api/edit-task", {task_id: task_id, description: description})
+    axios.post(config.BASE_URL + "/api/edit-recurrent-task", editTask)
     .then(function(response) {
       if (response.data.status == "OK") {
         loadTasks();
+        $(".editTaskModal").modal("hide");
+        setEditTask({
+          task_id: 0,
+          description: "",
+          time: "",
+          task_type: "",
+          week_day: "",
+          month_day: "",
+          month: ""
+        })
       }
       else {
         alert(response.data.error);
@@ -416,10 +503,6 @@ export default function Tasks({folder_id}) {
     }
     else if (task.type == "year_day") {
       for (var i in dates) {
-        console.log(dates[i].getDate());
-        console.log(task.month_day);
-        console.log(dates[i].getMonth());
-        console.log(task.month);
         if (dates[i].getDate() == task.month_day && dates[i].getMonth() == task.month - 1) {
           checks_visible = [Number(i)];
         }
@@ -585,6 +668,56 @@ export default function Tasks({folder_id}) {
                 <div className="form-group">
                     <div style={{textAlign: "right"}}>
                         <button type="submit" className="btn btn-primary">Add</button>
+                    </div>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal editTaskModal" tabindex="-1">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Edit Task</h5>
+              <button type="button" class="btn-close" onClick={closeEditTask} aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <form onSubmit={submitEditTask}>
+                <div className="form-group py-2">
+                  <label className="control-label">Description</label>
+                  <div>
+                      <input type="text" className="form-control input-lg" name="description" value={editTask.description} onChange={changeEditTaskDescription}/>
+                  </div>
+                </div>
+                <div className="form-group py-2">
+                  <label className="control-label">Time</label>
+                  <div>
+                      <input type="text" className="form-control input-lg" name="time" value={editTask.time} onChange={changeEditTaskTime}/>
+                  </div>
+                </div>
+                <div className="form-group py-2">
+                  <label className="control-label">Type</label>
+                  <Select value={selectedTaskType} options={taskTypes} onChange={changeEditTaskType} />
+                </div>
+                {showWeekDaySelector &&
+                <div className="form-group py-2">
+                  <label className="control-label">Week Day</label>
+                  <Select value={selectedWeekDay} options={weekDays} onChange={changeEditTaskWeekDay} />
+                </div>}
+                {showMonthDaySelector &&
+                <div className="form-group py-2">
+                  <label className="control-label">Month Day</label>
+                  <Select value={selectedMonthDay} options={monthDays} onChange={changeEditTaskMonthDay} />
+                </div>} 
+                {showMonthSelector &&
+                <div className="form-group py-2">
+                  <label className="control-label">Month</label>
+                  <Select value={selectedMonth} options={months} onChange={changeEditTaskMonth} />
+                </div>}
+                <div className="form-group">
+                    <div style={{textAlign: "right"}}>
+                        <button type="submit" className="btn btn-primary">Save</button>
                     </div>
                 </div>
               </form>
