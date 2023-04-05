@@ -275,17 +275,17 @@ export default function Tasks({folder_id}) {
           month_day: task.month_day,
           month: task.month,
         });
-        var taskType = taskTypes.find(item => item.value == task.task_type);
+        var taskType = taskTypes.find(item => item.value == task.type);
         setSelectedTaskType(taskType);
-        if (task.task_type == "week_day") {
+        if (task.type == "week_day") {
           var weekDay = weekDays.find(item => item.value == task.week_day);
           setSelectedWeekDay(weekDay);
         }
-        else if (task.task_type == "month_day") {
+        else if (task.type == "month_day") {
           var monthDay = monthDays.find(item => item.value == task.month_day);
           setSelectedMonthDay(monthDay);
         }
-        else if (task.task_type == "year_day") {
+        else if (task.type == "year_day") {
           var month = months.find(item => item.value == task.month);
           setSelectedMonth(month);
           var monthDay = monthDays.find(item => item.value == task.month_day);
@@ -396,7 +396,8 @@ export default function Tasks({folder_id}) {
     setSelectedMonth(item);
   }
 
-  function submitEditTask(task_id, description) {
+  function submitEditTask(e) {
+    e.preventDefault();
     axios.post(config.BASE_URL + "/api/edit-recurrent-task", editTask)
     .then(function(response) {
       if (response.data.status == "OK") {
@@ -595,6 +596,11 @@ export default function Tasks({folder_id}) {
       setShowWeekDaySelector(false);
       setShowMonthDaySelector(true);
       setShowMonthSelector(true);
+    }
+    else if (selectedTaskType.value == "daily" || selectedTaskType.value == "weekly" || selectedTaskType.value == "monthly" || selectedTaskType.value == "yearly") {
+      setShowWeekDaySelector(false);
+      setShowMonthDaySelector(false);
+      setShowMonthSelector(false);
     }
   }, [selectedTaskType]);
 
