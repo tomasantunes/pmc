@@ -177,7 +177,7 @@ app.post("/api/add-recurrent-task", (req, res) => {
   console.log(task_type);
 
   if (task_type == "week_day") {
-    var sql = "INSERT INTO tasks (folder_id, description, time, type, week_day, sort_index) VALUES (?, ?, ?, ?, ?, ?)";
+    var sql = "INSERT INTO tasks (folder_id, description, time, type, week_day, sort_index, is_done) VALUES (?, ?, ?, ?, ?, ?, 0)";
     con.query(sql, [folder_id, description, time, task_type, week_day, sort_index], function (err, result) {
       if (err) {
         console.log(err);
@@ -187,7 +187,7 @@ app.post("/api/add-recurrent-task", (req, res) => {
     });
   }
   else if (task_type == "month_day") {
-    var sql = "INSERT INTO tasks (folder_id, description, time, type, month_day, sort_index) VALUES (?, ?, ?, ?, ?, ?)";
+    var sql = "INSERT INTO tasks (folder_id, description, time, type, month_day, sort_index, is_done) VALUES (?, ?, ?, ?, ?, ?, 0)";
     con.query(sql, [folder_id, description, time, task_type, month_day, sort_index], function (err, result) {
       if (err) {
         console.log(err);
@@ -197,7 +197,7 @@ app.post("/api/add-recurrent-task", (req, res) => {
     });
   }
   else if (task_type == "year_day") {
-    var sql = "INSERT INTO tasks (folder_id, description, time, type, month_day, month, sort_index) VALUES (?, ?, ?, ?, ?, ?, ?)";
+    var sql = "INSERT INTO tasks (folder_id, description, time, type, month_day, month, sort_index, is_done) VALUES (?, ?, ?, ?, ?, ?, ?, 0)";
     con.query(sql, [folder_id, description, time, task_type, month_day, month, sort_index], function (err, result) {
       if (err) {
         console.log(err);
@@ -207,7 +207,7 @@ app.post("/api/add-recurrent-task", (req, res) => {
     });
   }
   else {
-    var sql = "INSERT INTO tasks (folder_id, description, time, type, sort_index) VALUES (?, ?, ?, ?, ?)";
+    var sql = "INSERT INTO tasks (folder_id, description, time, type, sort_index, is_done) VALUES (?, ?, ?, ?, ?, 0)";
     con.query(sql, [folder_id, description, time, task_type, sort_index], function (err, result) {
       if (err) {
         console.log(err);
