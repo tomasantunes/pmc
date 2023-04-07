@@ -2,6 +2,7 @@ import React, {useState, useEffect} from 'react';
 import axios from 'axios';
 import config from '../config';
 import $ from 'jquery';
+import {useNavigate} from 'react-router-dom';
 import {
   SortableContainer,
   SortableElement,
@@ -51,7 +52,7 @@ function TBody(props) {
 
 const SortableTBody = SortableContainer(TBody);
 
-export default function Tasks({folder_id}) {
+export default function Tasks({folder_id, folder}) {
   const [tasks, setTasks] = useState([]);
   const [newTask, setNewTask] = useState({
     description: "",
@@ -62,6 +63,9 @@ export default function Tasks({folder_id}) {
     description: "",
     time: ""
   });
+  const [hideDone, setHideDone] = useState(folder.hide_done == 1 ? true : false);
+
+  var navigate = useNavigate();
 
   const handleSort = ({ oldIndex, newIndex }) => {
     setTasks(prevState => {
@@ -102,7 +106,11 @@ export default function Tasks({folder_id}) {
     axios.get(config.BASE_URL + "/api/get-tasks-from-folder", {params: {folder_id: folder_id}})
     .then(function(response) {
       if (response.data.status == "OK") {
-        setTasks(response.data.data);
+        var tasks_arr = response.data.data;
+        if (folder.hide_done == 1) {
+          tasks_arr = tasks_arr.filter(task => task.is_done == false);
+        }
+        setTasks(tasks_arr);
       }
       else {
         alert(response.data.error);
@@ -232,6 +240,29 @@ export default function Tasks({folder_id}) {
     });
   }
 
+  function deleteFolder() {
+    bootprompt.confirm({
+      title: "Are you sure?",
+      message: "Are you sure you want to delete this folder?"
+    }, (result) => {
+      if (result) {
+        axios.post(config.BASE_URL + "/api/delete-folder", {folder_id: folder_id})
+        .then(function(response) {
+          if (response.data.status == "OK") {
+            navigate("/home");
+          }
+          else {
+            alert(response.data.error);
+          }
+        })
+        .catch(function(err) {
+          console.log(err);
+          alert(err.message);
+        });
+      }
+    });
+  }
+
   function changeNewTaskDescription(e) {
     setNewTask({
       ...newTask,
@@ -260,13 +291,39 @@ export default function Tasks({folder_id}) {
     });
   }
 
+  function toggleHideDone() {
+    axios.post("/api/set-hide-done", {folder_id: folder_id, hide_done: !hideDone})
+    .then(function(response) {
+      if (response.data.status == "OK") {
+        setHideDone(!hideDone);
+        window.location.reload();
+      }
+      else {
+        alert(response.data.error);
+      }
+    })
+    .catch(function(err) {
+      console.log(err);
+      alert(err.message);
+    });
+  }
+
   useEffect(() => {
     loadTasks();
   }, []);
   return (
     <>
-      <div className="my-3" style={{textAlign: "right", width: "500px", margin: "0 auto"}}>
+      <div className="buttons-menu my-3">
         <button className="btn btn-success" onClick={openAddTask}>Add Task</button>
+        <div class="dropdown">
+          <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+            Options
+          </button>
+          <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+            <li><a class="dropdown-item" href="#" onClick={deleteFolder}>Delete folder</a></li>
+            <li><a class="dropdown-item" href="#" onClick={toggleHideDone}>{hideDone ? "Show Done" : "Hide Done"}</a></li>
+          </ul>
+        </div>
       </div>
       <table className="table table-striped table-bordered align-middle tasks">
           <thead class="table-dark">

@@ -139,6 +139,39 @@ app.get("/api/get-tasks-from-folder", (req, res) => {
   });
 });
 
+app.post("/api/delete-folder", (req, res) => {
+  if (!req.session.isLoggedIn) {
+    res.json({status: "NOK", error: "Invalid Authorization."});
+    return;
+  }
+  var folder_id = req.body.folder_id;
+  var sql = "DELETE FROM folders WHERE id = ?";
+  con.query(sql, [folder_id], function (err, result) {
+    if (err) {
+      console.log(err);
+      res.json({status: "NOK", error: err.message});
+    }
+    res.json({status: "OK", data: "Folder has been deleted successfully."});
+  });
+});
+
+app.post("/api/set-hide-done", (req, res) => {
+  if (!req.session.isLoggedIn) {
+    res.json({status: "NOK", error: "Invalid Authorization."});
+    return;
+  }
+  var folder_id = req.body.folder_id;
+  var hide_done = req.body.hide_done;
+  var sql = "UPDATE folders SET hide_done = ? WHERE id = ?";
+  con.query(sql, [hide_done, folder_id], function (err, result) {
+    if (err) {
+      console.log(err);
+      res.json({status: "NOK", error: err.message});
+    }
+    res.json({status: "OK", data: "Folder has been updated successfully."});
+  });
+});
+
 app.get("/api/get-recurrent-tasks", (req, res) => {
   if (!req.session.isLoggedIn) {
     res.json({status: "NOK", error: "Invalid Authorization."});
