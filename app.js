@@ -271,7 +271,7 @@ app.get("/api/get-stats", (req, res) => {
         }
         var today_tasks = getTodayTasks(result3);
         if (today_tasks.length > 0) {
-          var sql4 = "SELECT * FROM recurrent_checks WHERE task_id IN (?) AND is_done = 1";
+          var sql4 = "SELECT * FROM recurrent_checks WHERE task_id IN (?) AND is_done = 1 AND date = DATE(NOW())";
           con.query(sql4, [today_tasks], function (err4, result4) {
             if (err4) {
               console.log(err4);
