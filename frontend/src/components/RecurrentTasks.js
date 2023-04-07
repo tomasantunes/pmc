@@ -198,22 +198,6 @@ export default function Tasks({folder_id}) {
     return false;
   }
 
-  function updateTaskDone(e, task_id) {
-    axios.post(config.BASE_URL + "/api/update-task-done", {task_id: task_id, is_done: e.target.checked})
-    .then(function(response) {
-      if (response.data.status == "OK") {
-        loadTasks();
-      }
-      else {
-        alert(response.data.error);
-      }
-    })
-    .catch(function(err) {
-      console.log(err);
-      alert(err.message);
-    });
-  }
-
   function submitAddTask(e) {
     e.preventDefault();
     axios.post(config.BASE_URL + "/api/add-recurrent-task", {...newTask, sort_index: tasks.length})
