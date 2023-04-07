@@ -49,7 +49,8 @@ export default function Sidebar() {
       if (response.data.status == "OK") {
         loadFolders();
         closeAddFolder();
-        navigate("/folder/" + response.data.data.insertId)
+        navigate("/folder/" + response.data.data.insertId);
+        window.location.reload();
       }
       else {
         alert(response.data.error);
@@ -89,6 +90,12 @@ export default function Sidebar() {
     });
   }
 
+
+  function goToLink(link) {
+    navigate(link);
+    window.location.reload();
+  }
+
   useEffect(() => {
     loadFolders();
   }, []);
@@ -101,7 +108,7 @@ export default function Sidebar() {
               <li><a href="#" onClick={openAddFolder}>Add Folder</a></li>
               {folders.map((folder) => {
                 return (
-                  <li key={folder.id}><a href={"/folder/" + folder.id}>{folder.name}</a></li>
+                  <li key={folder.id}><a href="#" onClick={() => goToLink("/folder/" + folder.id)}>{folder.name}</a></li>
                 )
               })}
           </ul>

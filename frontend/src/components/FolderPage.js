@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState, useEffect} from 'react';
 import { useParams } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import TasksPage from './TasksPage';
@@ -10,8 +10,9 @@ global.jQuery = $;
 window.bootstrap = require('bootstrap');
 
 export default function FolderPage() {
-  const id = useParams().id;
-
+  var params = useParams();
+  const id = params.id;
+  
   return (
     <>
       <Sidebar />

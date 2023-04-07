@@ -27,29 +27,32 @@ app.use(session({
 }));
 
 var con;
+var con2;
 if (secretConfig.ENVIRONMENT == "WINDOWS") {
-  var con = mysql.createPool({
+  con = mysql.createPool({
     connectionLimit : 90,
     connectTimeout: 1000000,
     host: secretConfig.DB_HOST,
     user: secretConfig.DB_USER,
     password: secretConfig.DB_PASSWORD,
     database: secretConfig.DB_NAME,
-    timezone: '+00:00'
+    timezone: '+00:00',
+    port: 3306
   });
 
-  var con2 = mysql2.createPool({
+  con2 = mysql2.createPool({
     connectionLimit : 90,
     connectTimeout: 1000000,
     host: secretConfig.DB_HOST,
     user: secretConfig.DB_USER,
     password: secretConfig.DB_PASSWORD,
     database: secretConfig.DB_NAME,
-    timezone: '+00:00'
+    timezone: '+00:00',
+    port: 3306
   });
 }
 else if (secretConfig.ENVIRONMENT == "UBUNTU") {
-  var con = mysql.createPool({
+  con = mysql.createPool({
     connectionLimit : 90,
     connectTimeout: 1000000,
     host: secretConfig.DB_HOST,
@@ -60,7 +63,7 @@ else if (secretConfig.ENVIRONMENT == "UBUNTU") {
     timezone: '+00:00'
   });
 
-  var con2 = mysql2.createPool({
+  con2 = mysql2.createPool({
     connectionLimit : 90,
     connectTimeout: 1000000,
     host: secretConfig.DB_HOST,
@@ -510,6 +513,11 @@ app.post("/api/check-login", (req, res) => {
   var sql = "SELECT * FROM logins WHERE is_valid = 0 AND created_at > (NOW() - INTERVAL 1 HOUR);";
 
   con.query(sql, function (err, result) {
+    if (err) {
+      console.log(err);
+      res.json({status: "NOK", error: err.message});
+      return;
+    }
     if (result.length <= 5) {
       if (user == secretConfig.USER && pass == secretConfig.PASS) {
         req.session.isLoggedIn = true;
