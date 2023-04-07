@@ -82,3 +82,19 @@ tbody {
     left: 50%;
     transform: translate(-50%, -50%);
 }
+
+.buttons-menu {
+    text-align: right;
+    width: 500px;
+    margin: 0 auto;
+}
+
+.buttons-menu button {
+    margin: 5px;
+    display: inline-block;
+}
+
+.buttons-menu .dropdown {
+    margin: 5px;
+    display: inline-block;
+}

@@ -69,9 +69,9 @@ export default function TasksPage({folder_id}) {
             <h3>{folder.name}<a href="#" className="edit-folder-name-btn" onClick={openEditFolderName}><i class="fa-solid fa-pencil"></i></a></h3>
         </div>
         {folder.type == "simple" ?
-          <Tasks folder_id={folder_id} />
+          <Tasks folder_id={folder_id} folder={folder} />
         :
-          <RecurrentTasks folder_id={folder_id} />
+          <RecurrentTasks folder_id={folder_id} folder={folder} />
         }
     </div>
   )
