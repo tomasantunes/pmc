@@ -172,6 +172,23 @@ app.post("/api/set-hide-done", (req, res) => {
   });
 });
 
+app.post("/api/set-hide-not-this-week", (req, res) => {
+  if (!req.session.isLoggedIn) {
+    res.json({status: "NOK", error: "Invalid Authorization."});
+    return;
+  }
+  var folder_id = req.body.folder_id;
+  var hide_not_this_week = req.body.hide_not_this_week;
+  var sql = "UPDATE folders SET hide_not_this_week = ? WHERE id = ?";
+  con.query(sql, [hide_not_this_week, folder_id], function (err, result) {
+    if (err) {
+      console.log(err);
+      res.json({status: "NOK", error: err.message});
+    }
+    res.json({status: "OK", data: "Folder has been updated successfully."});
+  });
+});
+
 app.get("/api/get-recurrent-tasks", (req, res) => {
   if (!req.session.isLoggedIn) {
     res.json({status: "NOK", error: "Invalid Authorization."});
