@@ -1,4 +1,5 @@
 import React, {useState, useEffect} from 'react';
+import {useNavigate} from 'react-router-dom';
 import axios from 'axios';
 import config from '../config';
 import $ from 'jquery';
@@ -91,11 +92,10 @@ function TBody(props) {
 
 const SortableTBody = SortableContainer(TBody);
 
-export default function Tasks({folder_id}) {
+export default function Tasks({folder_id, folder}) {
   const [tasks, setTasks] = useState([]);
   const [days, setDays] = useState([]);
   const [dates, setDates] = useState([]);
-  const [checks, setChecks] = useState([]);
   const [newTask, setNewTask] = useState({
     description: "",
     folder_id: folder_id,
@@ -122,6 +122,9 @@ export default function Tasks({folder_id}) {
   const [selectedWeekDay, setSelectedWeekDay] = useState();
   const [selectedMonthDay, setSelectedMonthDay] = useState();
   const [selectedMonth, setSelectedMonth] = useState();
+  console.log(folder.hide_not_this_week);
+  const [hideNotThisWeek, setHideNotThisWeek] = useState();
+  var navigate = useNavigate();
 
   const taskTypes = [
     {value: "daily", label: "Daily"},
@@ -430,6 +433,46 @@ export default function Tasks({folder_id}) {
     });
   }
 
+  function deleteFolder() {
+    bootprompt.confirm({
+      title: "Are you sure?",
+      message: "Are you sure you want to delete this folder?"
+    }, (result) => {
+      if (result) {
+        axios.post(config.BASE_URL + "/api/delete-folder", {folder_id: folder_id})
+        .then(function(response) {
+          if (response.data.status == "OK") {
+            navigate("/home");
+          }
+          else {
+            alert(response.data.error);
+          }
+        })
+        .catch(function(err) {
+          console.log(err);
+          alert(err.message);
+        });
+      }
+    });
+  }
+
+  function toggleHideNotThisWeek() {
+    axios.post("/api/set-hide-not-this-week", {folder_id: folder_id, hide_not_this_week: !hideNotThisWeek})
+    .then(function(response) {
+      if (response.data.status == "OK") {
+        setHideNotThisWeek(!hideNotThisWeek);
+        window.location.reload();
+      }
+      else {
+        alert(response.data.error);
+      }
+    })
+    .catch(function(err) {
+      console.log(err);
+      alert(err.message);
+    });
+  }
+
   function updateTaskDone(e, task_id, index) {
     axios.post(config.BASE_URL + "/api/update-recurrent-task-done", {task_id: task_id, is_done: e.target.checked, date: dates[index].toISOString().split('T')[0]})
     .then(function(response) {
@@ -515,8 +558,13 @@ export default function Tasks({folder_id}) {
           data[i].checks = checks;
           data[i].checks_visible = checks_visible;
         }
-        console.log(data);
-        setTasks(data);
+        var new_data = data;
+        if (hideNotThisWeek) {
+          new_data = new_data.filter((task) => {
+            return checkIfTaskIsThisWeek(task);
+          });
+        }
+        setTasks(new_data);
       }
       else {
         alert(response.data.error);
@@ -526,6 +574,47 @@ export default function Tasks({folder_id}) {
       console.log(err);
       alert(err.message);
     });
+  }
+
+  function checkIfTaskIsThisWeek(task) {
+    if (task.type == "daily") {
+      return true;
+    }
+    else if (task.type == "weekly") {
+      return true;
+    }
+    else if (task.type == "monthly") {
+      for (var i in dates) {
+        if (dates[i].getDate() == 1) {
+          return true;
+        }
+      }
+    }
+    else if (task.type == "yearly") {
+      for (var i in dates) {
+        if (dates[i].getMonth() == 0 && dates[i].getDate() == 1) {
+          return true;
+        }
+      }
+    }
+    else if (task.type == "week_day") {
+      return true;
+    }
+    else if (task.type == "month_day") {
+      for (var i in dates) {
+        if (dates[i].getDate() == task.month_day) {
+          return true;
+        }
+      }
+    }
+    else if (task.type == "year_day") {
+      for (var i in dates) {
+        if (dates[i].getDate() == task.month_day && dates[i].getMonth() == task.month - 1) {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 
   function addLeadingZeros(n) {
@@ -560,10 +649,10 @@ export default function Tasks({folder_id}) {
   }
 
   useEffect(() => {
-    if (dates.length > 0) {
+    if (dates.length > 0 && hideNotThisWeek != undefined) {
       loadTasks();
     }
-  }, [dates]);
+  }, [dates, hideNotThisWeek]);
 
   useEffect(() => {
     if (selectedTaskType.value == "week_day") {
@@ -589,13 +678,28 @@ export default function Tasks({folder_id}) {
   }, [selectedTaskType]);
 
   useEffect(() => {
+    if (folder != undefined && folder != null) {
+      setHideNotThisWeek(folder.hide_not_this_week == 1 ? true : false);
+    }
+  }, [folder]);
+
+  useEffect(() => {
     setDays(getDays());
     setDates(getDates());
   }, []);
   return (
     <>
-      <div className="my-3" style={{textAlign: "right", maxWidth: "1000px", margin: "0 auto"}}>
+      <div className="buttons-menu-recurrent my-3">
         <button className="btn btn-success" onClick={openAddTask}>Add Task</button>
+        <div class="dropdown">
+          <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+            Options
+          </button>
+          <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+            <li><a class="dropdown-item" href="#" onClick={deleteFolder}>Delete folder</a></li>
+            <li><a class="dropdown-item" href="#" onClick={toggleHideNotThisWeek}>{hideNotThisWeek == true ? "Disable Only This Week" : "Only This Week"}</a></li>
+          </ul>
+        </div>
       </div>
       <table className="table table-striped table-bordered align-middle recurrent-tasks">
           <thead class="table-dark">

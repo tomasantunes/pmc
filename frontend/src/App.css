@@ -98,3 +98,19 @@ tbody {
     margin: 5px;
     display: inline-block;
 }
+
+.buttons-menu-recurrent {
+    text-align: right;
+    width: 1000px;
+    margin: 0 auto;
+}
+
+.buttons-menu-recurrent button {
+    margin: 5px;
+    display: inline-block;
+}
+
+.buttons-menu-recurrent .dropdown {
+    margin: 5px;
+    display: inline-block;
+}
