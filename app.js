@@ -401,11 +401,16 @@ app.post("/api/update-task-done", (req, res) => {
   }
   var task_id = req.body.task_id;
   var is_done = req.body.is_done;
+  var date_done = req.body.date_done;
   var sql = "UPDATE tasks SET is_done = ? WHERE id = ?";
   con.query(sql, [is_done, task_id], function (err, result) {
     if (err) {
       console.log(err);
       res.json({status: "NOK", error: err.message});
+    }
+    if (is_done == true) {
+      var sql2 = "UPDATE tasks SET date_done = ? WHERE id = ?";
+      con.query(sql2, [date_done, task_id]);
     }
     res.json({status: "OK", data: "Task has been updated successfully."});
   });

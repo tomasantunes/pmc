@@ -123,7 +123,7 @@ export default function Tasks({folder_id, folder}) {
   }
 
   function updateTaskDone(e, task_id) {
-    axios.post(config.BASE_URL + "/api/update-task-done", {task_id: task_id, is_done: e.target.checked})
+    axios.post(config.BASE_URL + "/api/update-task-done", {task_id: task_id, is_done: e.target.checked, date_done: new Date().toISOString().slice(0, 19).replace('T', ' ')})
     .then(function(response) {
       if (response.data.status == "OK") {
         loadTasks();
