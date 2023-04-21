@@ -637,6 +637,17 @@ export default function Tasks({folder_id, folder}) {
     return days;
   }
 
+  function convertDatesToDays(dates_arr) {
+    var days = [];
+    for (var i in dates_arr) {
+      var date = dates_arr[i];
+      var mm = date.getMonth() + 1;
+      var dd = date.getDate();
+      days.push(addLeadingZeros(dd) + "/" + addLeadingZeros(mm));
+    }
+    return days;
+  }
+
   function getDates() {
     var dates = [];
     for (var i = 0; i < 7; i++) {
@@ -646,6 +657,28 @@ export default function Tasks({folder_id, folder}) {
       dates.push(date);
     }
     return dates;
+  }
+
+  function previousWeek() {
+    var new_dates = [];
+    for (var i in dates) {
+      var date = new Date(dates[i]);
+      date.setDate(date.getDate() - 7);
+      new_dates.push(date);
+    }
+    setDates(new_dates);
+    setDays(convertDatesToDays(new_dates));
+  }
+
+  function nextWeek() {
+    var new_dates = [];
+    for (var i in dates) {
+      var date = new Date(dates[i]);
+      date.setDate(date.getDate() + 7);
+      new_dates.push(date);
+    }
+    setDates(new_dates);
+    setDays(convertDatesToDays(new_dates));
   }
 
   useEffect(() => {
@@ -690,6 +723,8 @@ export default function Tasks({folder_id, folder}) {
   return (
     <>
       <div className="buttons-menu-recurrent my-3">
+        <button className="btn btn-primary" onClick={previousWeek}><i class="fa-solid fa-arrow-left"></i></button>
+        <button className="btn btn-primary" onClick={nextWeek}><i class="fa-solid fa-arrow-right"></i></button>
         <button className="btn btn-success" onClick={openAddTask}>Add Task</button>
         <div class="dropdown">
           <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
