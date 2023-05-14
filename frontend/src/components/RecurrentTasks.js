@@ -54,13 +54,13 @@ function TRow(props) {
     <tr {...props}>
       <td>{props.description}</td>
       <td>{props.time}</td>
-      <td>{checksVisible[0] && <input type="checkbox" checked={checks[0]} onChange={(e) => {toggleCheck(e, props.task_id, 0)}} />}</td>
       <td>{checksVisible[1] && <input type="checkbox" checked={checks[1]} onChange={(e) => {toggleCheck(e, props.task_id, 1)}} />}</td>
       <td>{checksVisible[2] && <input type="checkbox" checked={checks[2]} onChange={(e) => {toggleCheck(e, props.task_id, 2)}} />}</td>
       <td>{checksVisible[3] && <input type="checkbox" checked={checks[3]} onChange={(e) => {toggleCheck(e, props.task_id, 3)}} />}</td>
       <td>{checksVisible[4] && <input type="checkbox" checked={checks[4]} onChange={(e) => {toggleCheck(e, props.task_id, 4)}} />}</td>
       <td>{checksVisible[5] && <input type="checkbox" checked={checks[5]} onChange={(e) => {toggleCheck(e, props.task_id, 5)}} />}</td>
       <td>{checksVisible[6] && <input type="checkbox" checked={checks[6]} onChange={(e) => {toggleCheck(e, props.task_id, 6)}} />}</td>
+      <td>{checksVisible[0] && <input type="checkbox" checked={checks[0]} onChange={(e) => {toggleCheck(e, props.task_id, 0)}} />}</td>
       <td>
         <div class="dropdown">
             <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
@@ -137,13 +137,13 @@ export default function Tasks({folder_id, folder}) {
   ];
 
   const weekDays = [
-    {value: 0, label: "Monday"},
-    {value: 1, label: "Tuesday"},
-    {value: 2, label: "Wednesday"},
-    {value: 3, label: "Thursday"},
-    {value: 4, label: "Friday"},
-    {value: 5, label: "Saturday"},
-    {value: 6, label: "Sunday"}
+    {value: 1, label: "Monday"},
+    {value: 2, label: "Tuesday"},
+    {value: 3, label: "Wednesday"},
+    {value: 4, label: "Thursday"},
+    {value: 5, label: "Friday"},
+    {value: 6, label: "Saturday"},
+    {value: 0, label: "Sunday"},
   ];
 
   var monthDays = [];
@@ -499,7 +499,7 @@ export default function Tasks({folder_id, folder}) {
       checks_visible = [0, 1, 2, 3, 4, 5, 6];
     }
     else if (task.type == "weekly") {
-      checks_visible = [5];
+      checks_visible = [6];
     }
     else if (task.type == "monthly") {
       for (var i in dates) {
@@ -516,11 +516,7 @@ export default function Tasks({folder_id, folder}) {
       }
     }
     else if (task.type == "week_day") {
-      for (var i in dates) {
-        if (dates[i].getDay() - 1 == task.week_day) {
-          checks_visible = [Number(i)];
-        }
-      }
+      checks_visible = [Number(task.week_day)];
     }
     else if (task.type == "month_day") {
       for (var i in dates) {
