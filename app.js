@@ -28,7 +28,7 @@ app.use(session({
 
 var con;
 var con2;
-if (secretConfig.ENVIRONMENT == "WINDOWS") {
+if (secretConfig.ENVIRONMENT == "WINDOWS" || secretConfig.ENVIRONMENT == "MACOS") {
   con = mysql.createPool({
     connectionLimit : 90,
     connectTimeout: 1000000,
@@ -600,6 +600,15 @@ app.get('/login', (req, res) => {
 });
 
 app.get('/home', (req, res) => {
+  if(req.session.isLoggedIn) {
+    res.sendFile(path.resolve(__dirname) + '/frontend/build/index.html');
+  }
+  else {
+    res.redirect('/login');
+  }
+});
+
+app.get('/github-tasks', (req, res) => {
   if(req.session.isLoggedIn) {
     res.sendFile(path.resolve(__dirname) + '/frontend/build/index.html');
   }

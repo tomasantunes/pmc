@@ -1,3 +1,4 @@
 node_modules
 secret-config.json
 frontend/src/config.json
+.DS_Store
