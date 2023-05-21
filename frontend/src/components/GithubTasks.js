@@ -47,6 +47,7 @@ export default function Home() {
             </div>
           </div>
         }
+        <div dangerouslySetInnerHTML={{__html: githubTasks}}></div>
       </div>
     </>
   )

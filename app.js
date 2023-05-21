@@ -7,6 +7,8 @@ var mysql = require('mysql2');
 var mysql2 = require('mysql2/promise');
 var secretConfig = require('./secret-config');
 var session = require('express-session');
+const { Octokit } = require("@octokit/rest");
+var axios = require('axios');
 
 var app = express();
 
@@ -25,6 +27,25 @@ app.use(session({
   resave: false,
   saveUninitialized: true
 }));
+
+const octokit = new Octokit({
+  auth: secretConfig.GITHUB_TOKEN,
+  userAgent: 'myApp v1.2.3',
+  previews: ['jean-grey', 'symmetra'],
+  timeZone: 'Europe/Lisbon',
+  baseUrl: 'https://api.github.com',
+  log: {
+    debug: () => {},
+    info: () => {},
+    warn: console.warn,
+    error: console.error
+  },
+  request: {
+    agent: undefined,
+    fetch: undefined,
+    timeout: 0
+  }
+});
 
 var con;
 var con2;
@@ -337,6 +358,37 @@ app.get("/api/get-stats", (req, res) => {
       });
     });
   });
+});
+
+app.get("/api/get-github-tasks", async (req, res) => {
+  if (!req.session.isLoggedIn) {
+    res.json({status: "NOK", error: "Invalid Authorization."});
+    return;
+  }
+
+  var text = '';
+
+  const { data: repos } = await octokit.rest.repos.listForAuthenticatedUser({per_page: 100});
+
+  for (var i in repos) {
+    var repo_name = repos[i].name;
+    try {
+      const {data: todo } = await octokit.rest.repos.getContent({
+        owner: "tomasantunes",
+        repo: repo_name,
+        path: "TODO.md",
+      });
+      var response = await axios.get(todo.download_url);
+      console.log(response.data);
+      text += repo_name + '<br><br>';
+      text += response.data + '<br><br>';
+    }
+    catch (err) {
+      console.log(err.message);
+    }
+  }
+
+  res.json({status: "OK", data: text});
 });
 
 function getTodayTasks(tasks, cb) {
