@@ -23,7 +23,6 @@ export default function Stats() {
     })
     .catch(function(err) {
       console.log(err);
-      alert(err.message);
     });
   }
 
