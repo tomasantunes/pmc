@@ -340,21 +340,22 @@ app.get("/api/get-stats", (req, res) => {
           console.log(err);
           res.json({status: "NOK", error: err.message});
         }
-        var today_tasks = getTodayTasks(result3);
-        if (today_tasks.length > 0) {
-          var sql4 = "SELECT * FROM recurrent_checks WHERE task_id IN (?) AND is_done = 1 AND date = DATE(NOW())";
-          con.query(sql4, [today_tasks], function (err4, result4) {
-            if (err4) {
-              console.log(err4);
-              res.json({status: "NOK", error: err4.message});
-            }
-            var today_tasks_done = result4.length || 0;
-            res.json({status: "OK", data: {total_tasks: total_tasks, total_tasks_done: total_tasks_done, recurrent_tasks: today_tasks.length, recurrent_tasks_done: today_tasks_done}});
-          });
-        }
-        else {
-          res.json({status: "OK", data: {total_tasks: total_tasks, total_tasks_done: total_tasks_done, recurrent_tasks: 0, recurrent_tasks_done: 0}});
-        }
+        var today_tasks = getTodayTasks(result3, function(today_tasks) {
+          if (today_tasks.length > 0) {
+            var sql4 = "SELECT * FROM recurrent_checks WHERE task_id IN (?) AND is_done = 1 AND date = DATE(NOW())";
+            con.query(sql4, [today_tasks], function (err4, result4) {
+              if (err4) {
+                console.log(err4);
+                res.json({status: "NOK", error: err4.message});
+              }
+              var today_tasks_done = result4.length || 0;
+              res.json({status: "OK", data: {total_tasks: total_tasks, total_tasks_done: total_tasks_done, recurrent_tasks: today_tasks.length, recurrent_tasks_done: today_tasks_done}});
+            });
+          }
+          else {
+            res.json({status: "OK", data: {total_tasks: total_tasks, total_tasks_done: total_tasks_done, recurrent_tasks: 0, recurrent_tasks_done: 0}});
+          }
+        });
       });
     });
   });
@@ -484,7 +485,7 @@ function getTodayTasks(tasks, cb) {
       today_tasks.push(tasks[i].id);
     }
   }
-  return today_tasks;
+  cb(today_tasks);
 }
 
 function checkIfTaskIsToday(task) {
