@@ -25,8 +25,9 @@ function TRow(props) {
       var new_checks = prev;
       new_checks[index] = e.target.checked;
       return new_checks;
-    }); 
-    props.updateTaskDone(e, props.task_id, index);
+    });
+    var imap = [0, 1, 2, 3, 4, 5, 6];
+    props.updateTaskDone(e, props.task_id, imap.indexOf(index));
   }
 
   useEffect(() => {
@@ -54,13 +55,13 @@ function TRow(props) {
     <tr {...props}>
       <td>{props.description}</td>
       <td>{props.time}</td>
-      <td>{checksVisible[1] && <input type="checkbox" checked={checks[1]} onChange={(e) => {toggleCheck(e, props.task_id, 0)}} />}</td>
-      <td>{checksVisible[2] && <input type="checkbox" checked={checks[2]} onChange={(e) => {toggleCheck(e, props.task_id, 1)}} />}</td>
-      <td>{checksVisible[3] && <input type="checkbox" checked={checks[3]} onChange={(e) => {toggleCheck(e, props.task_id, 2)}} />}</td>
-      <td>{checksVisible[4] && <input type="checkbox" checked={checks[4]} onChange={(e) => {toggleCheck(e, props.task_id, 3)}} />}</td>
-      <td>{checksVisible[5] && <input type="checkbox" checked={checks[5]} onChange={(e) => {toggleCheck(e, props.task_id, 4)}} />}</td>
-      <td>{checksVisible[6] && <input type="checkbox" checked={checks[6]} onChange={(e) => {toggleCheck(e, props.task_id, 5)}} />}</td>
-      <td>{checksVisible[0] && <input type="checkbox" checked={checks[0]} onChange={(e) => {toggleCheck(e, props.task_id, 6)}} />}</td>
+      <td>{checksVisible[1] && <input type="checkbox" checked={checks[1]} onChange={(e) => {toggleCheck(e, props.task_id, 1)}} />}</td>
+      <td>{checksVisible[2] && <input type="checkbox" checked={checks[2]} onChange={(e) => {toggleCheck(e, props.task_id, 2)}} />}</td>
+      <td>{checksVisible[3] && <input type="checkbox" checked={checks[3]} onChange={(e) => {toggleCheck(e, props.task_id, 3)}} />}</td>
+      <td>{checksVisible[4] && <input type="checkbox" checked={checks[4]} onChange={(e) => {toggleCheck(e, props.task_id, 4)}} />}</td>
+      <td>{checksVisible[5] && <input type="checkbox" checked={checks[5]} onChange={(e) => {toggleCheck(e, props.task_id, 5)}} />}</td>
+      <td>{checksVisible[6] && <input type="checkbox" checked={checks[6]} onChange={(e) => {toggleCheck(e, props.task_id, 6)}} />}</td>
+      <td>{checksVisible[0] && <input type="checkbox" checked={checks[0]} onChange={(e) => {toggleCheck(e, props.task_id, 0)}} />}</td>
       <td>
         <div class="dropdown">
             <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
