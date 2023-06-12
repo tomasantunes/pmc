@@ -32,10 +32,26 @@ export default function Stats() {
   return (
     <>
       <h2>Stats</h2>
-      <p><b>Total Tasks:</b> {tasksTotal}</p>
-      <p><b>Tasks Done:</b> {tasksDone}</p>
-      <p><b>Total Recurrent Tasks:</b> {recurrentTasksTotal}</p>
-      <p><b>Recurrent Tasks Done:</b> {recurrentTasksDone}</p>
+      <table className="table table-sm table-bordered small-table">
+        <tbody>
+          <tr>
+            <th className="table-dark bg-blue">Tasks Today</th>
+            <td className="text-center">{tasksTotal}</td>
+          </tr>
+          <tr>
+            <th className="table-dark bg-blue">Tasks Done Today</th>
+            <td className="text-center">{tasksDone}</td>
+          </tr>
+          <tr>
+            <th className="table-dark bg-blue">Recurrent Tasks Today</th>
+            <td className="text-center">{recurrentTasksTotal}</td>
+          </tr>
+          <tr>
+            <th className="table-dark bg-blue">Recurrent Tasks Done Today</th>
+            <td className="text-center">{recurrentTasksDone}</td>
+          </tr>
+        </tbody>
+      </table>
     </>
   )
 }
