@@ -340,7 +340,7 @@ app.get("/api/get-stats", (req, res) => {
           console.log(err);
           res.json({status: "NOK", error: err.message});
         }
-        var today_tasks = getTodayTasks(result3, function(today_tasks) {
+        getTodayTasks(result3, function(today_tasks) {
           if (today_tasks.length > 0) {
             var sql4 = "SELECT * FROM recurrent_checks WHERE task_id IN (?) AND is_done = 1 AND date = DATE(NOW())";
             con.query(sql4, [today_tasks], function (err4, result4) {
@@ -485,6 +485,8 @@ function getTodayTasks(tasks, cb) {
       today_tasks.push(tasks[i].id);
     }
   }
+  console.log("Today tasks:");
+  console.log(today_tasks);
   cb(today_tasks);
 }
 
