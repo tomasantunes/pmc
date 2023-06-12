@@ -89,7 +89,6 @@ export default function Tasks({folder_id, folder}) {
       })
       .catch(function(err) {
         console.log(err);
-        alert(err.message);
       });
     }
   }
@@ -118,7 +117,6 @@ export default function Tasks({folder_id, folder}) {
     })
     .catch(function(err) {
       console.log(err);
-      alert(err.message);
     });
   }
 
@@ -134,7 +132,6 @@ export default function Tasks({folder_id, folder}) {
     })
     .catch(function(err) {
       console.log(err);
-      alert(err.message);
     });
   }
 
@@ -156,7 +153,6 @@ export default function Tasks({folder_id, folder}) {
     })
     .catch(function(err) {
       console.log(err);
-      alert(err.message);
     });
   }
 
@@ -179,7 +175,6 @@ export default function Tasks({folder_id, folder}) {
     })
     .catch(function(err) {
       console.log(err);
-      alert(err.message);
     });
   }
 
@@ -209,7 +204,6 @@ export default function Tasks({folder_id, folder}) {
     })
     .catch(function(err) {
       console.log(err);
-      alert(err.message);
     });
   }
 
@@ -234,7 +228,6 @@ export default function Tasks({folder_id, folder}) {
         })
         .catch(function(err) {
           console.log(err);
-          alert(err.message);
         });
       }
     });
@@ -257,7 +250,6 @@ export default function Tasks({folder_id, folder}) {
         })
         .catch(function(err) {
           console.log(err);
-          alert(err.message);
         });
       }
     });
@@ -304,7 +296,6 @@ export default function Tasks({folder_id, folder}) {
     })
     .catch(function(err) {
       console.log(err);
-      alert(err.message);
     });
   }
 

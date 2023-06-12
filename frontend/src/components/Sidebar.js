@@ -38,7 +38,6 @@ export default function Sidebar() {
     })
     .catch(function(err) {
       console.log(err);
-      alert(err.message);
     });
   }
 
@@ -58,7 +57,6 @@ export default function Sidebar() {
     })
     .catch(function(err) {
       console.log(err);
-      alert(err.message);
     });
   }
 
