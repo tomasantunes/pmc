@@ -348,7 +348,9 @@ app.get("/api/get-stats", (req, res) => {
                 console.log(err4);
                 res.json({status: "NOK", error: err4.message});
               }
-              var today_tasks_done = result4.length || 0;
+              console.log("Today tasks done:");
+              console.log(result4);
+              var today_tasks_done = result4.length;
               res.json({status: "OK", data: {total_tasks: total_tasks, total_tasks_done: total_tasks_done, recurrent_tasks: today_tasks.length, recurrent_tasks_done: today_tasks_done}});
             });
           }
