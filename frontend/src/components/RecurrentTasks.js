@@ -26,7 +26,7 @@ function TRow(props) {
       new_checks[index] = e.target.checked;
       return new_checks;
     });
-    var imap = [0, 1, 2, 3, 4, 5, 6];
+    var imap = [1, 2, 3, 4, 5, 6, 0];
     props.updateTaskDone(e, props.task_id, imap.indexOf(index));
   }
 
