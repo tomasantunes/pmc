@@ -381,10 +381,11 @@ app.get("/api/get-github-tasks", async (req, res) => {
       var response = await axios.get(todo.download_url);
       console.log(response.data);
       var lines = response.data.split('\n');
-      text += repo_name + '<br><br>';
+      text += '<h3>' + repo_name + '</h3><br/><br/>';
       for (var j in lines) {
-        text += lines[j] + '<br><br>';
+        text += lines[j] + '<br/>';
       }
+      text += '<br/><br/>';
     }
     catch (err) {
       console.log(err.message);
