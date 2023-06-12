@@ -7,6 +7,10 @@ export default function Stats() {
   const [tasksTotal, setTasksTotal] = useState(0);
   const [recurrentTasksTotal, setRecurrentTasksTotal] = useState(0);
   const [recurrentTasksDone, setRecurrentTasksDone] = useState(0);
+  const [totalAllTasks, setTotalAllTasks] = useState(0);
+  const [totalAllTasksDone, setTotalAllTasksDone] = useState(0);
+  const [totalAllRecurrentTasks, setTotalAllRecurrentTasks] = useState(0);
+  const [totalAllRecurrentTasksDone, setTotalAllRecurrentTasksDone] = useState(0);
 
   function loadStats() {
     axios.get(config.BASE_URL + "/api/get-stats")
@@ -16,6 +20,22 @@ export default function Stats() {
         setTasksTotal(response.data.data.total_tasks);
         setRecurrentTasksDone(response.data.data.recurrent_tasks_done);
         setRecurrentTasksTotal(response.data.data.recurrent_tasks);
+      }
+      else {
+        alert(response.data.error);
+      }
+    })
+    .catch(function(err) {
+      console.log(err);
+    });
+
+    axios.get(config.BASE_URL + "/api/get-stats2")
+    .then(function(response) {
+      if (response.data.status == "OK") {
+        setTotalAllTasks(response.data.data.total__all_tasks);
+        setTotalAllTasksDone(response.data.data.total__all_tasks_done);
+        setTotalAllRecurrentTasks(response.data.data.total_recurrent_tasks);
+        setTotalAllRecurrentTasksDone(response.data.data.total_recurrent_tasks_done);
       }
       else {
         alert(response.data.error);
@@ -49,6 +69,22 @@ export default function Stats() {
           <tr>
             <th className="table-dark bg-blue">Recurrent Tasks Done Today</th>
             <td className="text-center">{recurrentTasksDone}</td>
+          </tr>
+          <tr>
+            <th className="table-dark bg-blue">Total Tasks</th>
+            <td className="text-center">{totalAllTasks}</td>
+          </tr>
+          <tr>
+            <th className="table-dark bg-blue">Total Tasks Done</th>
+            <td className="text-center">{totalAllTasksDone}</td>
+          </tr>
+          <tr>
+            <th className="table-dark bg-blue">Total Recurrent Tasks</th>
+            <td className="text-center">{totalAllRecurrentTasks}</td>
+          </tr>
+          <tr>
+            <th className="table-dark bg-blue">Total Recurrent Tasks Done</th>
+            <td className="text-center">{totalAllRecurrentTasksDone}</td>
           </tr>
         </tbody>
       </table>
