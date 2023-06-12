@@ -360,6 +360,88 @@ app.get("/api/get-stats", (req, res) => {
   });
 });
 
+app.get("/api/get-stats2", async (req, res) => {
+  if (!req.session.isLoggedIn) {
+    res.json({status: "NOK", error: "Invalid Authorization."});
+    return;
+  }
+
+  var sql = "SELECT COUNT(*) AS count FROM tasks WHERE type='single'";
+  var res = await con2.execute(sql);
+  var total_tasks = res[0][0]["count"];
+
+  var sql2 = "SELECT COUNT(*) AS count FROM tasks WHERE type='single' AND is_done = 1";
+  var res2 = await con2.execute(sql2);
+  var total_tasks_done = res2[0][0]["count"];
+
+  var sql3 = "SELECT * FROM tasks WHERE type = 'daily'";
+  var res3 = await con2.execute(sql3);
+  var daily_tasks = res3[0];
+
+  var sql4 = "SELECT * FROM recurrent_checks WHERE task_id IN (?) AND is_done = 1 AND date <= DATE(NOW())";
+  var daily_tasks_done = await con2.execute(sql4, [daily_tasks.map(x => x.id)]);
+  daily_tasks_done = daily_tasks_done[0].length;
+
+  var days_by_task = {};
+  for (var i in daily_tasks) {
+    // get number of days since created_at field from each task until today
+    var sql5 = "SELECT DATEDIFF(NOW(), created_at) AS days FROM tasks WHERE id = ?";
+    var res5 = await con2.execute(sql5, [daily_tasks[i].id]);
+    var days = res5[0][0].days;
+    days_by_task[daily_tasks[i].id] = days;
+  }
+
+  var total_daily_tasks = days_by_task.reduce((a, b) => a + b, 0);
+
+  var sql6 = "SELECT * FROM tasks WHERE type = 'weekly'";
+  var res6 = await con2.execute(sql6);
+  var weekly_tasks = res6[0];
+
+  var sql7 = "SELECT * FROM recurrent_checks WHERE task_id IN (?) AND is_done = 1 AND date <= DATE(NOW())";
+  var weekly_tasks_done = await con2.execute(sql7, [weekly_tasks.map(x => x.id)]);
+  weekly_tasks_done = weekly_tasks_done[0].length;
+
+  var weeks_by_task = {};
+  for (var i in weekly_tasks) {
+    // get number of weeks since created_at field from each task until today
+    var sql8 = "SELECT FLOOR(DATEDIFF(NOW(), created_at) / 7) AS weeks FROM tasks WHERE id = ?";
+    var res8 = await con2.execute(sql8, [weekly_tasks[i].id]);
+    var weeks = res8[0][0].weeks;
+    weeks_by_task[weekly_tasks[i].id] = weeks;
+  }
+
+  var total_weekly_tasks = weeks_by_task.reduce((a, b) => a + b, 0);
+
+  var sql9 = "SELECT * FROM tasks WHERE type = 'week_day'";
+  var res9 = await con2.execute(sql9);
+  var week_day_tasks = res9[0];
+
+  var sql10 = "SELECT * FROM recurrent_checks WHERE task_id IN (?) AND is_done = 1 AND date <= DATE(NOW())";
+  var week_day_tasks_done = await con2.execute(sql10, [week_day_tasks.map(x => x.id)]);
+  week_day_tasks_done = week_day_tasks_done[0].length;
+
+  var week_days_by_task = {};
+  for (var i in week_day_tasks) {
+    // get number of weeks since created_at field from each task until today
+    var sql11 = "SELECT FLOOR(DATEDIFF(NOW(), created_at) / 7) AS weeks FROM tasks WHERE id = ?";
+    var res11 = await con2.execute(sql11, [week_day_tasks[i].id]);
+    var weeks = res11[0][0].weeks;
+    week_days_by_task[week_day_tasks[i].id] = weeks;
+  }
+
+  var total_week_day_tasks = week_days_by_task.reduce((a, b) => a + b, 0);
+
+  var total_recurrent_tasks = total_daily_tasks + total_weekly_tasks + total_week_day_tasks;
+  var total_recurrent_tasks_done = daily_tasks_done + weekly_tasks_done + week_day_tasks_done;
+
+  var total_all_tasks = total_tasks + total_recurrent_tasks;
+  var total_all_tasks_done = total_tasks_done + total_recurrent_tasks_done;
+
+  res.json({status: "OK", data: {total_all_tasks, total_all_tasks_done, total_recurrent_tasks, total_recurrent_tasks_done}});
+
+
+});
+
 app.get("/api/get-github-tasks", async (req, res) => {
   if (!req.session.isLoggedIn) {
     res.json({status: "NOK", error: "Invalid Authorization."});
