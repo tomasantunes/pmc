@@ -384,16 +384,12 @@ app.get("/api/get-stats2", async (req, res) => {
   var daily_tasks_ids = daily_tasks.map(x => x.id);
 
   var sql4 = "SELECT * FROM recurrent_checks WHERE task_id IN (?) AND is_done = 1 AND date <= DATE(NOW())";
-  var daily_tasks_done = await con2.execute(sql4, [daily_tasks_ids]);
+  var [rows, fields] = await con2.execute(sql4, [daily_tasks_ids]);
   console.log("Daily Tasks Done:");
-  console.log(daily_tasks_done);
-  console.log(daily_tasks_done[0]);
-  daily_tasks_done = daily_tasks_done[0].length;
-
-  var sql_date = "SELECT DATE(NOW()) AS date";
-  var res_date = await con2.execute(sql_date);
-  var date = res_date[0][0].date;
-  console.log("Date: " + date);
+  console.log(rows);
+  daily_tasks_done = rows.length;
+  const sql = conn.format(sql4, [daily_tasks_ids]);
+  console.log(sql);
 
   var days_by_task = {};
   for (var i in daily_tasks) {
