@@ -388,7 +388,7 @@ app.get("/api/get-stats2", async (req, res) => {
   console.log("Daily Tasks Done:");
   console.log(rows);
   daily_tasks_done = rows.length;
-  const query = conn.format(sql4, [daily_tasks_ids]);
+  const query = con2.format(sql4, [daily_tasks_ids]);
   console.log(query);
 
   var days_by_task = {};
