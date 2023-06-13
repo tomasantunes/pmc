@@ -370,8 +370,8 @@ app.get("/api/get-stats2", async (req, res) => {
   }
 
   var sql = "SELECT COUNT(*) AS count FROM tasks WHERE type='single'";
-  var res = await con2.execute(sql);
-  var total_tasks = res[0][0]["count"];
+  var res1 = await con2.execute(sql);
+  var total_tasks = res1[0][0]["count"];
 
   var sql2 = "SELECT COUNT(*) AS count FROM tasks WHERE type='single' AND is_done = 1";
   var res2 = await con2.execute(sql2);
@@ -447,8 +447,6 @@ app.get("/api/get-stats2", async (req, res) => {
   var total_all_tasks_done = total_tasks_done + total_recurrent_tasks_done;
 
   res.json({status: "OK", data: {total_all_tasks, total_all_tasks_done, total_recurrent_tasks, total_recurrent_tasks_done}});
-
-
 });
 
 app.get("/api/get-github-tasks", async (req, res) => {
