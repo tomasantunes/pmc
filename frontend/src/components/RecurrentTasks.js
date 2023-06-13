@@ -530,7 +530,9 @@ export default function Tasks({folder_id, folder}) {
 
     for (var i in dates) {
       if (dateIsLessThan(dates[i], new Date(task.created_at.split("T")[0]))) {
-        checks_visible.remove(Number(i));
+        checks_visible = checks_visible.filter((item) => {
+          return item != Number(i);
+        });
       }
     }
     return checks_visible;
