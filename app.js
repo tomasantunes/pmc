@@ -381,8 +381,10 @@ app.get("/api/get-stats2", async (req, res) => {
   var res3 = await con2.execute(sql3);
   var daily_tasks = res3[0];
 
+  console.log(daily_tasks.map(x => x.id));
+
   var sql4 = "SELECT * FROM recurrent_checks WHERE task_id IN (?) AND is_done = 1 AND date <= DATE(NOW())";
-  var daily_tasks_done = await con2.execute(sql4, daily_tasks.map(x => x.id));
+  var daily_tasks_done = await con2.execute(sql4, [daily_tasks.map(x => x.id)]);
   daily_tasks_done = daily_tasks_done[0].length;
 
   var days_by_task = {};
@@ -403,7 +405,7 @@ app.get("/api/get-stats2", async (req, res) => {
   var weekly_tasks = res6[0];
 
   var sql7 = "SELECT * FROM recurrent_checks WHERE task_id IN (?) AND is_done = 1 AND date <= DATE(NOW())";
-  var weekly_tasks_done = await con2.execute(sql7, weekly_tasks.map(x => x.id));
+  var weekly_tasks_done = await con2.execute(sql7, [weekly_tasks.map(x => x.id)]);
   weekly_tasks_done = weekly_tasks_done[0].length;
 
   var weeks_by_task = {};
@@ -424,7 +426,7 @@ app.get("/api/get-stats2", async (req, res) => {
   var week_day_tasks = res9[0];
 
   var sql10 = "SELECT * FROM recurrent_checks WHERE task_id IN (?) AND is_done = 1 AND date <= DATE(NOW())";
-  var week_day_tasks_done = await con2.execute(sql10, week_day_tasks.map(x => x.id));
+  var week_day_tasks_done = await con2.execute(sql10, [week_day_tasks.map(x => x.id)]);
   week_day_tasks_done = week_day_tasks_done[0].length;
 
   var week_days_by_task = {};
