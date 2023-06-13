@@ -31,9 +31,10 @@ export default function Stats() {
 
     axios.get(config.BASE_URL + "/api/get-stats2")
     .then(function(response) {
+      console.log(response.data);
       if (response.data.status == "OK") {
-        setTotalAllTasks(response.data.data.total__all_tasks);
-        setTotalAllTasksDone(response.data.data.total__all_tasks_done);
+        setTotalAllTasks(response.data.data.total_all_tasks);
+        setTotalAllTasksDone(response.data.data.total_all_tasks_done);
         setTotalAllRecurrentTasks(response.data.data.total_recurrent_tasks);
         setTotalAllRecurrentTasksDone(response.data.data.total_recurrent_tasks_done);
       }
