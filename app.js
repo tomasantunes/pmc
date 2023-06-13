@@ -379,6 +379,8 @@ app.get("/api/get-stats2", async (req, res) => {
   var res3 = await con2.execute(sql3);
   var daily_tasks = res3[0];
 
+  console.log("Daily Tasks Length: " + daily_tasks.length);
+
   var sql4 = "SELECT * FROM recurrent_checks INNER JOIN tasks ON recurrent_checks.task_id = tasks.id WHERE tasks.type = 'daily' AND recurrent_checks.is_done = 1 AND recurrent_checks.date <= DATE(NOW())";
   var [rows, fields] = await con2.execute(sql4);
   daily_tasks_done = rows.length;
@@ -391,6 +393,9 @@ app.get("/api/get-stats2", async (req, res) => {
     var days = res5[0][0].days;
     days_by_task[daily_tasks[i].id] = days;
   }
+
+  console.log("Days By Task:");
+  console.log(days_by_task);
 
   var total_daily_tasks = Object.keys(days_by_task).reduce(function (previous, key) {
     return previous + days_by_task[key];
