@@ -381,11 +381,7 @@ app.get("/api/get-stats2", async (req, res) => {
 
   var sql4 = "SELECT * FROM recurrent_checks INNER JOIN tasks ON recurrent_checks.task_id = tasks.id WHERE tasks.type = 'daily' AND recurrent_checks.is_done = 1 AND recurrent_checks.date <= DATE(NOW())";
   var [rows, fields] = await con2.execute(sql4);
-  console.log("Daily Tasks Done:");
-  console.log(rows);
   daily_tasks_done = rows.length;
-  const query = con2.format(sql4);
-  console.log(query);
 
   var days_by_task = {};
   for (var i in daily_tasks) {
@@ -404,15 +400,20 @@ app.get("/api/get-stats2", async (req, res) => {
   var res6 = await con2.execute(sql6);
   var weekly_tasks = res6[0];
 
-  var sql7 = "SELECT * FROM recurrent_checks WHERE task_id IN (?) AND is_done = 1 AND date <= DATE(NOW())";
+  var sql7 = "SELECT * FROM recurrent_checks INNER JOIN tasks ON recurrent_checks.task_id = tasks.id WHERE tasks.type = 'weekly' AND recurrent_checks.is_done = 1 AND recurrent_checks.date <= DATE(NOW())";
   var weekly_tasks_done = await con2.execute(sql7, [weekly_tasks.map(x => x.id)]);
   weekly_tasks_done = weekly_tasks_done[0].length;
 
   var weeks_by_task = {};
   for (var i in weekly_tasks) {
+    // get date of last saturday in mysql format with javascript
+    var today = new Date();
+    var last_saturday = new Date(today.setDate(today.getDate() - today.getDay() + 6));
+    var last_saturday_mysql = last_saturday.toISOString().slice(0, 10);
+
     // get number of weeks since created_at field from each task until today
-    var sql8 = "SELECT FLOOR(DATEDIFF(NOW(), created_at) / 7) AS weeks FROM tasks WHERE id = ?";
-    var res8 = await con2.execute(sql8, [weekly_tasks[i].id]);
+    var sql8 = "SELECT FLOOR(DATEDIFF(?, created_at) / 7) AS weeks FROM tasks WHERE id = ?";
+    var res8 = await con2.execute(sql8, [last_saturday_mysql, weekly_tasks[i].id]);
     var weeks = res8[0][0].weeks;
     weeks_by_task[weekly_tasks[i].id] = weeks;
   }
@@ -425,15 +426,20 @@ app.get("/api/get-stats2", async (req, res) => {
   var res9 = await con2.execute(sql9);
   var week_day_tasks = res9[0];
 
-  var sql10 = "SELECT * FROM recurrent_checks WHERE task_id IN (?) AND is_done = 1 AND date <= DATE(NOW())";
+  var sql10 = "SELECT * FROM recurrent_checks INNER JOIN tasks ON recurrent_checks.task_id = tasks.id WHERE tasks.type = 'week_day' AND recurrent_checks.is_done = 1 AND recurrent_checks.date <= DATE(NOW())";
   var week_day_tasks_done = await con2.execute(sql10, [week_day_tasks.map(x => x.id)]);
   week_day_tasks_done = week_day_tasks_done[0].length;
 
   var week_days_by_task = {};
   for (var i in week_day_tasks) {
-    // get number of weeks since created_at field from each task until today
-    var sql11 = "SELECT FLOOR(DATEDIFF(NOW(), created_at) / 7) AS weeks FROM tasks WHERE id = ?";
-    var res11 = await con2.execute(sql11, [week_day_tasks[i].id]);
+    var task_week_day = week_day_tasks[i].week_day;
+    var today = new Date();
+    var last_week_day = new Date(today.setDate(today.getDate() - today.getDay() + task_week_day));
+    var last_week_day_mysql = last_week_day.toISOString().slice(0, 10);
+
+    // get number of weeks since created_at field from each task until the last occurence of the week day
+    var sql11 = "SELECT FLOOR(DATEDIFF(?, created_at) / 7) AS weeks FROM tasks WHERE id = ?";
+    var res11 = await con2.execute(sql11, [last_week_day_mysql, week_day_tasks[i].id]);
     var weeks = res11[0][0].weeks;
     week_days_by_task[week_day_tasks[i].id] = weeks;
   }
