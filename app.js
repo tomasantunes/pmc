@@ -394,7 +394,9 @@ app.get("/api/get-stats2", async (req, res) => {
     days_by_task[daily_tasks[i].id] = days;
   }
 
-  var total_daily_tasks = days_by_task.reduce((a, b) => a + b, 0);
+  Object.keys(days_by_task).reduce(function (previous, key) {
+    return previous + days_by_task[key];
+  }, 0);
 
   var sql6 = "SELECT * FROM tasks WHERE type = 'weekly'";
   var res6 = await con2.execute(sql6);
@@ -413,7 +415,9 @@ app.get("/api/get-stats2", async (req, res) => {
     weeks_by_task[weekly_tasks[i].id] = weeks;
   }
 
-  var total_weekly_tasks = weeks_by_task.reduce((a, b) => a + b, 0);
+  Object.keys(weeks_by_task).reduce(function (previous, key) {
+    return previous + weeks_by_task[key];
+  }, 0);
 
   var sql9 = "SELECT * FROM tasks WHERE type = 'week_day'";
   var res9 = await con2.execute(sql9);
@@ -432,7 +436,9 @@ app.get("/api/get-stats2", async (req, res) => {
     week_days_by_task[week_day_tasks[i].id] = weeks;
   }
 
-  var total_week_day_tasks = week_days_by_task.reduce((a, b) => a + b, 0);
+  Object.keys(week_days_by_task).reduce(function (previous, key) {
+    return previous + week_days_by_task[key];
+  }, 0);
 
   var total_recurrent_tasks = total_daily_tasks + total_weekly_tasks + total_week_day_tasks;
   var total_recurrent_tasks_done = daily_tasks_done + weekly_tasks_done + week_day_tasks_done;
