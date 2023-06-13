@@ -122,7 +122,6 @@ export default function Tasks({folder_id, folder}) {
   const [selectedWeekDay, setSelectedWeekDay] = useState();
   const [selectedMonthDay, setSelectedMonthDay] = useState();
   const [selectedMonth, setSelectedMonth] = useState();
-  console.log(folder.hide_not_this_week);
   const [hideNotThisWeek, setHideNotThisWeek] = useState();
   var navigate = useNavigate();
 
@@ -530,7 +529,7 @@ export default function Tasks({folder_id, folder}) {
     }
 
     for (var i in dates) {
-      if (dateIsLessThan(dates[i].getDate(), new Date(task.created_at.split("T")[0]))) {
+      if (dateIsLessThan(dates[i], new Date(task.created_at.split("T")[0]))) {
         checks_visible.remove(Number(i));
       }
     }
