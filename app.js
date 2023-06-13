@@ -380,11 +380,11 @@ app.get("/api/get-stats2", async (req, res) => {
   var daily_tasks = res3[0];
 
   var sql4 = "SELECT * FROM recurrent_checks INNER JOIN tasks ON recurrent_checks.task_id = tasks.id WHERE tasks.type = 'daily' AND recurrent_checks.is_done = 1 AND recurrent_checks.date <= DATE(NOW())";
-  var [rows, fields] = await con2.execute(sql4, [daily_tasks_ids]);
+  var [rows, fields] = await con2.execute(sql4);
   console.log("Daily Tasks Done:");
   console.log(rows);
   daily_tasks_done = rows.length;
-  const query = con2.format(sql4, [daily_tasks_ids]);
+  const query = con2.format(sql4);
   console.log(query);
 
   var days_by_task = {};
