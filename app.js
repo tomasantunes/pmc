@@ -386,7 +386,7 @@ app.get("/api/get-stats2", async (req, res) => {
   var days_by_task = {};
   for (var i in daily_tasks) {
     // get number of days since created_at field from each task until today
-    var sql5 = "SELECT DATEDIFF(NOW(), created_at) AS days FROM tasks WHERE id = ?";
+    var sql5 = "SELECT DATEDIFF(NOW(), created_at) + 1 AS days FROM tasks WHERE id = ?";
     var res5 = await con2.execute(sql5, [daily_tasks[i].id]);
     var days = res5[0][0].days;
     days_by_task[daily_tasks[i].id] = days;
