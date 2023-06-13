@@ -388,8 +388,8 @@ app.get("/api/get-stats2", async (req, res) => {
   console.log("Daily Tasks Done:");
   console.log(rows);
   daily_tasks_done = rows.length;
-  const sql = conn.format(sql4, [daily_tasks_ids]);
-  console.log(sql);
+  const query = conn.format(sql4, [daily_tasks_ids]);
+  console.log(query);
 
   var days_by_task = {};
   for (var i in daily_tasks) {
