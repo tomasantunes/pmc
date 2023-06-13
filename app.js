@@ -422,7 +422,7 @@ app.get("/api/get-stats2", async (req, res) => {
     var sql8 = "SELECT FLOOR(DATEDIFF(?, created_at) / 7) AS weeks FROM tasks WHERE id = ?";
     var res8 = await con2.execute(sql8, [last_saturday_mysql, weekly_tasks[i].id]);
     var weeks = res8[0][0].weeks;
-    weeks_by_task[weekly_tasks[i].id] = weeks;
+    weeks_by_task[weekly_tasks[i].id] = Math.max(weeks, 0);
   }
 
   var total_weekly_tasks = Object.keys(weeks_by_task).reduce(function (previous, key) {
@@ -448,7 +448,7 @@ app.get("/api/get-stats2", async (req, res) => {
     var sql11 = "SELECT FLOOR(DATEDIFF(?, created_at) / 7) AS weeks FROM tasks WHERE id = ?";
     var res11 = await con2.execute(sql11, [last_week_day_mysql, week_day_tasks[i].id]);
     var weeks = res11[0][0].weeks;
-    week_days_by_task[week_day_tasks[i].id] = weeks;
+    week_days_by_task[week_day_tasks[i].id] = Math.max(weeks, 0);
   }
 
   var total_week_day_tasks = Object.keys(week_days_by_task).reduce(function (previous, key) {
