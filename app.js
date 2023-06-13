@@ -394,7 +394,7 @@ app.get("/api/get-stats2", async (req, res) => {
     days_by_task[daily_tasks[i].id] = days;
   }
 
-  Object.keys(days_by_task).reduce(function (previous, key) {
+  var total_daily_tasks = Object.keys(days_by_task).reduce(function (previous, key) {
     return previous + days_by_task[key];
   }, 0);
 
@@ -415,7 +415,7 @@ app.get("/api/get-stats2", async (req, res) => {
     weeks_by_task[weekly_tasks[i].id] = weeks;
   }
 
-  Object.keys(weeks_by_task).reduce(function (previous, key) {
+  var total_weekly_tasks = Object.keys(weeks_by_task).reduce(function (previous, key) {
     return previous + weeks_by_task[key];
   }, 0);
 
@@ -436,7 +436,7 @@ app.get("/api/get-stats2", async (req, res) => {
     week_days_by_task[week_day_tasks[i].id] = weeks;
   }
 
-  Object.keys(week_days_by_task).reduce(function (previous, key) {
+  var total_week_day_tasks = Object.keys(week_days_by_task).reduce(function (previous, key) {
     return previous + week_days_by_task[key];
   }, 0);
 
