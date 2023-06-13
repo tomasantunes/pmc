@@ -348,8 +348,6 @@ app.get("/api/get-stats", (req, res) => {
                 console.log(err4);
                 res.json({status: "NOK", error: err4.message});
               }
-              console.log("Today tasks done:");
-              console.log(result4);
               var today_tasks_done = result4.length;
               res.json({status: "OK", data: {total_tasks: total_tasks, total_tasks_done: total_tasks_done, recurrent_tasks: today_tasks.length, recurrent_tasks_done: today_tasks_done}});
             });
@@ -381,10 +379,13 @@ app.get("/api/get-stats2", async (req, res) => {
   var res3 = await con2.execute(sql3);
   var daily_tasks = res3[0];
 
+  console.log("All daily tasks:");
   console.log(daily_tasks.map(x => x.id));
 
   var sql4 = "SELECT * FROM recurrent_checks WHERE task_id IN (?) AND is_done = 1 AND date <= DATE(NOW())";
   var daily_tasks_done = await con2.execute(sql4, [daily_tasks.map(x => x.id)]);
+  console.log("Daily Tasks Done:");
+  console.log(daily_tasks_done[0]);
   daily_tasks_done = daily_tasks_done[0].length;
 
   var days_by_task = {};
@@ -493,8 +494,6 @@ function getTodayTasks(tasks, cb) {
       today_tasks.push(tasks[i].id);
     }
   }
-  console.log("Today tasks:");
-  console.log(today_tasks);
   cb(today_tasks);
 }
 
