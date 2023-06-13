@@ -401,6 +401,8 @@ app.get("/api/get-stats2", async (req, res) => {
     return previous + days_by_task[key];
   }, 0);
 
+  console.log("Total Daily Tasks: " + total_daily_tasks);
+
   var sql6 = "SELECT * FROM tasks WHERE type = 'weekly'";
   var res6 = await con2.execute(sql6);
   var weekly_tasks = res6[0];
