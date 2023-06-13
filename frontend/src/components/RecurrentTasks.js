@@ -485,6 +485,10 @@ export default function Tasks({folder_id, folder}) {
     return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
   }
 
+  function dateIsLessThan(a, b) {
+    return a.getFullYear() < b.getFullYear() || (a.getFullYear() == b.getFullYear() && a.getMonth() < b.getMonth()) || (a.getFullYear() == b.getFullYear() && a.getMonth() == b.getMonth() && a.getDate() < b.getDate());
+  }
+
   function getChecksVisible(task) {
     var checks_visible = [];
     if (task.type == "daily") {
@@ -522,6 +526,12 @@ export default function Tasks({folder_id, folder}) {
         if (dates[i].getDate() == task.month_day && dates[i].getMonth() == task.month - 1) {
           checks_visible = [Number(i)];
         }
+      }
+    }
+
+    for (var i in dates) {
+      if (dateIsLessThan(dates[i].getDate(), new Date(task.created_at.split("T")[0]))) {
+        checks_visible.remove(Number(i));
       }
     }
     return checks_visible;
