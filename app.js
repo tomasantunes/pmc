@@ -408,7 +408,7 @@ app.get("/api/get-stats2", async (req, res) => {
   var weekly_tasks = res6[0];
 
   var sql7 = "SELECT * FROM recurrent_checks INNER JOIN tasks ON recurrent_checks.task_id = tasks.id WHERE tasks.type = 'weekly' AND recurrent_checks.is_done = 1 AND recurrent_checks.date <= DATE(NOW())";
-  var weekly_tasks_done = await con2.execute(sql7, [weekly_tasks.map(x => x.id)]);
+  var weekly_tasks_done = await con2.execute(sql7);
   weekly_tasks_done = weekly_tasks_done[0].length;
 
   var weeks_by_task = {};
@@ -434,7 +434,7 @@ app.get("/api/get-stats2", async (req, res) => {
   var week_day_tasks = res9[0];
 
   var sql10 = "SELECT * FROM recurrent_checks INNER JOIN tasks ON recurrent_checks.task_id = tasks.id WHERE tasks.type = 'week_day' AND recurrent_checks.is_done = 1 AND recurrent_checks.date <= DATE(NOW())";
-  var week_day_tasks_done = await con2.execute(sql10, [week_day_tasks.map(x => x.id)]);
+  var week_day_tasks_done = await con2.execute(sql10);
   week_day_tasks_done = week_day_tasks_done[0].length;
 
   var week_days_by_task = {};
@@ -455,8 +455,114 @@ app.get("/api/get-stats2", async (req, res) => {
     return previous + week_days_by_task[key];
   }, 0);
 
-  var total_recurrent_tasks = total_daily_tasks + total_weekly_tasks + total_week_day_tasks;
-  var total_recurrent_tasks_done = daily_tasks_done + weekly_tasks_done + week_day_tasks_done;
+  var sql12 = "SELECT * FROM tasks WHERE type = 'monthly'";
+  var res12 = await con2.execute(sql12);
+  var monthly_tasks = res12[0];
+
+  var sql13 = "SELECT * FROM recurrent_checks INNER JOIN tasks ON recurrent_checks.task_id = tasks.id WHERE tasks.type = 'monthly' AND recurrent_checks.is_done = 1 AND recurrent_checks.date <= DATE(NOW())";
+  var monthly_tasks_done = await con2.execute(sql13);
+  monthly_tasks_done = monthly_tasks_done[0].length;
+
+  var months_by_task = {};
+  for (var i in monthly_tasks) {
+    // get date of the first day of the current month in mysql format with javascript
+    var today = new Date();
+    var first_day_of_month = new Date(today.getFullYear(), today.getMonth(), 1);
+    var first_day_of_month_mysql = first_day_of_month.toISOString().slice(0, 10);
+
+    // get number of months since created_at field from each task until the last occurrence of the monthly task
+    var sql14 = "SELECT FLOOR(DATEDIFF(?, created_at) / 30) AS months FROM tasks WHERE id = ?";
+    var res14 = await con2.execute(sql14, [first_day_of_month_mysql, monthly_tasks[i].id]);
+    var months = res14[0][0].months;
+    months_by_task[monthly_tasks[i].id] = Math.max(months, 0);
+  }
+
+  var total_monthly_tasks = Object.keys(months_by_task).reduce(function (previous, key) {
+    return previous + months_by_task[key];
+  }, 0);
+
+  var sql14 = "SELECT * FROM tasks WHERE type = 'yearly'";
+  var res14 = await con2.execute(sql14);
+  var yearly_tasks = res14[0];
+
+  var sql15 = "SELECT * FROM recurrent_checks INNER JOIN tasks ON recurrent_checks.task_id = tasks.id WHERE tasks.type = 'yearly' AND recurrent_checks.is_done = 1 AND recurrent_checks.date <= DATE(NOW())";
+  var yearly_tasks_done = await con2.execute(sql15);
+  yearly_tasks_done = yearly_tasks_done[0].length;
+
+  var years_by_task = {};
+  for (var i in yearly_tasks) {
+    // get date of the first day of the current year in mysql format with javascript
+    var today = new Date();
+    var first_day_of_year = new Date(today.getFullYear(), 0, 1);
+    var first_day_of_year_mysql = first_day_of_year.toISOString().slice(0, 10);
+
+    // get number of years since created_at field from each task until the last occurrence of the yearly task
+    var sql16 = "SELECT FLOOR(DATEDIFF(?, created_at) / 365) AS years FROM tasks WHERE id = ?";
+    var res16 = await con2.execute(sql16, [first_day_of_year_mysql, yearly_tasks[i].id]);
+    var years = res16[0][0].years;
+    years_by_task[yearly_tasks[i].id] = Math.max(years, 0);
+  }
+
+  var total_yearly_tasks = Object.keys(years_by_task).reduce(function (previous, key) {
+    return previous + years_by_task[key];
+  }, 0);
+
+  var sql16 = "SELECT * FROM tasks WHERE type = 'month_day'";
+  var res16 = await con2.execute(sql16);
+  var month_day_tasks = res16[0];
+
+  var sql17 = "SELECT * FROM recurrent_checks INNER JOIN tasks ON recurrent_checks.task_id = tasks.id WHERE tasks.type = 'month_day' AND recurrent_checks.is_done = 1 AND recurrent_checks.date <= DATE(NOW())";
+  var month_day_tasks_done = await con2.execute(sql17);
+  month_day_tasks_done = month_day_tasks_done[0].length;
+
+  var month_days_by_task = {};
+  for (var i in month_day_tasks) {
+    var task_month_day = month_day_tasks[i].month_day;
+    var today = new Date();
+    var last_month_day = new Date(today.getFullYear(), today.getMonth(), task_month_day);
+    var last_month_day_mysql = last_month_day.toISOString().slice(0, 10);
+
+    // get number of months since created_at field from each task until the last occurrence of the month day task
+    var sql18 = "SELECT FLOOR(DATEDIFF(?, created_at) / 30) AS months FROM tasks WHERE id = ?";
+    var res18 = await con2.execute(sql18, [last_month_day_mysql, month_day_tasks[i].id]);
+    var months = res18[0][0].months;
+    month_days_by_task[month_day_tasks[i].id] = Math.max(months, 0);
+  }
+
+  var total_month_day_tasks = Object.keys(month_days_by_task).reduce(function (previous, key) {
+    return previous + month_days_by_task[key];
+  }, 0);
+
+  var sql19 = "SELECT * FROM tasks WHERE type = 'year_day'";
+  var res19 = await con2.execute(sql19);
+  var year_day_tasks = res19[0];
+
+  var sql20 = "SELECT * FROM recurrent_checks INNER JOIN tasks ON recurrent_checks.task_id = tasks.id WHERE tasks.type = 'year_day' AND recurrent_checks.is_done = 1 AND recurrent_checks.date <= DATE(NOW())";
+  var year_day_tasks_done = await con2.execute(sql20);
+  year_day_tasks_done = year_day_tasks_done[0].length;
+
+  var year_days_by_task = {};
+  for (var i in year_day_tasks) {
+    var task_month_day = year_day_tasks[i].month_day;
+    var task_month = year_day_tasks[i].month;
+    var today = new Date();
+    var last_year_day = new Date(today.getFullYear(), task_month - 1, task_month_day);
+    var last_year_day_mysql = last_year_day.toISOString().slice(0, 10);
+
+    // get number of years since created_at field from each task until the last occurrence of the year day task
+    var sql21 = "SELECT FLOOR(DATEDIFF(?, created_at) / 365) AS years FROM tasks WHERE id = ?";
+    var res21 = await con2.execute(sql21, [last_year_day_mysql, year_day_tasks[i].id]);
+    var years = res21[0][0].years;
+    year_days_by_task[year_day_tasks[i].id] = Math.max(years, 0);
+  }
+
+  var total_year_day_tasks = Object.keys(year_days_by_task).reduce(function (previous, key) {
+    return previous + year_days_by_task[key];
+  }, 0);
+    
+
+  var total_recurrent_tasks = total_daily_tasks + total_weekly_tasks + total_week_day_tasks + total_monthly_tasks + total_yearly_tasks + total_month_day_tasks + total_year_day_tasks;
+  var total_recurrent_tasks_done = daily_tasks_done + weekly_tasks_done + week_day_tasks_done + monthly_tasks_done + yearly_tasks_done + month_day_tasks_done + year_day_tasks_done;
 
   var total_all_tasks = total_tasks + total_recurrent_tasks;
   var total_all_tasks_done = total_tasks_done + total_recurrent_tasks_done;
