@@ -47,6 +47,9 @@ function TRow(props) {
         checks_visible_arr.push(false);
       }
     }
+    if (props.type == "week_day" || props.type == "weekly") {
+      checks_visible_arr.push(checks_visible_arr.splice(0, 1)[0]);
+    }
     setChecks(checks_arr);
     setChecksVisible(checks_visible_arr);
   }, []);
@@ -54,13 +57,13 @@ function TRow(props) {
     <tr {...props}>
       <td>{props.description}</td>
       <td>{props.time}</td>
-      <td>{checksVisible[1] && <input type="checkbox" checked={checks[0]} onChange={(e) => {toggleCheck(e, props.task_id, 0)}} />}</td>
-      <td>{checksVisible[2] && <input type="checkbox" checked={checks[1]} onChange={(e) => {toggleCheck(e, props.task_id, 1)}} />}</td>
-      <td>{checksVisible[3] && <input type="checkbox" checked={checks[2]} onChange={(e) => {toggleCheck(e, props.task_id, 2)}} />}</td>
-      <td>{checksVisible[4] && <input type="checkbox" checked={checks[3]} onChange={(e) => {toggleCheck(e, props.task_id, 3)}} />}</td>
-      <td>{checksVisible[5] && <input type="checkbox" checked={checks[4]} onChange={(e) => {toggleCheck(e, props.task_id, 4)}} />}</td>
-      <td>{checksVisible[6] && <input type="checkbox" checked={checks[5]} onChange={(e) => {toggleCheck(e, props.task_id, 5)}} />}</td>
-      <td>{checksVisible[0] && <input type="checkbox" checked={checks[6]} onChange={(e) => {toggleCheck(e, props.task_id, 6)}} />}</td>
+      <td>{checksVisible[0] && <input type="checkbox" checked={checks[0]} onChange={(e) => {toggleCheck(e, props.task_id, 0)}} />}</td>
+      <td>{checksVisible[1] && <input type="checkbox" checked={checks[1]} onChange={(e) => {toggleCheck(e, props.task_id, 1)}} />}</td>
+      <td>{checksVisible[2] && <input type="checkbox" checked={checks[2]} onChange={(e) => {toggleCheck(e, props.task_id, 2)}} />}</td>
+      <td>{checksVisible[3] && <input type="checkbox" checked={checks[3]} onChange={(e) => {toggleCheck(e, props.task_id, 3)}} />}</td>
+      <td>{checksVisible[4] && <input type="checkbox" checked={checks[4]} onChange={(e) => {toggleCheck(e, props.task_id, 4)}} />}</td>
+      <td>{checksVisible[5] && <input type="checkbox" checked={checks[5]} onChange={(e) => {toggleCheck(e, props.task_id, 5)}} />}</td>
+      <td>{checksVisible[6] && <input type="checkbox" checked={checks[6]} onChange={(e) => {toggleCheck(e, props.task_id, 6)}} />}</td>
       <td>
         <div class="dropdown">
             <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
@@ -83,7 +86,7 @@ function TBody(props) {
     <tbody {...props} className="table-group-divider">
       {props.data.map((task, i) => {
         return (
-          <SortableTRow key={task.id} index={i} task_id={task.id} description={task.description} time={task.time} checks={task.checks} checks_visible={task.checks_visible} updateTaskDone={props.updateTaskDone} openEditTask={props.openEditTask} deleteTask={props.deleteTask} />
+          <SortableTRow key={task.id} index={i} task_id={task.id} description={task.description} time={task.time} checks={task.checks} type={task.type} checks_visible={task.checks_visible} updateTaskDone={props.updateTaskDone} openEditTask={props.openEditTask} deleteTask={props.deleteTask} />
         )
       })}
     </tbody>
@@ -528,11 +531,23 @@ export default function Tasks({folder_id, folder}) {
       }
     }
 
-    for (var i in dates) {
-      if (dateIsLessThan(dates[i], new Date(task.created_at.split("T")[0]))) {
-        checks_visible = checks_visible.filter((item) => {
-          return item != Number(i);
-        });
+    if (task.type != "week_day") {
+      for (var i in dates) {
+        if (dateIsLessThan(dates[i], new Date(task.created_at.split("T")[0]))) {
+          checks_visible = checks_visible.filter((item) => {
+            return item != Number(i);
+          });
+        }
+      }
+    }
+    else {
+      var idx_arr = [1, 2, 3, 4, 5, 6, 0];
+      for (var i in dates) {
+        if (dateIsLessThan(dates[i], new Date(task.created_at.split("T")[0]))) {
+          checks_visible = checks_visible.filter((item) => {
+            return idx_arr.indexOf(item) != Number(i);
+          });
+        }
       }
     }
     return checks_visible;
