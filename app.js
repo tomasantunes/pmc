@@ -57,7 +57,7 @@ if (secretConfig.ENVIRONMENT == "WINDOWS" || secretConfig.ENVIRONMENT == "MACOS"
     user: secretConfig.DB_USER,
     password: secretConfig.DB_PASSWORD,
     database: secretConfig.DB_NAME,
-    timezone: '+00:00',
+    timezone: '-01:00',
     port: 3306
   });
 
@@ -68,7 +68,7 @@ if (secretConfig.ENVIRONMENT == "WINDOWS" || secretConfig.ENVIRONMENT == "MACOS"
     user: secretConfig.DB_USER,
     password: secretConfig.DB_PASSWORD,
     database: secretConfig.DB_NAME,
-    timezone: '+00:00',
+    timezone: '-01:00',
     port: 3306
   });
 }
@@ -81,7 +81,7 @@ else if (secretConfig.ENVIRONMENT == "UBUNTU") {
     password: secretConfig.DB_PASSWORD,
     database: secretConfig.DB_NAME,
     socketPath: '/var/run/mysqld/mysqld.sock',
-    timezone: '+00:00'
+    timezone: '-01:00'
   });
 
   con2 = mysql2.createPool({
@@ -92,7 +92,7 @@ else if (secretConfig.ENVIRONMENT == "UBUNTU") {
     password: secretConfig.DB_PASSWORD,
     database: secretConfig.DB_NAME,
     socketPath: '/var/run/mysqld/mysqld.sock',
-    timezone: '+00:00'
+    timezone: '-01:00'
   });
 }
 
