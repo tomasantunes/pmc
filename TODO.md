@@ -5,3 +5,4 @@
 - Change time input to use a time selector.
 - Add a new option: monday to friday.
 - Add an option to change a task's folder.
+- Add checkbox on header to mark or unmark all checkboxes.
