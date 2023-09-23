@@ -123,8 +123,8 @@ async function getMotivationalText(messages) {
     model: "gpt-4",
     messages: [{"role": "user", "content": prompt}],
   });
-  console.log(completion.data.choices[0].message);
-  var message = completion.data.choices[0].message;
+  console.log(completion.choices[0].message);
+  var message = completion.choices[0].message;
   return message.content;
 }
 
