@@ -8,6 +8,7 @@ var mysql2 = require('mysql2/promise');
 var secretConfig = require('./secret-config');
 var session = require('express-session');
 const { Octokit } = require("@octokit/rest");
+const { Configuration, OpenAIApi } = require("openai");
 var axios = require('axios');
 
 var app = express();
@@ -99,6 +100,38 @@ else if (secretConfig.ENVIRONMENT == "UBUNTU") {
     dateStrings: true
   });
 }
+
+const configuration = new Configuration({
+  apiKey: secretConfig.OPENAI_API_KEY,
+});
+
+const openai = new OpenAIApi(configuration);
+
+async function getTaskList() {
+  var sql = "SELECT description FROM tasks";
+
+  const [rows, fields] = await con2.execute(sql);
+  var arr = rows.map(a => a.description);
+  return arr;
+}
+
+async function getMotivationalText(messages) {
+  var task_list = await getTaskList();
+  var prompt = "Generate a motivational text to help me do my tasks and get productive based on the following task list: ";
+  prompt += task_list.join(", ");
+  const completion = await openai.createChatCompletion({
+    model: "gpt-4",
+    messages: {"role": "user", "content": prompt},
+  });
+  console.log(completion.data.choices[0].message);
+  var message = completion.data.choices[0].message;
+  return message.content;
+}
+
+app.get("/api/generate-motivational-text", async (req, res) => {
+  var motivational_text = await getMotivationalText();
+  res.json({status: "OK", data: motivational_text});
+});
 
 app.get("/api/get-folders", (req, res) => {
   if (!req.session.isLoggedIn) {
