@@ -121,7 +121,7 @@ async function getMotivationalText(messages) {
   prompt += task_list.join(", ");
   const completion = await openai.chat.completions.create({
     model: "gpt-4",
-    messages: {"role": "user", "content": prompt},
+    messages: [{"role": "user", "content": prompt}],
   });
   console.log(completion.data.choices[0].message);
   var message = completion.data.choices[0].message;
