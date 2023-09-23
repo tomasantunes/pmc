@@ -17,9 +17,9 @@ export default function Home() {
   function getMotivationalText() {
     setIsLoading(true);
     axios.get(config.BASE_URL + '/api/generate-motivational-text')
-      .then(res => {
+      .then(response => {
         setIsLoading(false);
-        setMotivationalText(res.data);
+        setMotivationalText(response.data.data);
       })
       .catch(err => {
         setIsLoading(false);

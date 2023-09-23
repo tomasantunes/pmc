@@ -108,7 +108,7 @@ const configuration = {
 const openai = new OpenAI(configuration);
 
 async function getTaskList() {
-  var sql = "SELECT description FROM tasks";
+  var sql = "SELECT description FROM tasks WHERE is_done = 0";
 
   const [rows, fields] = await con2.execute(sql);
   var arr = rows.map(a => a.description);
