@@ -8,7 +8,7 @@ var mysql2 = require('mysql2/promise');
 var secretConfig = require('./secret-config');
 var session = require('express-session');
 const { Octokit } = require("@octokit/rest");
-const { Configuration, OpenAIApi } = require("openai");
+const OpenAI = require("openai");
 var axios = require('axios');
 
 var app = express();
@@ -101,11 +101,11 @@ else if (secretConfig.ENVIRONMENT == "UBUNTU") {
   });
 }
 
-const configuration = new Configuration({
+const configuration = {
   apiKey: secretConfig.OPENAI_API_KEY,
-});
+};
 
-const openai = new OpenAIApi(configuration);
+const openai = new OpenAI(configuration);
 
 async function getTaskList() {
   var sql = "SELECT description FROM tasks";
@@ -119,7 +119,7 @@ async function getMotivationalText(messages) {
   var task_list = await getTaskList();
   var prompt = "Generate a motivational text to help me do my tasks and get productive based on the following task list: ";
   prompt += task_list.join(", ");
-  const completion = await openai.createChatCompletion({
+  const completion = await openai.chat.completions.create({
     model: "gpt-4",
     messages: {"role": "user", "content": prompt},
   });
