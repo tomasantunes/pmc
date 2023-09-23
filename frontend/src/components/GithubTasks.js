@@ -1,6 +1,5 @@
 import React, {useState, useEffect} from 'react';
 import Sidebar from './Sidebar';
-import Stats from './Stats';
 import $ from 'jquery';
 import axios from 'axios';
 import config from '../config';

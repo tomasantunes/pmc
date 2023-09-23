@@ -4,6 +4,7 @@ import FolderPage from './components/FolderPage';
 import Login from './components/Login';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import GithubTasks from './components/GithubTasks';
+import Motivation from './components/Motivation';
 
 function App() {
   return (
@@ -13,6 +14,7 @@ function App() {
         <Route path="/folder/:id" element={<FolderPage />} />
         <Route path="/login" element={<Login />} />
         <Route path="/github-tasks" element={<GithubTasks />} />
+        <Route path="/motivation" element={<Motivation />} />
       </Routes>
     </Router>
   );
