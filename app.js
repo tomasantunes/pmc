@@ -130,6 +130,7 @@ async function getMotivationalText(messages) {
 
 app.get("/api/generate-motivational-text", async (req, res) => {
   var motivational_text = await getMotivationalText();
+  motivational_text = motivational_text.replace(/(?:\r\n|\r|\n)/g, '<br>');
   res.json({status: "OK", data: motivational_text});
 });
 
@@ -912,6 +913,15 @@ app.get('/home', (req, res) => {
 });
 
 app.get('/github-tasks', (req, res) => {
+  if(req.session.isLoggedIn) {
+    res.sendFile(path.resolve(__dirname) + '/frontend/build/index.html');
+  }
+  else {
+    res.redirect('/login');
+  }
+});
+
+app.get('/motivation', (req, res) => {
   if(req.session.isLoggedIn) {
     res.sendFile(path.resolve(__dirname) + '/frontend/build/index.html');
   }
