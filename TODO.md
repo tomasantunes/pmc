@@ -8,3 +8,4 @@
 - Add checkbox on header to mark or unmark all checkboxes.
 - Fix bug where you can't select text on the table rows.
 - Fix error when marking checkboxes from 00:00 to 01:00.
+- Use ChatGPT to generate motivational texts on the homepage.
