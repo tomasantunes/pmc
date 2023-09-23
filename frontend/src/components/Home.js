@@ -29,7 +29,7 @@ export default function Home() {
 
   useEffect(() => {
     getMotivationalText();
-  });
+  }, []);
 
   return (
     <>
