@@ -104,6 +104,7 @@ export default function Sidebar() {
           <ul className="menu">
               <li><Link to="/home">Home</Link></li>
               <li><Link to="/github-tasks">Github Tasks</Link></li>
+              <li><Link to="/motivation">Github Tasks</Link></li>
               <li><a href="#" onClick={openAddFolder}>Add Folder</a></li>
               {folders.map((folder) => {
                 return (
