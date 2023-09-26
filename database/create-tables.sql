@@ -49,3 +49,4 @@ ALTER TABLE tasks DROP COLUMN week_day;
 ALTER TABLE tasks DROP COLUMN month_day;
 ALTER TABLE tasks DROP COLUMN month;
 ALTER TABLE folders DROP COLUMN hide_not_this_week;
+ALTER TABLE recurrent_checks ADD is_cancelled BOOLEAN NOT NULL DEFAULT 0;
