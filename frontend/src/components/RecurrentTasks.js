@@ -214,7 +214,7 @@ export default function Tasks({folder_id, folder}) {
             });
             selected_days.push(week_day);
           }
-          setSelectedWeekDays(selectedDays);
+          setSelectedWeekDays(selected_days);
         }
         else {
           setSelectedWeekDays([]);
