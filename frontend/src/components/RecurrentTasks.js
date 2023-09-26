@@ -204,6 +204,21 @@ export default function Tasks({folder_id, folder}) {
           time: task.time,
           days: task.days
         });
+        if (task.days != "") {
+          var days = task.days.split(",");
+          days = days.map(Number);
+          var selected_days = [];
+          for (var i in days) {
+            var week_day = weekDays.find((d) => {
+              return d.value == days[i];
+            });
+            selected_days.push(week_day);
+          }
+          setSelectedWeekDays(selectedDays);
+        }
+        else {
+          setSelectedWeekDays([]);
+        }
         $(".editTaskModal").modal("show");
 
       }
