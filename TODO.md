@@ -10,7 +10,6 @@
 - Fix error when marking checkboxes from 00:00 to 01:00.
 - Create folder type "List"
 - Change recurrent tasks to selected week days.
-    - Change function checkIfTaskIsToday()
-    - Change recurrent task modal to select week days.
-- Reset stats
+    - Change label of week day selector
+    - If task.days is empty pass an empty array to the table.
 - Remove total tasks done from front end.

@@ -359,10 +359,24 @@ export default function Tasks({folder_id, folder}) {
   }
 
   function getChecksVisible(task) {
-    var checks_visible = task.days.split(",");
-    checks_visible = checks_visible.map(Number);
-    console.log(checks_visible);
-    return checks_visible;
+    if (task.days != "") {
+      var checks_visible = task.days.split(",");
+      checks_visible = checks_visible.map(Number);
+      console.log(checks_visible);
+      var idx_arr = [1, 2, 3, 4, 5, 6, 0];
+      for (var i in dates) {
+        if (dateIsLessThan(dates[i], new Date(task.created_at.split("T")[0]))) {
+          checks_visible = checks_visible.filter((item) => {
+            return idx_arr.indexOf(item) != Number(i);
+          });
+        }
+      }
+      return checks_visible;
+    }
+    else {
+      return [];
+    }
+    
   }
 
   function loadTasks() {
@@ -525,7 +539,7 @@ export default function Tasks({folder_id, folder}) {
                   </div>
                 </div>
                 <div className="form-group py-2">
-                  <label className="control-label">Week Day</label>
+                  <label className="control-label">Week Days</label>
                   <Select isMulti value={selectedWeekDays} options={weekDays} onChange={changeWeekDays} />
                 </div>
                 <div className="form-group">
@@ -560,7 +574,7 @@ export default function Tasks({folder_id, folder}) {
                   </div>
                 </div>
                 <div className="form-group py-2">
-                  <label className="control-label">Week Day</label>
+                  <label className="control-label">Week Days</label>
                   <Select isMulti value={selectedWeekDays} options={weekDays} onChange={changeEditTaskWeekDays} />
                 </div>
                 <div className="form-group">
