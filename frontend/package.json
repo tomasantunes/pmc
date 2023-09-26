@@ -10,6 +10,7 @@
     "axios": "^1.3.4",
     "bootprompt": "^6.0.2",
     "bootstrap": "^5.2.3",
+    "caniuse-lite": "^1.0.30001539",
     "jquery": "^3.6.4",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",

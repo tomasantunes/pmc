@@ -231,23 +231,6 @@ app.post("/api/set-hide-done", (req, res) => {
   });
 });
 
-app.post("/api/set-hide-not-this-week", (req, res) => {
-  if (!req.session.isLoggedIn) {
-    res.json({status: "NOK", error: "Invalid Authorization."});
-    return;
-  }
-  var folder_id = req.body.folder_id;
-  var hide_not_this_week = req.body.hide_not_this_week;
-  var sql = "UPDATE folders SET hide_not_this_week = ? WHERE id = ?";
-  con.query(sql, [hide_not_this_week, folder_id], function (err, result) {
-    if (err) {
-      console.log(err);
-      res.json({status: "NOK", error: err.message});
-    }
-    res.json({status: "OK", data: "Folder has been updated successfully."});
-  });
-});
-
 app.get("/api/get-recurrent-tasks", (req, res) => {
   if (!req.session.isLoggedIn) {
     res.json({status: "NOK", error: "Invalid Authorization."});
@@ -280,52 +263,17 @@ app.post("/api/add-recurrent-task", (req, res) => {
   var folder_id = req.body.folder_id;
   var description = req.body.description;
   var time = req.body.time;
-  var task_type = req.body.task_type;
-  var week_day = req.body.week_day;
-  var month_day = req.body.month_day;
-  var month = req.body.month;
+  var days = req.body.days;
   var sort_index = req.body.sort_index;
 
-  if (task_type == "week_day") {
-    var sql = "INSERT INTO tasks (folder_id, description, time, type, week_day, sort_index, is_done) VALUES (?, ?, ?, ?, ?, ?, 0)";
-    con.query(sql, [folder_id, description, time, task_type, week_day, sort_index], function (err, result) {
-      if (err) {
-        console.log(err);
-        res.json({status: "NOK", error: err.message});
-      }
-      res.json({status: "OK", data: "Task has been added successfully."});
-    });
-  }
-  else if (task_type == "month_day") {
-    var sql = "INSERT INTO tasks (folder_id, description, time, type, month_day, sort_index, is_done) VALUES (?, ?, ?, ?, ?, ?, 0)";
-    con.query(sql, [folder_id, description, time, task_type, month_day, sort_index], function (err, result) {
-      if (err) {
-        console.log(err);
-        res.json({status: "NOK", error: err.message});
-      }
-      res.json({status: "OK", data: "Task has been added successfully."});
-    });
-  }
-  else if (task_type == "year_day") {
-    var sql = "INSERT INTO tasks (folder_id, description, time, type, month_day, month, sort_index, is_done) VALUES (?, ?, ?, ?, ?, ?, ?, 0)";
-    con.query(sql, [folder_id, description, time, task_type, month_day, month, sort_index], function (err, result) {
-      if (err) {
-        console.log(err);
-        res.json({status: "NOK", error: err.message});
-      }
-      res.json({status: "OK", data: "Task has been added successfully."});
-    });
-  }
-  else {
-    var sql = "INSERT INTO tasks (folder_id, description, time, type, sort_index, is_done) VALUES (?, ?, ?, ?, ?, 0)";
-    con.query(sql, [folder_id, description, time, task_type, sort_index], function (err, result) {
-      if (err) {
-        console.log(err);
-        res.json({status: "NOK", error: err.message});
-      }
-      res.json({status: "OK", data: "Task has been added successfully."});
-    });
-  }
+  var sql = "INSERT INTO tasks (folder_id, description, time, type, days, sort_index, is_done) VALUES (?, ?, ?, ?, ?, ?, 0)";
+  con.query(sql, [folder_id, description, time, "recurrent", days, sort_index], function (err, result) {
+    if (err) {
+      console.log(err);
+      res.json({status: "NOK", error: err.message});
+    }
+    res.json({status: "OK", data: "Task has been added successfully."});
+  });
 });
 
 async function getTaskChecks(task_id, dti, dtf) {
@@ -399,215 +347,6 @@ app.get("/api/get-stats", (req, res) => {
   });
 });
 
-app.get("/api/get-stats2", async (req, res) => {
-  if (!req.session.isLoggedIn) {
-    res.json({status: "NOK", error: "Invalid Authorization."});
-    return;
-  }
-
-  var sql = "SELECT COUNT(*) AS count FROM tasks WHERE type='single'";
-  var res1 = await con2.execute(sql);
-  var total_tasks = res1[0][0]["count"];
-
-  var sql2 = "SELECT COUNT(*) AS count FROM tasks WHERE type='single' AND is_done = 1";
-  var res2 = await con2.execute(sql2);
-  var total_tasks_done = res2[0][0]["count"];
-
-  var sql3 = "SELECT * FROM tasks WHERE type = 'daily'";
-  var res3 = await con2.execute(sql3);
-  var daily_tasks = res3[0];
-
-  console.log("Daily Tasks Length: " + daily_tasks.length);
-
-  var sql4 = "SELECT * FROM recurrent_checks INNER JOIN tasks ON recurrent_checks.task_id = tasks.id WHERE tasks.type = 'daily' AND recurrent_checks.is_done = 1 AND recurrent_checks.date <= DATE(NOW())";
-  var [rows, fields] = await con2.execute(sql4);
-  daily_tasks_done = rows.length;
-
-  var days_by_task = {};
-  for (var i in daily_tasks) {
-    // get number of days since created_at field from each task until today
-    var sql5 = "SELECT DATEDIFF(NOW(), created_at) + 1 AS days FROM tasks WHERE id = ?";
-    var res5 = await con2.execute(sql5, [daily_tasks[i].id]);
-    var days = res5[0][0].days;
-    days_by_task[daily_tasks[i].id] = days;
-  }
-
-  console.log("Days By Task:");
-  console.log(days_by_task);
-
-  var total_daily_tasks = Object.keys(days_by_task).reduce(function (previous, key) {
-    return previous + days_by_task[key];
-  }, 0);
-
-  console.log("Total Daily Tasks: " + total_daily_tasks);
-
-  var sql6 = "SELECT * FROM tasks WHERE type = 'weekly'";
-  var res6 = await con2.execute(sql6);
-  var weekly_tasks = res6[0];
-
-  var sql7 = "SELECT * FROM recurrent_checks INNER JOIN tasks ON recurrent_checks.task_id = tasks.id WHERE tasks.type = 'weekly' AND recurrent_checks.is_done = 1 AND recurrent_checks.date <= DATE(NOW())";
-  var weekly_tasks_done = await con2.execute(sql7);
-  weekly_tasks_done = weekly_tasks_done[0].length;
-
-  var weeks_by_task = {};
-  for (var i in weekly_tasks) {
-    // get date of last saturday in mysql format with javascript
-    var today = new Date();
-    var last_saturday = new Date(today.setDate(today.getDate() - today.getDay() + 6));
-    var last_saturday_mysql = last_saturday.toISOString().slice(0, 10);
-
-    // get number of weeks since created_at field from each task until today
-    var sql8 = "SELECT FLOOR(DATEDIFF(?, created_at) / 7) AS weeks FROM tasks WHERE id = ?";
-    var res8 = await con2.execute(sql8, [last_saturday_mysql, weekly_tasks[i].id]);
-    var weeks = res8[0][0].weeks;
-    weeks_by_task[weekly_tasks[i].id] = Math.max(weeks, 0);
-  }
-
-  var total_weekly_tasks = Object.keys(weeks_by_task).reduce(function (previous, key) {
-    return previous + weeks_by_task[key];
-  }, 0);
-
-  var sql9 = "SELECT * FROM tasks WHERE type = 'week_day'";
-  var res9 = await con2.execute(sql9);
-  var week_day_tasks = res9[0];
-
-  var sql10 = "SELECT * FROM recurrent_checks INNER JOIN tasks ON recurrent_checks.task_id = tasks.id WHERE tasks.type = 'week_day' AND recurrent_checks.is_done = 1 AND recurrent_checks.date <= DATE(NOW())";
-  var week_day_tasks_done = await con2.execute(sql10);
-  week_day_tasks_done = week_day_tasks_done[0].length;
-
-  var week_days_by_task = {};
-  for (var i in week_day_tasks) {
-    var task_week_day = week_day_tasks[i].week_day;
-    var today = new Date();
-    var last_week_day = new Date(today.setDate(today.getDate() - today.getDay() + task_week_day));
-    var last_week_day_mysql = last_week_day.toISOString().slice(0, 10);
-
-    // get number of weeks since created_at field from each task until the last occurence of the week day
-    var sql11 = "SELECT FLOOR(DATEDIFF(?, created_at) / 7) AS weeks FROM tasks WHERE id = ?";
-    var res11 = await con2.execute(sql11, [last_week_day_mysql, week_day_tasks[i].id]);
-    var weeks = res11[0][0].weeks;
-    week_days_by_task[week_day_tasks[i].id] = Math.max(weeks, 0);
-  }
-
-  var total_week_day_tasks = Object.keys(week_days_by_task).reduce(function (previous, key) {
-    return previous + week_days_by_task[key];
-  }, 0);
-
-  var sql12 = "SELECT * FROM tasks WHERE type = 'monthly'";
-  var res12 = await con2.execute(sql12);
-  var monthly_tasks = res12[0];
-
-  var sql13 = "SELECT * FROM recurrent_checks INNER JOIN tasks ON recurrent_checks.task_id = tasks.id WHERE tasks.type = 'monthly' AND recurrent_checks.is_done = 1 AND recurrent_checks.date <= DATE(NOW())";
-  var monthly_tasks_done = await con2.execute(sql13);
-  monthly_tasks_done = monthly_tasks_done[0].length;
-
-  var months_by_task = {};
-  for (var i in monthly_tasks) {
-    // get date of the first day of the current month in mysql format with javascript
-    var today = new Date();
-    var first_day_of_month = new Date(today.getFullYear(), today.getMonth(), 1);
-    var first_day_of_month_mysql = first_day_of_month.toISOString().slice(0, 10);
-
-    // get number of months since created_at field from each task until the last occurrence of the monthly task
-    var sql14 = "SELECT FLOOR(DATEDIFF(?, created_at) / 30) AS months FROM tasks WHERE id = ?";
-    var res14 = await con2.execute(sql14, [first_day_of_month_mysql, monthly_tasks[i].id]);
-    var months = res14[0][0].months;
-    months_by_task[monthly_tasks[i].id] = Math.max(months, 0);
-  }
-
-  var total_monthly_tasks = Object.keys(months_by_task).reduce(function (previous, key) {
-    return previous + months_by_task[key];
-  }, 0);
-
-  var sql14 = "SELECT * FROM tasks WHERE type = 'yearly'";
-  var res14 = await con2.execute(sql14);
-  var yearly_tasks = res14[0];
-
-  var sql15 = "SELECT * FROM recurrent_checks INNER JOIN tasks ON recurrent_checks.task_id = tasks.id WHERE tasks.type = 'yearly' AND recurrent_checks.is_done = 1 AND recurrent_checks.date <= DATE(NOW())";
-  var yearly_tasks_done = await con2.execute(sql15);
-  yearly_tasks_done = yearly_tasks_done[0].length;
-
-  var years_by_task = {};
-  for (var i in yearly_tasks) {
-    // get date of the first day of the current year in mysql format with javascript
-    var today = new Date();
-    var first_day_of_year = new Date(today.getFullYear(), 0, 1);
-    var first_day_of_year_mysql = first_day_of_year.toISOString().slice(0, 10);
-
-    // get number of years since created_at field from each task until the last occurrence of the yearly task
-    var sql16 = "SELECT FLOOR(DATEDIFF(?, created_at) / 365) AS years FROM tasks WHERE id = ?";
-    var res16 = await con2.execute(sql16, [first_day_of_year_mysql, yearly_tasks[i].id]);
-    var years = res16[0][0].years;
-    years_by_task[yearly_tasks[i].id] = Math.max(years, 0);
-  }
-
-  var total_yearly_tasks = Object.keys(years_by_task).reduce(function (previous, key) {
-    return previous + years_by_task[key];
-  }, 0);
-
-  var sql16 = "SELECT * FROM tasks WHERE type = 'month_day'";
-  var res16 = await con2.execute(sql16);
-  var month_day_tasks = res16[0];
-
-  var sql17 = "SELECT * FROM recurrent_checks INNER JOIN tasks ON recurrent_checks.task_id = tasks.id WHERE tasks.type = 'month_day' AND recurrent_checks.is_done = 1 AND recurrent_checks.date <= DATE(NOW())";
-  var month_day_tasks_done = await con2.execute(sql17);
-  month_day_tasks_done = month_day_tasks_done[0].length;
-
-  var month_days_by_task = {};
-  for (var i in month_day_tasks) {
-    var task_month_day = month_day_tasks[i].month_day;
-    var today = new Date();
-    var last_month_day = new Date(today.getFullYear(), today.getMonth(), task_month_day);
-    var last_month_day_mysql = last_month_day.toISOString().slice(0, 10);
-
-    // get number of months since created_at field from each task until the last occurrence of the month day task
-    var sql18 = "SELECT FLOOR(DATEDIFF(?, created_at) / 30) AS months FROM tasks WHERE id = ?";
-    var res18 = await con2.execute(sql18, [last_month_day_mysql, month_day_tasks[i].id]);
-    var months = res18[0][0].months;
-    month_days_by_task[month_day_tasks[i].id] = Math.max(months, 0);
-  }
-
-  var total_month_day_tasks = Object.keys(month_days_by_task).reduce(function (previous, key) {
-    return previous + month_days_by_task[key];
-  }, 0);
-
-  var sql19 = "SELECT * FROM tasks WHERE type = 'year_day'";
-  var res19 = await con2.execute(sql19);
-  var year_day_tasks = res19[0];
-
-  var sql20 = "SELECT * FROM recurrent_checks INNER JOIN tasks ON recurrent_checks.task_id = tasks.id WHERE tasks.type = 'year_day' AND recurrent_checks.is_done = 1 AND recurrent_checks.date <= DATE(NOW())";
-  var year_day_tasks_done = await con2.execute(sql20);
-  year_day_tasks_done = year_day_tasks_done[0].length;
-
-  var year_days_by_task = {};
-  for (var i in year_day_tasks) {
-    var task_month_day = year_day_tasks[i].month_day;
-    var task_month = year_day_tasks[i].month;
-    var today = new Date();
-    var last_year_day = new Date(today.getFullYear(), task_month - 1, task_month_day);
-    var last_year_day_mysql = last_year_day.toISOString().slice(0, 10);
-
-    // get number of years since created_at field from each task until the last occurrence of the year day task
-    var sql21 = "SELECT FLOOR(DATEDIFF(?, created_at) / 365) AS years FROM tasks WHERE id = ?";
-    var res21 = await con2.execute(sql21, [last_year_day_mysql, year_day_tasks[i].id]);
-    var years = res21[0][0].years;
-    year_days_by_task[year_day_tasks[i].id] = Math.max(years, 0);
-  }
-
-  var total_year_day_tasks = Object.keys(year_days_by_task).reduce(function (previous, key) {
-    return previous + year_days_by_task[key];
-  }, 0);
-    
-
-  var total_recurrent_tasks = total_daily_tasks + total_weekly_tasks + total_week_day_tasks + total_monthly_tasks + total_yearly_tasks + total_month_day_tasks + total_year_day_tasks;
-  var total_recurrent_tasks_done = daily_tasks_done + weekly_tasks_done + week_day_tasks_done + monthly_tasks_done + yearly_tasks_done + month_day_tasks_done + year_day_tasks_done;
-
-  var total_all_tasks = total_tasks + total_recurrent_tasks;
-  var total_all_tasks_done = total_tasks_done + total_recurrent_tasks_done;
-
-  res.json({status: "OK", data: {total_all_tasks, total_all_tasks_done, total_recurrent_tasks, total_recurrent_tasks_done}});
-});
-
 app.get("/api/get-github-tasks", async (req, res) => {
   if (!req.session.isLoggedIn) {
     res.json({status: "NOK", error: "Invalid Authorization."});
@@ -659,38 +398,9 @@ function checkIfTaskIsToday(task) {
   var wd = today.getDay() - 1;
   var mm = today.getMonth() + 1;
 
-  if (task.type == "daily") {
+  var days = task.days.split(",");
+  if (days.includes(wd)) {
     return true;
-  }
-  else if (task.type == "weekly") {
-    if (task.week_day == 5) {
-      return true;
-    }
-  }
-  else if (task.type == "monthly") {
-    if (task.month_day == dd) {
-      return true;
-    }
-  }
-  else if (task.type == "yearly") {
-    if (task.month_day == dd && task.month == mm) {
-      return true;
-    }
-  }
-  else if(task.type == "week_day") {
-    if (task.week_day == wd) {
-      return true;
-    }
-  }
-  else if (task.type == "month_day") {
-    if (task.month_day == dd) {
-      return true;
-    }
-  }
-  else if (task.type == "year_day") {
-    if (task.month_day == dd && task.month == mm) {
-      return true;
-    }
   }
   return false;
 }
@@ -832,12 +542,9 @@ app.post("/api/edit-recurrent-task", (req, res) => {
   var task_id = req.body.task_id;
   var description = req.body.description;
   var time = req.body.time;
-  var task_type = req.body.task_type;
-  var week_day = req.body.week_day;
-  var month_day = req.body.month_day;
-  var month = req.body.month;
-  var sql = "UPDATE tasks SET description = ?, time = ?, type = ?, week_day = ?, month_day = ?, month = ? WHERE id = ?";
-  con.query(sql, [description, time, task_type, week_day, month_day, month, task_id], function (err, result) {
+  var days = req.body.days;
+  var sql = "UPDATE tasks SET description = ?, time = ?, days = ? WHERE id = ?";
+  con.query(sql, [description, time, days, task_id], function (err, result) {
     if (err) {
       console.log(err);
       res.json({status: "NOK", error: err.message});
