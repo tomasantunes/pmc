@@ -70,6 +70,7 @@ function TRow(props) {
             <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
             <li><a class="dropdown-item" href="#" onClick={() => { props.openEditTask(props.task_id) }}>Edit</a></li>
             <li><a class="dropdown-item" href="#" onClick={() => { props.deleteTask(props.task_id) }}>Delete</a></li>
+            <li><a class="dropdown-item" href="#" onClick={() => { props.cancelTask(props.task_id) }}>Cancel Today's Task</a></li>
             </ul>
         </div>
       </td>
@@ -84,7 +85,7 @@ function TBody(props) {
     <tbody {...props} className="table-group-divider">
       {props.data.map((task, i) => {
         return (
-          <SortableTRow key={task.id} index={i} task_id={task.id} description={task.description} time={task.time} checks={task.checks} type={task.type} checks_visible={task.checks_visible} updateTaskDone={props.updateTaskDone} openEditTask={props.openEditTask} deleteTask={props.deleteTask} />
+          <SortableTRow key={task.id} index={i} task_id={task.id} description={task.description} time={task.time} checks={task.checks} type={task.type} checks_visible={task.checks_visible} updateTaskDone={props.updateTaskDone} openEditTask={props.openEditTask} deleteTask={props.deleteTask} cancelTask={props.cancelTask} />
         )
       })}
     </tbody>
@@ -154,6 +155,22 @@ export default function Tasks({folder_id, folder}) {
       return true;
     }
     return false;
+  }
+
+  function cancelTask(task_id) {
+    axios.post(config.BASE_URL + "/api/cancel-task", {task_id: task_id, date: new Date().toISOString().split('T')[0]})
+    .then(function(response) {
+      if (response.data.status == "OK") {
+        loadTasks();
+      }
+      else {
+        alert(response.data.error);
+      }
+    })
+    .catch(function(err) {
+      console.log(err);
+      alert(err.message);
+    });
   }
 
   function submitAddTask(e) {
@@ -373,7 +390,7 @@ export default function Tasks({folder_id, folder}) {
     return a.getFullYear() < b.getFullYear() || (a.getFullYear() == b.getFullYear() && a.getMonth() < b.getMonth()) || (a.getFullYear() == b.getFullYear() && a.getMonth() == b.getMonth() && a.getDate() < b.getDate());
   }
 
-  function getChecksVisible(task) {
+  async function getChecksVisible(task) {
     if (task.days != "") {
       var checks_visible = task.days.split(",");
       checks_visible = checks_visible.map(Number);
@@ -384,6 +401,21 @@ export default function Tasks({folder_id, folder}) {
           checks_visible = checks_visible.filter((item) => {
             return idx_arr.indexOf(item) != Number(i);
           });
+        }
+
+        // use await to make an axios request to "/api/check-if-task-is-cancelled"
+        // if it is cancelled, remove the index from checks_visible
+        // else, keep the index in checks_visible
+        var response = await axios.get(config.BASE_URL + "/api/check-if-task-is-cancelled", {params: {task_id: task.id, date: dates[i].toISOString().split('T')[0]}});
+        if (response.data.status == "OK") {
+          if (response.data.data == true) {
+            checks_visible = checks_visible.filter((item) => {
+              return idx_arr.indexOf(item) != Number(i);
+            });
+          }
+        }
+        else {
+          alert(response.data.error);
         }
       }
       return checks_visible;
@@ -397,12 +429,12 @@ export default function Tasks({folder_id, folder}) {
   function loadTasks() {
     setTasks([]);
     axios.get(config.BASE_URL + "/api/get-recurrent-tasks", {params: {folder_id: folder_id, dti: dates[0].toISOString().split('T')[0], dtf: dates[6].toISOString().split('T')[0]}})
-    .then(function(response) {
+    .then(async function(response) {
       if (response.data.status == "OK") {
         var data = response.data.data;
         for (var i in data) {
           var checks = [];
-          var checks_visible = getChecksVisible(data[i]);
+          var checks_visible = await getChecksVisible(data[i]);
           for (var j in data[i].checks) {
             for (var k in dates) {
               if (compareDates(new Date(data[i].checks[j].date.split("T")[0]), dates[k]) && data[i].checks[j].is_done) {
@@ -530,7 +562,7 @@ export default function Tasks({folder_id, folder}) {
                   <th style={{width: "10%"}}>Actions</th>
               </tr>
           </thead>
-          <SortableTBody data={tasks} onSortEnd={handleSort} updateTaskDone={updateTaskDone} openEditTask={openEditTask} deleteTask={deleteTask} shouldCancelStart={cancelSort} />
+          <SortableTBody data={tasks} onSortEnd={handleSort} updateTaskDone={updateTaskDone} openEditTask={openEditTask} deleteTask={deleteTask} cancelTask={cancelTask} shouldCancelStart={cancelSort} />
       </table>
       <div class="modal addTaskModal" tabindex="-1">
         <div class="modal-dialog">

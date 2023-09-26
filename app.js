@@ -382,24 +382,27 @@ app.get("/api/get-github-tasks", async (req, res) => {
   res.json({status: "OK", data: text});
 });
 
-function getTodayTasks(tasks, cb) {
+async function getTodayTasks(tasks, cb) {
   var today_tasks = [];
   for (var i in tasks) {
-    if (checkIfTaskIsToday(tasks[i])) {
+    if (await checkIfTaskIsToday(tasks[i])) {
       today_tasks.push(tasks[i].id);
     }
   }
   cb(today_tasks);
 }
 
-function checkIfTaskIsToday(task) {
+async function checkIfTaskIsToday(task) {
   var today = new Date();
   var dd = today.getDate();
   var wd = today.getDay() - 1;
   var mm = today.getMonth() + 1;
 
+  var is_cancelled = await checkIfTaskIsCancelled(task.id, today.toISOString().slice(0, 10));
+
   var days = task.days.split(",");
-  if (days.includes(wd)) {
+  days = days.map(Number);
+  if (days.includes(wd) && !is_cancelled) {
     return true;
   }
   return false;
@@ -534,6 +537,18 @@ app.post("/api/edit-task", (req, res) => {
   });
 });
 
+app.get("/api/check-if-task-is-cancelled", async (req, res) => {
+  if (!req.session.isLoggedIn) {
+    res.json({status: "NOK", error: "Invalid Authorization."});
+    return;
+  }
+
+  var task_id = req.query.task_id;
+  var dt = req.query.date;
+  var is_cancelled = await checkIfTaskIsCancelled(task_id, dt);
+  res.json({status: "OK", data: is_cancelled});
+});
+
 app.post("/api/edit-recurrent-task", (req, res) => {
   if (!req.session.isLoggedIn) {
     res.json({status: "NOK", error: "Invalid Authorization."});
@@ -550,6 +565,66 @@ app.post("/api/edit-recurrent-task", (req, res) => {
       res.json({status: "NOK", error: err.message});
     }
     res.json({status: "OK", data: "Task has been updated successfully."});
+  });
+});
+
+async function checkIfTaskIsCancelled(task_id, dt) {
+  var sql = "SELECT * FROM recurrent_checks WHERE task_id = ? AND date = ?";
+  var [rows, fields] = await con2.execute(sql, [task_id, dt]);
+  if (rows.length > 0) {
+    if (rows[0].is_cancelled == 1) {
+      return true;
+    }
+    else {
+      return false;
+    }
+  }
+  else {
+    return false;
+  }
+}
+
+app.post("/api/cancel-task", (req, res) => {
+  if (!req.session.isLoggedIn) {
+    res.json({status: "NOK", error: "Invalid Authorization."});
+    return;
+  }
+
+  var task_id = req.body.task_id;
+  var dt = req.body.date;
+
+  var sql = "SELECT * FROM recurrent_checks WHERE task_id = ? AND date = ?";
+  con.query(sql, [task_id, dt], function (err, result) {
+    if (err) {
+      console.log(err);
+      res.json({status: "NOK", error: err.message});
+      return;
+    }
+    if (result.length > 0) {
+      if (result[0].is_done == 1) {
+        res.json({status: "NOK", error: "Task has already been done."});
+      }
+      else {
+        var sql2 = "UPDATE recurrent_checks SET is_cancelled = 1 WHERE task_id = ? AND date = ?";
+        con.query(sql2, [task_id, dt], function (err2, result2) {
+          if (err2) {
+            console.log(err2);
+            res.json({status: "NOK", error: err2.message});
+          }
+          res.json({status: "OK", data: "Task has been cancelled successfully."});
+        });
+      }
+    }
+    else {
+      var sql2 = "INSERT INTO recurrent_checks (task_id, date, is_cancelled, is_done) VALUES (?, ?, 1, 0)";
+      con.query(sql2, [task_id, dt], function (err2, result2) {
+        if (err2) {
+          console.log(err2);
+          res.json({status: "NOK", error: err2.message});
+        }
+        res.json({status: "OK", data: "Task has been cancelled successfully."});
+      });
+    }
   });
 });
 
