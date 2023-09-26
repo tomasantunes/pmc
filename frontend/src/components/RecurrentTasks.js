@@ -47,9 +47,7 @@ function TRow(props) {
         checks_visible_arr.push(false);
       }
     }
-    if (props.type == "week_day" || props.type == "weekly") {
-      checks_visible_arr.push(checks_visible_arr.splice(0, 1)[0]);
-    }
+    checks_visible_arr.push(checks_visible_arr.splice(0, 1)[0]);
     setChecks(checks_arr);
     setChecksVisible(checks_visible_arr);
   }, []);
@@ -104,39 +102,16 @@ export default function Tasks({folder_id, folder}) {
     folder_id: folder_id,
     sort_index: 0,
     task_type: "daily",
-    week_day: "",
-    month_day: "",
-    month: "",
-    time: "",
+    days: ""
   });
   const [editTask, setEditTask] = useState({
     task_id: "",
     description: "",
     time: "",
-    task_type: "",
-    week_day: "",
-    month_day: "",
-    month: "",
+    days: ""
   });
-  const [selectedTaskType, setSelectedTaskType] = useState({value: "daily", label: "Daily"});
-  const [showWeekDaySelector, setShowWeekDaySelector] = useState(false);
-  const [showMonthDaySelector, setShowMonthDaySelector] = useState(false);
-  const [showMonthSelector, setShowMonthSelector] = useState(false);
-  const [selectedWeekDay, setSelectedWeekDay] = useState();
-  const [selectedMonthDay, setSelectedMonthDay] = useState();
-  const [selectedMonth, setSelectedMonth] = useState();
-  const [hideNotThisWeek, setHideNotThisWeek] = useState();
+  const [selectedWeekDays, setSelectedWeekDays] = useState([]);
   var navigate = useNavigate();
-
-  const taskTypes = [
-    {value: "daily", label: "Daily"},
-    {value: "weekly", label: "Weekly"},
-    {value: "monthly", label: "Monthly"},
-    {value: "yearly", label: "Yearly"},
-    {value: "week_day", label: "Week Day"},
-    {value: "month_day", label: "Month Day"},
-    {value: "year_day", label: "Year Day"},
-  ];
 
   const weekDays = [
     {value: 1, label: "Monday"},
@@ -146,27 +121,6 @@ export default function Tasks({folder_id, folder}) {
     {value: 5, label: "Friday"},
     {value: 6, label: "Saturday"},
     {value: 0, label: "Sunday"},
-  ];
-
-  var monthDays = [];
-
-  for (var i = 1; i <= 31; i++) {
-    monthDays.push({value: i, label: i});
-  }
-
-  const months = [
-    {value: 1, label: "January"},
-    {value: 2, label: "February"},
-    {value: 3, label: "March"},
-    {value: 4, label: "April"},
-    {value: 5, label: "May"},
-    {value: 6, label: "June"},
-    {value: 7, label: "July"},
-    {value: 8, label: "August"},
-    {value: 9, label: "September"},
-    {value: 10, label: "October"},
-    {value: 11, label: "November"},
-    {value: 12, label: "December"}
   ];
 
   const handleSort = ({ oldIndex, newIndex }) => {
@@ -214,18 +168,9 @@ export default function Tasks({folder_id, folder}) {
           time: "",
           folder_id: folder_id,
           sort_index: 0,
-          task_type: "daily",
-          week_day: "",
-          month_day: "",
-          month: "",
+          days: ""
         });
-        setSelectedTaskType({value: "daily", label: "Daily"});
-        setSelectedWeekDay({});
-        setSelectedMonthDay({});
-        setSelectedMonth({});
-        setShowWeekDaySelector(false);
-        setShowMonthDaySelector(false);
-        setShowMonthSelector(false);
+        setSelectedWeekDays([]);
       }
       else {
         alert(response.data.error);
@@ -257,27 +202,8 @@ export default function Tasks({folder_id, folder}) {
           task_id: task.id,
           description: task.description,
           time: task.time,
-          task_type: task.type,
-          week_day: task.week_day,
-          month_day: task.month_day,
-          month: task.month,
+          days: task.days
         });
-        var taskType = taskTypes.find(item => item.value == task.type);
-        setSelectedTaskType(taskType);
-        if (task.type == "week_day") {
-          var weekDay = weekDays.find(item => item.value == task.week_day);
-          setSelectedWeekDay(weekDay);
-        }
-        else if (task.type == "month_day") {
-          var monthDay = monthDays.find(item => item.value == task.month_day);
-          setSelectedMonthDay(monthDay);
-        }
-        else if (task.type == "year_day") {
-          var month = months.find(item => item.value == task.month);
-          setSelectedMonth(month);
-          var monthDay = monthDays.find(item => item.value == task.month_day);
-          setSelectedMonthDay(monthDay);
-        }
         $(".editTaskModal").modal("show");
 
       }
@@ -304,36 +230,16 @@ export default function Tasks({folder_id, folder}) {
     });
   }
 
-  function changeNewTaskType(item) {
+  function changeWeekDays(items) {
+    var days = [];
+    for (var i in items) {
+      days.push(items[i].value);
+    }
     setNewTask({
       ...newTask,
-      task_type: item.value
+      days: days.join(",")
     });
-    setSelectedTaskType(item);
-  }
-
-  function changeWeekDay(item) {
-    setNewTask({
-      ...newTask,
-      week_day: item.value
-    });
-    setSelectedWeekDay(item);
-  }
-
-  function changeMonthDay(item) {
-    setNewTask({
-      ...newTask,
-      month_day: item.value
-    });
-    setSelectedMonthDay(item);
-  }
-
-  function changeMonth(item) {
-    setNewTask({
-      ...newTask,
-      month: item.value
-    });
-    setSelectedMonth(item);
+    setSelectedWeekDays(items);
   }
 
   function changeEditTaskDescription(e) {
@@ -350,36 +256,16 @@ export default function Tasks({folder_id, folder}) {
     });
   }
 
-  function changeEditTaskType(item) {
+  function changeEditTaskWeekDays(items) {
+    var days = [];
+    for (var i in items) {
+      days.push(items[i].value);
+    }
     setEditTask({
       ...editTask,
-      task_type: item.value
+      days: days.join(",")
     });
-    setSelectedTaskType(item);
-  }
-
-  function changeEditTaskWeekDay(item) {
-    setEditTask({
-      ...editTask,
-      week_day: item.value
-    });
-    setSelectedWeekDay(item);
-  }
-
-  function changeEditTaskMonthDay(item) {
-    setEditTask({
-      ...editTask,
-      month_day: item.value
-    });
-    setSelectedMonthDay(item);
-  }
-
-  function changeEditTaskMonth(item) {
-    setEditTask({
-      ...editTask,
-      month: item.value
-    });
-    setSelectedMonth(item);
+    setSelectedWeekDays(items);
   }
 
   function submitEditTask(e) {
@@ -393,10 +279,7 @@ export default function Tasks({folder_id, folder}) {
           task_id: 0,
           description: "",
           time: "",
-          task_type: "",
-          week_day: "",
-          month_day: "",
-          month: ""
+          days: ""
         })
       }
       else {
@@ -452,22 +335,6 @@ export default function Tasks({folder_id, folder}) {
     });
   }
 
-  function toggleHideNotThisWeek() {
-    axios.post("/api/set-hide-not-this-week", {folder_id: folder_id, hide_not_this_week: !hideNotThisWeek})
-    .then(function(response) {
-      if (response.data.status == "OK") {
-        setHideNotThisWeek(!hideNotThisWeek);
-        window.location.reload();
-      }
-      else {
-        alert(response.data.error);
-      }
-    })
-    .catch(function(err) {
-      console.log(err);
-    });
-  }
-
   function updateTaskDone(e, task_id, index) {
     axios.post(config.BASE_URL + "/api/update-recurrent-task-done", {task_id: task_id, is_done: e.target.checked, date: dates[index].toISOString().split('T')[0]})
     .then(function(response) {
@@ -492,64 +359,9 @@ export default function Tasks({folder_id, folder}) {
   }
 
   function getChecksVisible(task) {
-    var checks_visible = [];
-    if (task.type == "daily") {
-      checks_visible = [0, 1, 2, 3, 4, 5, 6];
-    }
-    else if (task.type == "weekly") {
-      checks_visible = [6];
-    }
-    else if (task.type == "monthly") {
-      for (var i in dates) {
-        if (dates[i].getDate() == 1) {
-          checks_visible = [Number(i)];
-        }
-      }
-    }
-    else if (task.type == "yearly") {
-      for (var i in dates) {
-        if (dates[i].getMonth() == 0 && dates[i].getDate() == 1) {
-          checks_visible = [Number(i)];
-        }
-      }
-    }
-    else if (task.type == "week_day") {
-      checks_visible = [Number(task.week_day)];
-    }
-    else if (task.type == "month_day") {
-      for (var i in dates) {
-        if (dates[i].getDate() == task.month_day) {
-          checks_visible = [Number(i)];
-        }
-      }
-    }
-    else if (task.type == "year_day") {
-      for (var i in dates) {
-        if (dates[i].getDate() == task.month_day && dates[i].getMonth() == task.month - 1) {
-          checks_visible = [Number(i)];
-        }
-      }
-    }
-
-    if (task.type != "week_day") {
-      for (var i in dates) {
-        if (dateIsLessThan(dates[i], new Date(task.created_at.split("T")[0]))) {
-          checks_visible = checks_visible.filter((item) => {
-            return item != Number(i);
-          });
-        }
-      }
-    }
-    else {
-      var idx_arr = [1, 2, 3, 4, 5, 6, 0];
-      for (var i in dates) {
-        if (dateIsLessThan(dates[i], new Date(task.created_at.split("T")[0]))) {
-          checks_visible = checks_visible.filter((item) => {
-            return idx_arr.indexOf(item) != Number(i);
-          });
-        }
-      }
-    }
+    var checks_visible = task.days.split(",");
+    checks_visible = checks_visible.map(Number);
+    console.log(checks_visible);
     return checks_visible;
   }
 
@@ -573,11 +385,6 @@ export default function Tasks({folder_id, folder}) {
           data[i].checks_visible = checks_visible;
         }
         var new_data = data;
-        if (hideNotThisWeek) {
-          new_data = new_data.filter((task) => {
-            return checkIfTaskIsThisWeek(task);
-          });
-        }
         setTasks(new_data);
       }
       else {
@@ -587,47 +394,6 @@ export default function Tasks({folder_id, folder}) {
     .catch(function(err) {
       console.log(err);
     });
-  }
-
-  function checkIfTaskIsThisWeek(task) {
-    if (task.type == "daily") {
-      return true;
-    }
-    else if (task.type == "weekly") {
-      return true;
-    }
-    else if (task.type == "monthly") {
-      for (var i in dates) {
-        if (dates[i].getDate() == 1) {
-          return true;
-        }
-      }
-    }
-    else if (task.type == "yearly") {
-      for (var i in dates) {
-        if (dates[i].getMonth() == 0 && dates[i].getDate() == 1) {
-          return true;
-        }
-      }
-    }
-    else if (task.type == "week_day") {
-      return true;
-    }
-    else if (task.type == "month_day") {
-      for (var i in dates) {
-        if (dates[i].getDate() == task.month_day) {
-          return true;
-        }
-      }
-    }
-    else if (task.type == "year_day") {
-      for (var i in dates) {
-        if (dates[i].getDate() == task.month_day && dates[i].getMonth() == task.month - 1) {
-          return true;
-        }
-      }
-    }
-    return false;
   }
 
   function addLeadingZeros(n) {
@@ -695,39 +461,10 @@ export default function Tasks({folder_id, folder}) {
   }
 
   useEffect(() => {
-    if (dates.length > 0 && hideNotThisWeek != undefined) {
+    if (dates.length > 0) {
       loadTasks();
     }
-  }, [dates, hideNotThisWeek]);
-
-  useEffect(() => {
-    if (selectedTaskType.value == "week_day") {
-      setShowWeekDaySelector(true);
-      setShowMonthDaySelector(false);
-      setShowMonthSelector(false);
-    }
-    else if (selectedTaskType.value == "month_day") {
-      setShowWeekDaySelector(false);
-      setShowMonthDaySelector(true);
-      setShowMonthSelector(false);
-    }
-    else if (selectedTaskType.value == "year_day") {
-      setShowWeekDaySelector(false);
-      setShowMonthDaySelector(true);
-      setShowMonthSelector(true);
-    }
-    else if (selectedTaskType.value == "daily" || selectedTaskType.value == "weekly" || selectedTaskType.value == "monthly" || selectedTaskType.value == "yearly") {
-      setShowWeekDaySelector(false);
-      setShowMonthDaySelector(false);
-      setShowMonthSelector(false);
-    }
-  }, [selectedTaskType]);
-
-  useEffect(() => {
-    if (folder != undefined && folder != null) {
-      setHideNotThisWeek(folder.hide_not_this_week == 1 ? true : false);
-    }
-  }, [folder]);
+  }, [dates]);
 
   useEffect(() => {
     setDays(getDays());
@@ -745,7 +482,6 @@ export default function Tasks({folder_id, folder}) {
           </button>
           <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
             <li><a class="dropdown-item" href="#" onClick={deleteFolder}>Delete folder</a></li>
-            <li><a class="dropdown-item" href="#" onClick={toggleHideNotThisWeek}>{hideNotThisWeek == true ? "Disable Only This Week" : "Only This Week"}</a></li>
           </ul>
         </div>
       </div>
@@ -789,24 +525,9 @@ export default function Tasks({folder_id, folder}) {
                   </div>
                 </div>
                 <div className="form-group py-2">
-                  <label className="control-label">Type</label>
-                  <Select value={selectedTaskType} options={taskTypes} onChange={changeNewTaskType} />
-                </div>
-                {showWeekDaySelector &&
-                <div className="form-group py-2">
                   <label className="control-label">Week Day</label>
-                  <Select value={selectedWeekDay} options={weekDays} onChange={changeWeekDay} />
-                </div>}
-                {showMonthDaySelector &&
-                <div className="form-group py-2">
-                  <label className="control-label">Month Day</label>
-                  <Select value={selectedMonthDay} options={monthDays} onChange={changeMonthDay} />
-                </div>} 
-                {showMonthSelector &&
-                <div className="form-group py-2">
-                  <label className="control-label">Month</label>
-                  <Select value={selectedMonth} options={months} onChange={changeMonth} />
-                </div>}
+                  <Select isMulti value={selectedWeekDays} options={weekDays} onChange={changeWeekDays} />
+                </div>
                 <div className="form-group">
                     <div style={{textAlign: "right"}}>
                         <button type="submit" className="btn btn-primary">Add</button>
@@ -839,24 +560,9 @@ export default function Tasks({folder_id, folder}) {
                   </div>
                 </div>
                 <div className="form-group py-2">
-                  <label className="control-label">Type</label>
-                  <Select value={selectedTaskType} options={taskTypes} onChange={changeEditTaskType} />
-                </div>
-                {showWeekDaySelector &&
-                <div className="form-group py-2">
                   <label className="control-label">Week Day</label>
-                  <Select value={selectedWeekDay} options={weekDays} onChange={changeEditTaskWeekDay} />
-                </div>}
-                {showMonthDaySelector &&
-                <div className="form-group py-2">
-                  <label className="control-label">Month Day</label>
-                  <Select value={selectedMonthDay} options={monthDays} onChange={changeEditTaskMonthDay} />
-                </div>} 
-                {showMonthSelector &&
-                <div className="form-group py-2">
-                  <label className="control-label">Month</label>
-                  <Select value={selectedMonth} options={months} onChange={changeEditTaskMonth} />
-                </div>}
+                  <Select isMulti value={selectedWeekDays} options={weekDays} onChange={changeEditTaskWeekDays} />
+                </div>
                 <div className="form-group">
                     <div style={{textAlign: "right"}}>
                         <button type="submit" className="btn btn-primary">Save</button>
