@@ -29,6 +29,7 @@ export default function Stats() {
       console.log(err);
     });
 
+    /*
     axios.get(config.BASE_URL + "/api/get-stats2")
     .then(function(response) {
       console.log(response.data);
@@ -45,6 +46,7 @@ export default function Stats() {
     .catch(function(err) {
       console.log(err);
     });
+    */
   }
 
   useEffect(() => {
@@ -71,6 +73,7 @@ export default function Stats() {
             <th className="table-dark bg-blue">Recurrent Tasks Done Today</th>
             <td className="text-center">{recurrentTasksDone}</td>
           </tr>
+          {/*}
           <tr>
             <th className="table-dark bg-blue">Total Tasks</th>
             <td className="text-center">{totalAllTasks}</td>
@@ -86,7 +89,7 @@ export default function Stats() {
           <tr>
             <th className="table-dark bg-blue">Total Recurrent Tasks Done</th>
             <td className="text-center">{totalAllRecurrentTasksDone}</td>
-          </tr>
+          </tr>*/}
         </tbody>
       </table>
     </>
