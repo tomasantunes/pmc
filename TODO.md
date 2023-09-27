@@ -11,3 +11,4 @@
 - Change week days selector to use checkboxes.
 - Create option to uncancel a task.
 - Verify cancelled tasks on the back-end to avoid slowness.
+- Delete recurrent checks when you delete a task.
