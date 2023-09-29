@@ -250,6 +250,16 @@ app.get("/api/get-recurrent-tasks", (req, res) => {
       var task_id = result[i].id;
       var checks = await getTaskChecks(task_id, dti, dtf);
       result[i].checks = checks;
+
+      var dt = new Date();
+      var wd = dt.getDay();
+      var is_cancelled = await checkIfTaskIsCancelled(task_id, dt.toISOString().slice(0, 10));
+      if (is_cancelled) {
+        var days = result[i].days.split(",");
+        var idx_to_remove = days.indexOf(wd.toString());
+        days.splice(idx_to_remove, 1);
+        result[i].days = days.join(",");
+      }
     }
     res.json({status: "OK", data: result});
   });
@@ -535,18 +545,6 @@ app.post("/api/edit-task", (req, res) => {
     }
     res.json({status: "OK", data: "Task has been updated successfully."});
   });
-});
-
-app.get("/api/check-if-task-is-cancelled", async (req, res) => {
-  if (!req.session.isLoggedIn) {
-    res.json({status: "NOK", error: "Invalid Authorization."});
-    return;
-  }
-
-  var task_id = req.query.task_id;
-  var dt = req.query.date;
-  var is_cancelled = await checkIfTaskIsCancelled(task_id, dt);
-  res.json({status: "OK", data: is_cancelled});
 });
 
 app.post("/api/edit-recurrent-task", (req, res) => {

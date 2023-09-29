@@ -402,21 +402,6 @@ export default function Tasks({folder_id, folder}) {
             return idx_arr.indexOf(item) != Number(i);
           });
         }
-
-        // use await to make an axios request to "/api/check-if-task-is-cancelled"
-        // if it is cancelled, remove the index from checks_visible
-        // else, keep the index in checks_visible
-        var response = await axios.get(config.BASE_URL + "/api/check-if-task-is-cancelled", {params: {task_id: task.id, date: dates[i].toISOString().split('T')[0]}});
-        if (response.data.status == "OK") {
-          if (response.data.data == true) {
-            checks_visible = checks_visible.filter((item) => {
-              return idx_arr.indexOf(item) != Number(i);
-            });
-          }
-        }
-        else {
-          alert(response.data.error);
-        }
       }
       return checks_visible;
     }
