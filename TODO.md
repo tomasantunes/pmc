@@ -8,6 +8,5 @@
 - Fix bug where you can't select text on the table rows.
 - Fix error when marking checkboxes from 00:00 to 01:00.
 - Create folder type "List"
-- Change week days selector to use checkboxes.
 - Create option to uncancel a task.
 - Delete recurrent checks when you delete a task.
