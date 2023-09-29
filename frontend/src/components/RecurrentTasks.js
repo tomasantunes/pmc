@@ -112,6 +112,13 @@ export default function Tasks({folder_id, folder}) {
     days: ""
   });
   const [selectedWeekDays, setSelectedWeekDays] = useState([]);
+  const [mondayChecked, setMondayChecked] = useState(false);
+  const [tuesdayChecked, setTuesdayChecked] = useState(false);
+  const [wednesdayChecked, setWednesdayChecked] = useState(false);
+  const [thursdayChecked, setThursdayChecked] = useState(false);
+  const [fridayChecked, setFridayChecked] = useState(false);
+  const [saturdayChecked, setSaturdayChecked] = useState(false);
+  const [sundayChecked, setSundayChecked] = useState(false);
   var navigate = useNavigate();
 
   const weekDays = [
@@ -157,6 +164,147 @@ export default function Tasks({folder_id, folder}) {
     return false;
   }
 
+  function toggleMonday(e) {
+    setMondayChecked(e.target.checked);
+    if (e.target.checked) {
+      setSelectedWeekDays((prev) => {
+        var new_arr = prev;
+        new_arr.push(weekDays[0]);
+        return new_arr;
+      });
+    }
+    else {
+      setSelectedWeekDays((prev) => {
+        var new_arr = prev;
+        new_arr = new_arr.filter((item) => {
+          return item.value != 1;
+        });
+        return new_arr;
+      });
+    }
+  }
+
+  function toggleTuesday(e) {
+    setTuesdayChecked(e.target.checked);
+    if (e.target.checked) {
+      setSelectedWeekDays((prev) => {
+        var new_arr = prev;
+        new_arr.push(weekDays[1]);
+        return new_arr;
+      });
+    }
+    else {
+      setSelectedWeekDays((prev) => {
+        var new_arr = prev;
+        new_arr = new_arr.filter((item) => {
+          return item.value != 2;
+        });
+        return new_arr;
+      });
+    }
+  }
+
+  function toggleWednesday(e) {
+    setWednesdayChecked(e.target.checked);
+    if (e.target.checked) {
+      setSelectedWeekDays((prev) => {
+        var new_arr = prev;
+        new_arr.push(weekDays[2]);
+        return new_arr;
+      });
+    }
+    else {
+      setSelectedWeekDays((prev) => {
+        var new_arr = prev;
+        new_arr = new_arr.filter((item) => {
+          return item.value != 3;
+        });
+        return new_arr;
+      });
+    }
+  }
+
+  function toggleThursday(e) {
+    setThursdayChecked(e.target.checked);
+    if (e.target.checked) {
+      setSelectedWeekDays((prev) => {
+        var new_arr = prev;
+        new_arr.push(weekDays[3]);
+        return new_arr;
+      });
+    }
+    else {
+      setSelectedWeekDays((prev) => {
+        var new_arr = prev;
+        new_arr = new_arr.filter((item) => {
+          return item.value != 4;
+        });
+        return new_arr;
+      });
+    }
+  }
+
+  function toggleFriday(e) {
+    setFridayChecked(e.target.checked);
+    if (e.target.checked) {
+      setSelectedWeekDays((prev) => {
+        var new_arr = prev;
+        new_arr.push(weekDays[4]);
+        return new_arr;
+      });
+    }
+    else {
+      setSelectedWeekDays((prev) => {
+        var new_arr = prev;
+        new_arr = new_arr.filter((item) => {
+          return item.value != 5;
+        });
+        return new_arr;
+      });
+    }
+  }
+
+  function toggleSaturday(e) {
+    setSaturdayChecked(e.target.checked);
+    if (e.target.checked) {
+      setSelectedWeekDays((prev) => {
+        var new_arr = prev;
+        new_arr.push(weekDays[5]);
+        return new_arr;
+      });
+    }
+    else {
+      setSelectedWeekDays((prev) => {
+        var new_arr = prev;
+        new_arr = new_arr.filter((item) => {
+          return item.value != 6;
+        });
+        return new_arr;
+      });
+    }
+  }
+
+  function toggleSunday(e) {
+    setSundayChecked(e.target.checked);
+    if (e.target.checked) {
+      setSelectedWeekDays((prev) => {
+        var new_arr = prev;
+        new_arr.push(weekDays[6]);
+        return new_arr;
+      });
+    }
+    else {
+      setSelectedWeekDays((prev) => {
+        var new_arr = prev;
+        new_arr = new_arr.filter((item) => {
+          return item.value != 0;
+        });
+        return new_arr;
+      });
+    }
+  }
+
+
   function cancelTask(task_id) {
     axios.post(config.BASE_URL + "/api/cancel-task", {task_id: task_id, date: new Date().toISOString().split('T')[0]})
     .then(function(response) {
@@ -175,7 +323,10 @@ export default function Tasks({folder_id, folder}) {
 
   function submitAddTask(e) {
     e.preventDefault();
-    axios.post(config.BASE_URL + "/api/add-recurrent-task", {...newTask, sort_index: tasks.length})
+    var days = selectedWeekDays.map((item) => {
+      return item.value;
+    }).join(",");
+    axios.post(config.BASE_URL + "/api/add-recurrent-task", {...newTask, sort_index: tasks.length, days: days})
     .then(function(response) {
       if (response.data.status == "OK") {
         loadTasks();
@@ -188,6 +339,7 @@ export default function Tasks({folder_id, folder}) {
           days: ""
         });
         setSelectedWeekDays([]);
+        clearWeekDayChecks();
       }
       else {
         alert(response.data.error);
@@ -211,6 +363,7 @@ export default function Tasks({folder_id, folder}) {
   }
 
   function openEditTask(task_id) {
+    clearWeekDayChecks();
     axios.get(config.BASE_URL + "/api/get-task", {params: {task_id: task_id}})
     .then(function(response) {
       if (response.data.status == "OK") {
@@ -229,6 +382,7 @@ export default function Tasks({folder_id, folder}) {
             var week_day = weekDays.find((d) => {
               return d.value == days[i];
             });
+            setWeekDayCheck(days[i]);
             selected_days.push(week_day);
           }
           setSelectedWeekDays(selected_days);
@@ -248,6 +402,40 @@ export default function Tasks({folder_id, folder}) {
     });
   }
 
+  function setWeekDayCheck(value) {
+    if (value == 0) {
+      setSundayChecked(true);
+    }
+    else if (value == 1) {
+      setMondayChecked(true);
+    }
+    else if (value == 2) {
+      setTuesdayChecked(true);
+    }
+    else if (value == 3) {
+      setWednesdayChecked(true);
+    }
+    else if (value == 4) {
+      setThursdayChecked(true);
+    }
+    else if (value == 5) {
+      setFridayChecked(true);
+    }
+    else if (value == 6) {
+      setSaturdayChecked(true);
+    }
+  }
+
+  function clearWeekDayChecks() {
+    setMondayChecked(false);
+    setTuesdayChecked(false);
+    setWednesdayChecked(false);
+    setThursdayChecked(false);
+    setFridayChecked(false);
+    setSaturdayChecked(false);
+    setSundayChecked(false);
+  }
+
   function changeNewTaskDescription(e) {
     setNewTask({
       ...newTask,
@@ -260,18 +448,6 @@ export default function Tasks({folder_id, folder}) {
       ...newTask,
       time: e.target.value
     });
-  }
-
-  function changeWeekDays(items) {
-    var days = [];
-    for (var i in items) {
-      days.push(items[i].value);
-    }
-    setNewTask({
-      ...newTask,
-      days: days.join(",")
-    });
-    setSelectedWeekDays(items);
   }
 
   function changeEditTaskDescription(e) {
@@ -302,7 +478,10 @@ export default function Tasks({folder_id, folder}) {
 
   function submitEditTask(e) {
     e.preventDefault();
-    axios.post(config.BASE_URL + "/api/edit-recurrent-task", editTask)
+    var days = selectedWeekDays.map((item) => {
+      return item.value;
+    }).join(",");
+    axios.post(config.BASE_URL + "/api/edit-recurrent-task", {...editTask, days: days})
     .then(function(response) {
       if (response.data.status == "OK") {
         loadTasks();
@@ -312,7 +491,9 @@ export default function Tasks({folder_id, folder}) {
           description: "",
           time: "",
           days: ""
-        })
+        });
+        setSelectedWeekDays([]);
+        clearWeekDayChecks();
       }
       else {
         alert(response.data.error);
@@ -572,7 +753,27 @@ export default function Tasks({folder_id, folder}) {
                 </div>
                 <div className="form-group py-2">
                   <label className="control-label">Week Days</label>
-                  <Select isMulti value={selectedWeekDays} options={weekDays} onChange={changeWeekDays} />
+                  <div className="my-2">
+                    <input type="checkbox" checked={mondayChecked} onChange={toggleMonday} /> Monday
+                  </div>
+                  <div className="mb-2">
+                    <input type="checkbox" checked={tuesdayChecked} onChange={toggleTuesday} /> Tuesday
+                  </div>
+                  <div className="mb-2">
+                    <input type="checkbox" checked={wednesdayChecked} onChange={toggleWednesday} /> Wesnesday
+                  </div>
+                  <div className="mb-2">
+                    <input type="checkbox" checked={thursdayChecked} onChange={toggleThursday} /> Thursday
+                  </div>
+                  <div className="mb-2">
+                    <input type="checkbox" checked={fridayChecked} onChange={toggleFriday} /> Friday
+                  </div>
+                  <div className="mb-2">
+                    <input type="checkbox" checked={saturdayChecked} onChange={toggleSaturday} /> Saturday<br/>
+                  </div>
+                  <div className="mb-2">
+                    <input type="checkbox" checked={sundayChecked} onChange={toggleSunday} /> Sunday
+                  </div>
                 </div>
                 <div className="form-group">
                     <div style={{textAlign: "right"}}>
@@ -607,7 +808,27 @@ export default function Tasks({folder_id, folder}) {
                 </div>
                 <div className="form-group py-2">
                   <label className="control-label">Week Days</label>
-                  <Select isMulti value={selectedWeekDays} options={weekDays} onChange={changeEditTaskWeekDays} />
+                  <div className="my-2">
+                    <input type="checkbox" checked={mondayChecked} onChange={toggleMonday} /> Monday
+                  </div>
+                  <div className="mb-2">
+                    <input type="checkbox" checked={tuesdayChecked} onChange={toggleTuesday} /> Tuesday
+                  </div>
+                  <div className="mb-2">
+                    <input type="checkbox" checked={wednesdayChecked} onChange={toggleWednesday} /> Wesnesday
+                  </div>
+                  <div className="mb-2">
+                    <input type="checkbox" checked={thursdayChecked} onChange={toggleThursday} /> Thursday
+                  </div>
+                  <div className="mb-2">
+                    <input type="checkbox" checked={fridayChecked} onChange={toggleFriday} /> Friday
+                  </div>
+                  <div className="mb-2">
+                    <input type="checkbox" checked={saturdayChecked} onChange={toggleSaturday} /> Saturday<br/>
+                  </div>
+                  <div className="mb-2">
+                    <input type="checkbox" checked={sundayChecked} onChange={toggleSunday} /> Sunday
+                  </div>
                 </div>
                 <div className="form-group">
                     <div style={{textAlign: "right"}}>
