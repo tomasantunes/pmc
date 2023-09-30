@@ -129,9 +129,22 @@ async function getMotivationalText(messages) {
 }
 
 app.get("/api/generate-motivational-text", async (req, res) => {
+  if (!req.session.isLoggedIn) {
+    res.json({status: "NOK", error: "Invalid Authorization."});
+    return;
+  }
   var motivational_text = await getMotivationalText();
   motivational_text = motivational_text.replace(/(?:\r\n|\r|\n)/g, '<br>');
   res.json({status: "OK", data: motivational_text});
+});
+
+app.get("/api/get-task-list", async (req, res) => {
+  if (!req.session.isLoggedIn) {
+    res.json({status: "NOK", error: "Invalid Authorization."});
+    return;
+  }
+  var task_list = await getTaskList();
+  res.json({status: "OK", data: task_list});
 });
 
 app.get("/api/get-folders", (req, res) => {
