@@ -453,6 +453,26 @@ app.post("/api/update-task-done", (req, res) => {
   });
 });
 
+app.post("/api/update-all-tasks-done", (req, res) => {
+  if (!req.session.isLoggedIn) {
+    res.json({status: "NOK", error: "Invalid Authorization."});
+    return;
+  }
+
+  var folder_id = req.body.folder_id;
+  var is_done = req.body.is_done;
+
+  var sql = "UPDATE tasks SET is_done = ? WHERE folder_id = ?";
+  con.query(sql, [is_done, folder_id], function (err, result) {
+    if (err) {
+      console.log(err);
+      res.json({status: "NOK", error: err.message});
+      return;
+    }
+    res.json({status: "OK", data: "Tasks have been updated successfully."});
+  });
+});
+
 app.post("/api/update-recurrent-task-done", (req, res) => {
   if (!req.session.isLoggedIn) {
     res.json({status: "NOK", error: "Invalid Authorization."});

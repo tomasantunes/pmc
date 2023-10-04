@@ -135,6 +135,36 @@ export default function Tasks({folder_id, folder}) {
     });
   }
 
+  function setAllTasksDone() {
+    axios.post(config.BASE_URL + "/api/update-all-tasks-done", {folder_id: folder_id, is_done: 1})
+    .then(function(response) {
+      if (response.data.status == "OK") {
+        loadTasks();
+      }
+      else {
+        console.log(response.data.error);
+      }
+    })
+    .catch(function(err) {
+      console.log(err);
+    });
+  }
+
+  function setAllTasksNotDone() {
+    axios.post(config.BASE_URL + "/api/update-all-tasks-done", {folder_id: folder_id, is_done: 0})
+    .then(function(response) {
+      if (response.data.status == "OK") {
+        loadTasks();
+      }
+      else {
+        console.log(response.data.error);
+      }
+    })
+    .catch(function(err) {
+      console.log(err);
+    });
+  }
+
   function submitAddTask(e) {
     e.preventDefault();
     axios.post(config.BASE_URL + "/api/add-task", {folder_id: folder_id, description: newTask.description, time: newTask.time, sort_index: tasks.length})
@@ -319,7 +349,9 @@ export default function Tasks({folder_id, folder}) {
       <table className="table table-striped table-bordered align-middle tasks">
           <thead class="table-dark">
               <tr>
-                  <th style={{width: "10%"}}>Done</th>
+                  <th style={{width: "10%"}}>
+                    <input type="checkbox" checked={tasks.filter(task => task.is_done == true).length > 0 && tasks.length > 0} onChange={(e) => { e.target.checked ? setAllTasksDone() : setAllTasksNotDone() }} />
+                  </th>
                   <th style={{width: "50%"}}>Task</th>
                   <th style={{width: "20%"}}>Time</th>
                   <th style={{width: "20%"}}>Actions</th>
