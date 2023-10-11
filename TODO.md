@@ -9,3 +9,4 @@
 - Create folder type "List"
 - Create option to uncancel a task.
 - Delete recurrent checks when you delete a task.
+- Create motivational text for github tasks.
