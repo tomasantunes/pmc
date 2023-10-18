@@ -306,7 +306,7 @@ export default function Tasks({folder_id, folder}) {
 
 
   function cancelTask(task_id) {
-    axios.post(config.BASE_URL + "/api/cancel-task", {task_id: task_id, date: new Date().toISOString().split('T')[0]})
+    axios.post(config.BASE_URL + "/api/cancel-task", {task_id: task_id, date: toLocaleISOString(new Date()).split('T')[0]})
     .then(function(response) {
       if (response.data.status == "OK") {
         loadTasks();
@@ -548,8 +548,29 @@ export default function Tasks({folder_id, folder}) {
     });
   }
 
+  function toLocaleISOString(date) {
+    function pad(number) {
+        if (number < 10) {
+            return '0' + number;
+        }
+        return number;
+    }
+
+    return date.getFullYear() +
+        '-' + pad(date.getMonth() + 1) +
+        '-' + pad(date.getDate()) +
+        'T' + pad(date.getHours()) +
+        ':' + pad(date.getMinutes()) +
+        ':' + pad(date.getSeconds()) ;
+
+  }
+
   function updateTaskDone(e, task_id, index) {
-    axios.post(config.BASE_URL + "/api/update-recurrent-task-done", {task_id: task_id, is_done: e.target.checked, date: dates[index].toISOString().split('T')[0]})
+    var dt = toLocaleISOString(dates[index]).split('T')[0];
+    console.log(dates[index]);
+    console.log(dt);
+    console.log(index);
+    axios.post(config.BASE_URL + "/api/update-recurrent-task-done", {task_id: task_id, is_done: e.target.checked, date: dt})
     .then(function(response) {
       if (response.data.status == "OK") {
         loadTasks();
@@ -594,7 +615,7 @@ export default function Tasks({folder_id, folder}) {
 
   function loadTasks() {
     setTasks([]);
-    axios.get(config.BASE_URL + "/api/get-recurrent-tasks", {params: {folder_id: folder_id, dti: dates[0].toISOString().split('T')[0], dtf: dates[6].toISOString().split('T')[0]}})
+    axios.get(config.BASE_URL + "/api/get-recurrent-tasks", {params: {folder_id: folder_id, dti: toLocaleISOString(dates[0]).split('T')[0], dtf: toLocaleISOString(dates[6]).split('T')[0]}})
     .then(async function(response) {
       if (response.data.status == "OK") {
         var data = response.data.data;
