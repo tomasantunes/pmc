@@ -5,7 +5,6 @@
 - Change time input to use a time selector.
 - Add an option to change a task's folder.
 - Fix bug where you can't select text on the table rows.
-- Fix error when marking checkboxes from 00:00 to 01:00. (It's on the front-end)
 - Create folder type "List"
 - Create option to uncancel a task.
 - Delete recurrent checks when you delete a task.
