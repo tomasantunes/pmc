@@ -244,6 +244,16 @@ app.post("/api/set-hide-done", (req, res) => {
   });
 });
 
+function getRangeOfDates(startDate, stopDate) {
+  var dateArray = new Array();
+  var currentDate = startDate;
+  while (currentDate <= stopDate) {
+      dateArray.push(new Date (currentDate));
+      currentDate = currentDate.addDays(1);
+  }
+  return dateArray;
+}
+
 app.get("/api/get-recurrent-tasks", (req, res) => {
   if (!req.session.isLoggedIn) {
     res.json({status: "NOK", error: "Invalid Authorization."});
@@ -263,6 +273,19 @@ app.get("/api/get-recurrent-tasks", (req, res) => {
       var task_id = result[i].id;
       var checks = await getTaskChecks(task_id, dti, dtf);
       result[i].checks = checks;
+
+      var dt_range = getRangeOfDates(new Date(dti), new Date(dtf));
+      for (var i in dt_range) {
+        var dt = dt_range[i];
+        var wd = dt.getDay();
+        var is_cancelled = await checkIfTaskIsCancelled(task_id, dt.toISOString().slice(0, 10));
+        if (is_cancelled) {
+          var days = result[i].days.split(",");
+          var idx_to_remove = days.indexOf(wd.toString());
+          days.splice(idx_to_remove, 1);
+          result[i].days = days.join(",");
+        }
+      }
     }
     res.json({status: "OK", data: result});
   });
@@ -290,7 +313,7 @@ app.post("/api/add-recurrent-task", (req, res) => {
 });
 
 async function getTaskChecks(task_id, dti, dtf) {
-  var sql = "SELECT * FROM recurrent_checks WHERE task_id = ? AND is_cancelled = 0 AND date BETWEEN ? AND ?";
+  var sql = "SELECT * FROM recurrent_checks WHERE task_id = ? AND date BETWEEN ? AND ?";
   const [rows, fields] = await con2.execute(sql, [task_id, dti, dtf]);
   return rows;
 }
