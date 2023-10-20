@@ -9,4 +9,3 @@
 - Create option to uncancel a task.
 - Delete recurrent checks when you delete a task.
 - Create motivational text for github tasks.
-- FIx bug on cancelled tasks. They don't show as cancelled on the next day.
