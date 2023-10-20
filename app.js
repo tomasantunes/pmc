@@ -128,6 +128,12 @@ async function getMotivationalText(messages) {
   return message.content;
 }
 
+Date.prototype.addDays = function(days) {
+  var date = new Date(this.valueOf());
+  date.setDate(date.getDate() + days);
+  return date;
+}
+
 app.get("/api/generate-motivational-text", async (req, res) => {
   if (!req.session.isLoggedIn) {
     res.json({status: "NOK", error: "Invalid Authorization."});
