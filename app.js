@@ -229,7 +229,21 @@ app.post("/api/delete-folder", (req, res) => {
       console.log(err);
       res.json({status: "NOK", error: err.message});
     }
-    res.json({status: "OK", data: "Folder has been deleted successfully."});
+    var sql2 = "DELETE FROM tasks WHERE folder_id = ?";
+    con.query(sql2, [folder_id], function (err2, result2) {
+      if (err2) {
+        console.log(err2);
+        res.json({status: "NOK", error: err2.message});
+      }
+      var sql3 = "DELETE FROM recurrent_checks WHERE task_id IN (SELECT id FROM tasks WHERE folder_id = ?)";
+      con.query(sql3, [folder_id], function (err3, result3) {
+        if (err3) {
+          console.log(err3);
+          res.json({status: "NOK", error: err3.message});
+        }
+        res.json({status: "OK", data: "Folder has been deleted successfully."});
+      });
+    });
   });
 });
 
@@ -690,7 +704,14 @@ app.post("/api/delete-task", (req, res) => {
       console.log(err);
       res.json({status: "NOK", error: err.message});
     }
-    res.json({status: "OK", data: "Task has been deleted successfully."});
+    var sql2 = "DELETE FROM recurrent_checks WHERE task_id = ?";
+    con.query(sql2, [task_id], function (err2, result2) {
+      if (err2) {
+        console.log(err2);
+        res.json({status: "NOK", error: err2.message});
+      }
+      res.json({status: "OK", data: "Task has been deleted successfully."});
+    });
   });
 });
 
