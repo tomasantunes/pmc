@@ -8,6 +8,9 @@ import {
   SortableElement,
   arrayMove
 } from "react-sortable-hoc";
+import TimePicker from 'rc-time-picker';
+import 'rc-time-picker/assets/index.css';
+import moment from 'moment';
 
 window.jQuery = $;
 window.$ = $;
@@ -56,12 +59,14 @@ export default function Tasks({folder_id, folder}) {
   const [tasks, setTasks] = useState([]);
   const [newTask, setNewTask] = useState({
     description: "",
-    time: ""
+    start_time: "",
+    end_time: ""
   });
   const [editTask, setEditTask] = useState({
     task_id: 0,
     description: "",
-    time: ""
+    start_time: "",
+    end_time: ""
   });
   const [hideDone, setHideDone] = useState(folder.hide_done == 1 ? true : false);
 
@@ -167,7 +172,7 @@ export default function Tasks({folder_id, folder}) {
 
   function submitAddTask(e) {
     e.preventDefault();
-    axios.post(config.BASE_URL + "/api/add-task", {folder_id: folder_id, description: newTask.description, time: newTask.time, sort_index: tasks.length})
+    axios.post(config.BASE_URL + "/api/add-task", {folder_id: folder_id, description: newTask.description, start_time: newTask.start_time.format("HH:mm"), end_time: newTask.end_time.format("HH:mm"), sort_index: tasks.length})
     .then(function(response) {
       if (response.data.status == "OK") {
         loadTasks();
@@ -188,7 +193,7 @@ export default function Tasks({folder_id, folder}) {
 
   function submitEditTask(e) {
     e.preventDefault();
-    axios.post(config.BASE_URL + "/api/edit-task", editTask)
+    axios.post(config.BASE_URL + "/api/edit-task", {...editTask, start_time: editTask.start_time.format("HH:mm"), end_time: editTask.end_time.format("HH:mm")})
     .then(function(response) {
       if (response.data.status == "OK") {
         loadTasks();
@@ -292,10 +297,17 @@ export default function Tasks({folder_id, folder}) {
     });
   }
 
-  function changeNewTaskTime(e) {
+  function changeNewTaskStartTime(time) {
     setNewTask({
       ...newTask,
-      time: e.target.value
+      start_time: time
+    });
+  }
+
+  function changeNewTaskEndTime(time) {
+    setNewTask({
+      ...newTask,
+      end_time: time
     });
   }
 
@@ -306,10 +318,17 @@ export default function Tasks({folder_id, folder}) {
     });
   }
 
-  function changeEditTaskTime(e) {
+  function changeEditTaskStartTime(time) {
     setEditTask({
       ...editTask,
-      time: e.target.value
+      start_time: time
+    });
+  }
+
+  function changeEditTaskEndTime(time) {
+    setEditTask({
+      ...editTask,
+      end_time: time
     });
   }
 
@@ -375,9 +394,15 @@ export default function Tasks({folder_id, folder}) {
                   </div>
                 </div>
                 <div className="form-group py-2">
-                  <label className="control-label">Time</label>
+                  <label className="control-label">Start Time</label>
                   <div>
-                      <input type="text" className="form-control input-lg" name="time" value={newTask.time} onChange={changeNewTaskTime}/>
+                      <TimePicker value={newTask.start_time} onChange={changeNewTaskStartTime} showSecond={false} />
+                  </div>
+                </div>
+                <div className="form-group py-2">
+                  <label className="control-label">End Time</label>
+                  <div>
+                      <TimePicker value={newTask.end_time} onChange={changeNewTaskEndTime} showSecond={false} />
                   </div>
                 </div>
                 <div className="form-group">
@@ -406,9 +431,15 @@ export default function Tasks({folder_id, folder}) {
                   </div>
                 </div>
                 <div className="form-group py-2">
-                  <label className="control-label">Time</label>
+                  <label className="control-label">Start Time</label>
                   <div>
-                      <input type="text" className="form-control input-lg" name="time" value={editTask.time} onChange={changeEditTaskTime}/>
+                      <TimePicker value={editTask.start_time} onChange={changeEditTaskStartTime} showSecond={false} />
+                  </div>
+                </div>
+                <div className="form-group py-2">
+                  <label className="control-label">End Time</label>
+                  <div>
+                      <TimePicker value={editTask.end_time} onChange={changeEditTaskEndTime} showSecond={false} />
                   </div>
                 </div>
                 <div className="form-group">

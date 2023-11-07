@@ -29,7 +29,7 @@ CREATE TABLE events (
     task_id INT(11) DEFAULT NULL,
     description VARCHAR(2048) NOT NULL,
     start_date DATETIME NOT NULL,
-    end_date DATETIME NOT NULL,
+    end_date DATETIME NOT NULL
 );
 
 CREATE TABLE logins (
@@ -58,3 +58,6 @@ ALTER TABLE tasks DROP COLUMN month_day;
 ALTER TABLE tasks DROP COLUMN month;
 ALTER TABLE folders DROP COLUMN hide_not_this_week;
 ALTER TABLE recurrent_checks ADD is_cancelled BOOLEAN NOT NULL DEFAULT 0;
+ALTER TABLE tasks DROP COLUMN time;
+ALTER TABLE tasks ADD COLUMN start_time TIME DEFAULT NULL;
+ALTER TABLE tasks ADD COLUMN end_time TIME DEFAULT NULL;

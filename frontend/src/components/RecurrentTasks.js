@@ -8,7 +8,9 @@ import {
   SortableElement,
   arrayMove
 } from "react-sortable-hoc";
-import Select from 'react-select';
+import TimePicker from 'rc-time-picker';
+import 'rc-time-picker/assets/index.css';
+import moment from 'moment';
 
 window.jQuery = $;
 window.$ = $;
@@ -103,12 +105,15 @@ export default function Tasks({folder_id, folder}) {
     folder_id: folder_id,
     sort_index: 0,
     task_type: "daily",
-    days: ""
+    days: "",
+    start_time: "",
+    end_time: ""
   });
   const [editTask, setEditTask] = useState({
     task_id: "",
     description: "",
-    time: "",
+    start_time: "",
+    end_time: "",
     days: ""
   });
   const [selectedWeekDays, setSelectedWeekDays] = useState([]);
@@ -326,7 +331,8 @@ export default function Tasks({folder_id, folder}) {
     var days = selectedWeekDays.map((item) => {
       return item.value;
     }).join(",");
-    axios.post(config.BASE_URL + "/api/add-recurrent-task", {...newTask, sort_index: tasks.length, days: days})
+
+    axios.post(config.BASE_URL + "/api/add-recurrent-task", {...newTask, sort_index: tasks.length, days: days, start_time: newTask.start_time.format("HH:mm"), end_time: newTask.end_time.format("HH:mm")})
     .then(function(response) {
       if (response.data.status == "OK") {
         loadTasks();
@@ -443,10 +449,17 @@ export default function Tasks({folder_id, folder}) {
     });
   }
 
-  function changeNewTaskTime(e) {
+  function changeNewTaskStartTime(time) {
     setNewTask({
       ...newTask,
-      time: e.target.value
+      start_time: time
+    });
+  }
+
+  function changeNewTaskEndTime(time) {
+    setNewTask({
+      ...newTask,
+      end_time: time
     });
   }
 
@@ -457,10 +470,17 @@ export default function Tasks({folder_id, folder}) {
     });
   }
 
-  function changeEditTaskTime(e) {
+  function changeEditTaskStartTime(time) {
     setEditTask({
       ...editTask,
-      time: e.target.value
+      time: time
+    });
+  }
+
+  function changeEditTaskEndTime(time) {
+    setEditTask({
+      ...editTask,
+      time: time
     });
   }
 
@@ -481,7 +501,7 @@ export default function Tasks({folder_id, folder}) {
     var days = selectedWeekDays.map((item) => {
       return item.value;
     }).join(",");
-    axios.post(config.BASE_URL + "/api/edit-recurrent-task", {...editTask, days: days})
+    axios.post(config.BASE_URL + "/api/edit-recurrent-task", {...editTask, days: days, start_time: editTask.start_time.format("HH:mm"), end_time: editTask.end_time.format("HH:mm")})
     .then(function(response) {
       if (response.data.status == "OK") {
         loadTasks();
@@ -736,7 +756,6 @@ export default function Tasks({folder_id, folder}) {
       <table className="table table-striped table-bordered align-middle recurrent-tasks">
           <thead class="table-dark">
               <tr>
-                  
                   <th style={{width: "45%"}}>Task</th>
                   <th style={{width: "10%"}}>Time</th>
                   <th style={{width: "5%"}}>Mon <br/>{days[0]}</th>
@@ -767,9 +786,15 @@ export default function Tasks({folder_id, folder}) {
                   </div>
                 </div>
                 <div className="form-group py-2">
-                  <label className="control-label">Time</label>
+                  <label className="control-label">Start Time</label>
                   <div>
-                      <input type="text" className="form-control input-lg" name="time" value={newTask.time} onChange={changeNewTaskTime}/>
+                      <TimePicker value={newTask.start_time} onChange={changeNewTaskStartTime} showSecond={false} />
+                  </div>
+                </div>
+                <div className="form-group py-2">
+                  <label className="control-label">End Time</label>
+                  <div>
+                      <TimePicker value={newTask.end_time} onChange={changeNewTaskEndTime} showSecond={false} />
                   </div>
                 </div>
                 <div className="form-group py-2">
@@ -822,9 +847,15 @@ export default function Tasks({folder_id, folder}) {
                   </div>
                 </div>
                 <div className="form-group py-2">
-                  <label className="control-label">Time</label>
+                  <label className="control-label">Start Time</label>
                   <div>
-                      <input type="text" className="form-control input-lg" name="time" value={editTask.time} onChange={changeEditTaskTime}/>
+                      <TimePicker value={editTask.start_time} onChange={changeEditTaskStartTime} showSecond={false} />
+                  </div>
+                </div>
+                <div className="form-group py-2">
+                  <label className="control-label">End Time</label>
+                  <div>
+                      <TimePicker value={editTask.end_time} onChange={changeEditTaskEndTime} showSecond={false} />
                   </div>
                 </div>
                 <div className="form-group py-2">
