@@ -128,6 +128,12 @@ async function getMotivationalText(messages) {
   return message.content;
 }
 
+Date.prototype.addDays = function(days) {
+  var date = new Date(this.valueOf());
+  date.setDate(date.getDate() + days);
+  return date;
+}
+
 app.get("/api/generate-motivational-text", async (req, res) => {
   if (!req.session.isLoggedIn) {
     res.json({status: "NOK", error: "Invalid Authorization."});
@@ -223,7 +229,21 @@ app.post("/api/delete-folder", (req, res) => {
       console.log(err);
       res.json({status: "NOK", error: err.message});
     }
-    res.json({status: "OK", data: "Folder has been deleted successfully."});
+    var sql2 = "DELETE FROM tasks WHERE folder_id = ?";
+    con.query(sql2, [folder_id], function (err2, result2) {
+      if (err2) {
+        console.log(err2);
+        res.json({status: "NOK", error: err2.message});
+      }
+      var sql3 = "DELETE FROM recurrent_checks WHERE task_id IN (SELECT id FROM tasks WHERE folder_id = ?)";
+      con.query(sql3, [folder_id], function (err3, result3) {
+        if (err3) {
+          console.log(err3);
+          res.json({status: "NOK", error: err3.message});
+        }
+        res.json({status: "OK", data: "Folder has been deleted successfully."});
+      });
+    });
   });
 });
 
@@ -243,6 +263,16 @@ app.post("/api/set-hide-done", (req, res) => {
     res.json({status: "OK", data: "Folder has been updated successfully."});
   });
 });
+
+function getRangeOfDates(startDate, stopDate) {
+  var dateArray = new Array();
+  var currentDate = startDate;
+  while (currentDate <= stopDate) {
+      dateArray.push(new Date (currentDate));
+      currentDate = currentDate.addDays(1);
+  }
+  return dateArray;
+}
 
 app.get("/api/get-recurrent-tasks", (req, res) => {
   if (!req.session.isLoggedIn) {
@@ -264,14 +294,17 @@ app.get("/api/get-recurrent-tasks", (req, res) => {
       var checks = await getTaskChecks(task_id, dti, dtf);
       result[i].checks = checks;
 
-      var dt = new Date();
-      var wd = dt.getDay();
-      var is_cancelled = await checkIfTaskIsCancelled(task_id, dt.toISOString().slice(0, 10));
-      if (is_cancelled) {
-        var days = result[i].days.split(",");
-        var idx_to_remove = days.indexOf(wd.toString());
-        days.splice(idx_to_remove, 1);
-        result[i].days = days.join(",");
+      var dt_range = getRangeOfDates(new Date(dti), new Date(dtf));
+      for (var i in dt_range) {
+        var dt = dt_range[i];
+        var wd = dt.getDay();
+        var is_cancelled = await checkIfTaskIsCancelled(task_id, dt.toISOString().slice(0, 10));
+        if (is_cancelled) {
+          var days = result[i].days.split(",");
+          var idx_to_remove = days.indexOf(wd.toString());
+          days.splice(idx_to_remove, 1);
+          result[i].days = days.join(",");
+        }
       }
     }
     res.json({status: "OK", data: result});
@@ -671,7 +704,14 @@ app.post("/api/delete-task", (req, res) => {
       console.log(err);
       res.json({status: "NOK", error: err.message});
     }
-    res.json({status: "OK", data: "Task has been deleted successfully."});
+    var sql2 = "DELETE FROM recurrent_checks WHERE task_id = ?";
+    con.query(sql2, [task_id], function (err2, result2) {
+      if (err2) {
+        console.log(err2);
+        res.json({status: "NOK", error: err2.message});
+      }
+      res.json({status: "OK", data: "Task has been deleted successfully."});
+    });
   });
 });
 
