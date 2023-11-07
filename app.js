@@ -207,7 +207,7 @@ app.get("/api/get-tasks-from-folder", (req, res) => {
     return;
   }
   var folder_id = req.query.folder_id;
-  var sql = "SELECT * FROM tasks WHERE folder_id = ? ORDER BY sort_index ASC";
+  var sql = "SELECT *, CONCAT(DATE_FORMAT(start_time, '%H:%i'), ' - ', DATE_FORMAT(end_time, '%H:%i')) AS time FROM tasks WHERE folder_id = ? ORDER BY sort_index ASC";
   con.query(sql, [folder_id], function (err, result) {
     if (err) {
       console.log(err);
@@ -282,7 +282,7 @@ app.get("/api/get-recurrent-tasks", (req, res) => {
   var folder_id = req.query.folder_id;
   var dti = req.query.dti;
   var dtf = req.query.dtf;
-  var sql = "SELECT * FROM tasks WHERE folder_id = ? ORDER BY sort_index ASC";
+  var sql = "SELECT *, CONCAT(DATE_FORMAT(start_time, '%H:%i'), ' - ', DATE_FORMAT(end_time, '%H:%i')) AS time FROM tasks WHERE folder_id = ? ORDER BY sort_index ASC";
   con.query(sql, [folder_id], async function (err, result) {
     if (err) {
       console.log(err);
@@ -318,12 +318,13 @@ app.post("/api/add-recurrent-task", (req, res) => {
   }
   var folder_id = req.body.folder_id;
   var description = req.body.description;
-  var time = req.body.time;
+  var start_time = req.body.start_time;
+  var end_time = req.body.end_time;
   var days = req.body.days;
   var sort_index = req.body.sort_index;
 
-  var sql = "INSERT INTO tasks (folder_id, description, time, type, days, sort_index, is_done) VALUES (?, ?, ?, ?, ?, ?, 0)";
-  con.query(sql, [folder_id, description, time, "recurrent", days, sort_index], function (err, result) {
+  var sql = "INSERT INTO tasks (folder_id, description, start_time, end_time, type, days, sort_index, is_done) VALUES (?, ?, ?, ?, ?, ?, ?, 0)";
+  con.query(sql, [folder_id, description, start_time, end_time, "recurrent", days, sort_index], function (err, result) {
     if (err) {
       console.log(err);
       res.json({status: "NOK", error: err.message});
@@ -343,12 +344,12 @@ function getDatesUntil2050(days) {
   var d = new Date();
   var year_i = null;
 
+  var days = days.split(",");
+  days = days.map(Number);
+
   while (year_i != 2050) {
     dates_to_push = [];
-
-    var days = days.split(",");
-    days = days.map(Number);
-
+    
     // Get all the days of the current year that are in the array "days"
     while (d.getFullYear() === year_i) {
       var wd = d.getDay() - 1;
@@ -584,10 +585,11 @@ app.post("/api/add-task", (req, res) => {
   }
   var folder_id = req.body.folder_id;
   var description = req.body.description;
-  var time = req.body.time;
+  var start_time = req.body.start_time;
+  var end_time = req.body.end_time;
   var sort_index = req.body.sort_index;
-  var sql = "INSERT INTO tasks (folder_id, description, time, is_done, sort_index) VALUES (?, ?, ?, 0, ?)";
-  con.query(sql, [folder_id, description, time, sort_index], function (err, result) {
+  var sql = "INSERT INTO tasks (folder_id, description, start_time, end_time, is_done, sort_index) VALUES (?, ?, ?, ?, 0, ?)";
+  con.query(sql, [folder_id, description, start_time, end_time, sort_index], function (err, result) {
     if (err) {
       console.log(err);
       res.json({status: "NOK", error: err.message});
@@ -636,9 +638,11 @@ app.post("/api/edit-task", (req, res) => {
   }
   var task_id = req.body.task_id;
   var description = req.body.description;
-  var time = req.body.time;
-  var sql = "UPDATE tasks SET description = ?, time = ? WHERE id = ?";
-  con.query(sql, [description, time, task_id], function (err, result) {
+  var start_time = req.body.start_time;
+  var end_time = req.body.end_time;
+
+  var sql = "UPDATE tasks SET description = ?, start_time = ?, end_time = ? WHERE id = ?";
+  con.query(sql, [description, start_time, end_time, task_id], function (err, result) {
     if (err) {
       console.log(err);
       res.json({status: "NOK", error: err.message});
@@ -654,10 +658,12 @@ app.post("/api/edit-recurrent-task", (req, res) => {
   }
   var task_id = req.body.task_id;
   var description = req.body.description;
-  var time = req.body.time;
+  var start_time = req.body.start_time;
+  var end_time = req.body.end_time;
   var days = req.body.days;
-  var sql = "UPDATE tasks SET description = ?, time = ?, days = ? WHERE id = ?";
-  con.query(sql, [description, time, days, task_id], function (err, result) {
+
+  var sql = "UPDATE tasks SET description = ?, start_time = ?, end_time = ?, days = ? WHERE id = ?";
+  con.query(sql, [description, start_time, end_time, days, task_id], function (err, result) {
     if (err) {
       console.log(err);
       res.json({status: "NOK", error: err.message});

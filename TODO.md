@@ -3,7 +3,6 @@
 - Create calendar
     - Create calendar page
 - Change "add-recurrent-task" call to insert events until 2050.
-- Change "time" field on tasks to have a beginning time and an end time and use a timepicker.
 - Create page to generate random tasks
 - Change "cancel-task" call with a modal to select the weekdays you want to cancel and to remove the recurrent checks and events for that week.
 
