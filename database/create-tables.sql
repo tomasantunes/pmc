@@ -24,6 +24,14 @@ CREATE TABLE recurrent_checks (
     date DATE NOT NULL
 );
 
+CREATE TABLE events (
+    id INT(11) AUTO_INCREMENT PRIMARY KEY,
+    task_id INT(11) DEFAULT NULL,
+    description VARCHAR(2048) NOT NULL,
+    start_date DATETIME NOT NULL,
+    end_date DATETIME NOT NULL,
+);
+
 CREATE TABLE logins (
     id INT(11) AUTO_INCREMENT PRIMARY KEY,
     is_valid BOOLEAN NOT NULL,
