@@ -328,9 +328,43 @@ app.post("/api/add-recurrent-task", (req, res) => {
       console.log(err);
       res.json({status: "NOK", error: err.message});
     }
+    
+    var dates = getDatesUntil2050(days);
+
+    for (var i in dates) {
+      var sql2 = "INSERT INTO recurrent_checks (task_id, date, is_done) VALUES (?, ?, 0)";
+      con.query(sql2, [result.insertId, dates[i].toISOString().slice(0, 10)]);
+    }
     res.json({status: "OK", data: "Task has been added successfully."});
   });
 });
+
+function getDatesUntil2050(days) {
+  var d = new Date();
+  var year_i = null;
+
+  while (year_i != 2050) {
+    dates_to_push = [];
+
+    var days = days.split(",");
+    days = days.map(Number);
+
+    // Get all the days of the current year that are in the array "days"
+    while (d.getFullYear() === year_i) {
+      var wd = d.getDay() - 1;
+      if (days.includes(wd)) {
+        var pushDate = new Date(d.getTime());
+        dates_to_push.push(pushDate);
+      }
+      d.setDate(d.getDate() + 1);
+    }
+
+    year_i = d.getFullYear() + 1;
+    d.setFullYear(year_i);
+    d.setDate(1);
+    d.setMonth(0);
+  }
+}
 
 async function getTaskChecks(task_id, dti, dtf) {
   var sql = "SELECT * FROM recurrent_checks WHERE task_id = ? AND date BETWEEN ? AND ?";
