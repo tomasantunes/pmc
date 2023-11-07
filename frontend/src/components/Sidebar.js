@@ -23,6 +23,7 @@ export default function Sidebar() {
   const folderTypes = [
     { value: 'simple', label: 'Simple' },
     { value: 'recurrent', label: 'Recurrent' },
+    { value: 'list', label: 'List' },
   ]
 
   function loadFolders() {

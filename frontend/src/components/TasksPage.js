@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import Tasks from './Tasks';
 import RecurrentTasks from './RecurrentTasks';
+import TasksList from './TasksList';
 import $ from 'jquery';
 import axios from 'axios';
 import config from '../config';
@@ -58,6 +59,18 @@ export default function TasksPage({folder_id}) {
     });
   }
 
+  function renderTasksElement() {
+    if (folder.type == "simple") {
+      return (<Tasks folder_id={folder_id} folder={folder} />);
+    }
+    else if (folder.type == "list") {
+      return (<TasksList folder_id={folder_id} folder={folder} />);
+    }
+    else {
+      return (<RecurrentTasks folder_id={folder_id} folder={folder} />);
+    }
+  }
+
   useEffect(() => {
     getFolderInfo(folder_id);
   }, []);
@@ -66,11 +79,7 @@ export default function TasksPage({folder_id}) {
         <div style={{textAlign: "center"}}>
             <h3>{folder.name}<a href="#" className="edit-folder-name-btn" onClick={openEditFolderName}><i class="fa-solid fa-pencil"></i></a></h3>
         </div>
-        {folder.type == "simple" ?
-          <Tasks folder_id={folder_id} folder={folder} />
-        :
-          <RecurrentTasks folder_id={folder_id} folder={folder} />
-        }
+        {renderTasksElement()}
     </div>
   )
 }
