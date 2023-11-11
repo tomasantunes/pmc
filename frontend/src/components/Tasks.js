@@ -182,7 +182,7 @@ export default function Tasks({folder_id, folder}) {
     .then(function(response) {
       if (response.data.status == "OK") {
         loadTasks();
-        var dt = new Date();
+        dt = new Date();
         setNewTask({
           description: "",
           start_time: dt,

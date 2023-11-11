@@ -349,8 +349,8 @@ app.post("/api/add-recurrent-task", (req, res) => {
       end_date = end_date.toISOString().slice(0, 19).replace('T', ' ');
       console.log(start_date);
       console.log(end_date);
-      var sql3 = "INSERT INTO events (start_date, end_date, description) VALUES (?, ?, ?)";
-      await con2.query(sql3, [start_date, end_date, description]);
+      var sql3 = "INSERT INTO events (task_id, start_date, end_date, description) VALUES (?, ?, ?, ?)";
+      await con2.query(sql3, [result.insertId, start_date, end_date, description]);
     }
     res.json({status: "OK", data: "Task has been added successfully."});
   });
@@ -600,11 +600,15 @@ app.post("/api/add-task", (req, res) => {
   var end_time = req.body.end_time;
   var sort_index = req.body.sort_index;
   var sql = "INSERT INTO tasks (folder_id, description, start_time, end_time, is_done, sort_index) VALUES (?, ?, ?, ?, 0, ?)";
-  con.query(sql, [folder_id, description, start_time, end_time, sort_index], function (err, result) {
+  con.query(sql, [folder_id, description, start_time, end_time, sort_index], async function (err, result) {
     if (err) {
       console.log(err);
       res.json({status: "NOK", error: err.message});
     }
+
+    var sql2 = "INSERT INTO events (task_id, start_date, end_date, description) VALUES (?, ?, ?, ?)";
+    await con2.query(sql2, [result.insertId, start_time, end_time, description]);
+
     res.json({status: "OK", data: "Task has been added successfully."});
   });
 });
@@ -653,11 +657,15 @@ app.post("/api/edit-task", (req, res) => {
   var end_time = req.body.end_time.toISOString().slice(0, 19).replace('T', ' ');
 
   var sql = "UPDATE tasks SET description = ?, start_time = ?, end_time = ? WHERE id = ?";
-  con.query(sql, [description, start_time, end_time, task_id], function (err, result) {
+  con.query(sql, [description, start_time, end_time, task_id], async function (err, result) {
     if (err) {
       console.log(err);
       res.json({status: "NOK", error: err.message});
     }
+
+    var sql2 = "UPDATE events SET start_date = ?, end_date = ?, description = ? WHERE task_id = ?";
+    await con2.query(sql2, [start_time, end_time, description, task_id]);
+
     res.json({status: "OK", data: "Task has been updated successfully."});
   });
 });
@@ -674,11 +682,39 @@ app.post("/api/edit-recurrent-task", (req, res) => {
   var days = req.body.days;
 
   var sql = "UPDATE tasks SET description = ?, start_time = ?, end_time = ?, days = ? WHERE id = ?";
-  con.query(sql, [description, start_time, end_time, days, task_id], function (err, result) {
+  con.query(sql, [description, start_time, end_time, days, task_id], async function (err, result) {
     if (err) {
       console.log(err);
       res.json({status: "NOK", error: err.message});
     }
+
+    var sql2 = "DELETE FROM recurrent_checks WHERE task_id = ? AND date > DATE(NOW())";
+    await con2.query(sql2, [task_id]);
+    var sql3 = "DELETE FROM events WHERE task_id = ? AND start_date > DATE(NOW())";
+    await con2.query(sql3, [task_id]);
+
+    var dates = getDatesUntilNextYear(days);
+
+    console.log(dates);
+
+    for (var i in dates) {
+      var sql2 = "INSERT INTO recurrent_checks (task_id, date, is_done) VALUES (?, ?, 0)";
+      await con2.query(sql2, [task_id, dates[i].toISOString().slice(0, 10)]);
+
+      var start_date = dates[i];
+      var st = start_time.split(":");
+      start_date.setHours(st[0], st[1], 0);
+      start_date = start_date.toISOString().slice(0, 19).replace('T', ' ');
+      var end_date = dates[i];
+      var et = end_time.split(":");
+      end_date.setHours(et[0], et[1], 0);
+      end_date = end_date.toISOString().slice(0, 19).replace('T', ' ');
+      console.log(start_date);
+      console.log(end_date);
+      var sql3 = "INSERT INTO events (task_id, start_date, end_date, description) VALUES (?, ?, ?, ?)";
+      await con2.query(sql3, [task_id, start_date, end_date, description]);
+    }
+
     res.json({status: "OK", data: "Task has been updated successfully."});
   });
 });
