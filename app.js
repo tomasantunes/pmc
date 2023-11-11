@@ -653,8 +653,8 @@ app.post("/api/edit-task", (req, res) => {
   }
   var task_id = req.body.task_id;
   var description = req.body.description;
-  var start_time = req.body.start_time.toISOString().slice(0, 19).replace('T', ' ');
-  var end_time = req.body.end_time.toISOString().slice(0, 19).replace('T', ' ');
+  var start_time = req.body.start_time;
+  var end_time = req.body.end_time;
 
   var sql = "UPDATE tasks SET description = ?, start_time = ?, end_time = ? WHERE id = ?";
   con.query(sql, [description, start_time, end_time, task_id], async function (err, result) {
