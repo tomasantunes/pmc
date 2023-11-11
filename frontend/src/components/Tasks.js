@@ -213,8 +213,17 @@ export default function Tasks({folder_id, folder}) {
 
   function submitEditTask(e) {
     e.preventDefault();
-    console.log(editTask);
-    axios.post(config.BASE_URL + "/api/edit-task", {...editTask, start_time: editTask.start_time.toISOString().slice(0, 19).replace('T', ' '), end_time: editTask.end_time.toISOString().slice(0, 19).replace('T', ' ')})
+    var st = editTask.start_time;
+    var et = editTask.end_time;
+    if (editTask.start_time == null || editTask.end_time == null) {
+      st = "";
+      et = "";
+    }
+    else {
+      st = st.toISOString().slice(0, 19).replace('T', ' ');
+      et = et.toISOString().slice(0, 19).replace('T', ' ');
+    }
+    axios.post(config.BASE_URL + "/api/edit-task", {...editTask, start_time: st, end_time: et})
     .then(function(response) {
       if (response.data.status == "OK") {
         loadTasks();

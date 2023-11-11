@@ -672,6 +672,11 @@ app.post("/api/edit-task", (req, res) => {
   var start_time = req.body.start_time;
   var end_time = req.body.end_time;
 
+  if (typeof start_time == "undefined" || start_time == "" || typeof end_time == "undefined" || end_time == "") {
+    start_time = new Date('1970-01-01Z00:00:00:000').toISOString().slice(0, 19).replace('T', ' ');
+    end_time = new Date('1970-01-01Z00:00:00:000').toISOString().slice(0, 19).replace('T', ' ');
+  }
+
   var sql = "UPDATE tasks SET description = ?, start_time = ?, end_time = ? WHERE id = ?";
   con.query(sql, [description, start_time, end_time, task_id], async function (err, result) {
     if (err) {
