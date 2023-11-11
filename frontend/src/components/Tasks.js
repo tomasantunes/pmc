@@ -241,8 +241,8 @@ export default function Tasks({folder_id, folder}) {
           description: task.description,
           time: task.time
         });
-        setSelectedStartTime(moment(task.start_time));
-        setSelectedEndTime(moment(task.end_time));
+        setSelectedStartTime(moment(task.start_time).toDate());
+        setSelectedEndTime(moment(task.end_time).toDate());
         $(".editTaskModal").modal("show");
       }
       else {
