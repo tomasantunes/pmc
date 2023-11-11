@@ -324,8 +324,18 @@ app.post("/api/add-recurrent-task", (req, res) => {
   var days = req.body.days;
   var sort_index = req.body.sort_index;
 
+  var dt1 = new Date();
+  var t1 = start_time.split(":");
+  dt1.setHours(t1[0], t1[1], 0);
+  var start_time2 = dt1.toISOString().slice(0, 19).replace('T', ' ');
+  var dt2 = new Date();
+  var t2 = end_time.split(":");
+  dt2.setHours(t2[0], t2[1], 0);
+  var end_time2 = dt2.toISOString().slice(0, 19).replace('T', ' ');
+
+
   var sql = "INSERT INTO tasks (folder_id, description, start_time, end_time, type, days, sort_index, is_done) VALUES (?, ?, ?, ?, ?, ?, ?, 0)";
-  con.query(sql, [folder_id, description, start_time, end_time, "recurrent", days, sort_index], async function (err, result) {
+  con.query(sql, [folder_id, description, start_time2, end_time2, "recurrent", days, sort_index], async function (err, result) {
     if (err) {
       console.log(err);
       res.json({status: "NOK", error: err.message});
