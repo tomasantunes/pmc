@@ -127,6 +127,7 @@ tbody {
 .customEvent {
     background-color: #66bfff;
     color: white;
+    border: 1px solid black;
 }
 
 .small-text {
