@@ -133,7 +133,6 @@ export default function Home() {
           onIntervalSelect = {handleSelect}
           onIntervalUpdate = {handleEventUpdate}
           onIntervalRemove = {handleEventRemove}
-          eventComponent={CustomEvent}
         />
       </div>
     </>
