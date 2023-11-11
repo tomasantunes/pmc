@@ -325,56 +325,57 @@ app.post("/api/add-recurrent-task", (req, res) => {
   var sort_index = req.body.sort_index;
 
   var sql = "INSERT INTO tasks (folder_id, description, start_time, end_time, type, days, sort_index, is_done) VALUES (?, ?, ?, ?, ?, ?, ?, 0)";
-  con.query(sql, [folder_id, description, start_time, end_time, "recurrent", days, sort_index], function (err, result) {
+  con.query(sql, [folder_id, description, start_time, end_time, "recurrent", days, sort_index], async function (err, result) {
     if (err) {
       console.log(err);
       res.json({status: "NOK", error: err.message});
     }
     
-    var dates = getDatesUntil2050(days);
+    var dates = getDatesUntilNextYear(days);
+
+    console.log(dates);
 
     for (var i in dates) {
       var sql2 = "INSERT INTO recurrent_checks (task_id, date, is_done) VALUES (?, ?, 0)";
-      con.query(sql2, [result.insertId, dates[i].toISOString().slice(0, 10)]);
+      await con2.query(sql2, [result.insertId, dates[i].toISOString().slice(0, 10)]);
 
       var start_date = dates[i];
       var st = start_time.split(":");
       start_date.setHours(st[0], st[1], 0);
+      start_date = start_date.toISOString().slice(0, 19).replace('T', ' ');
       var end_date = dates[i];
       var et = end_time.split(":");
       end_date.setHours(et[0], et[1], 0);
+      end_date = end_date.toISOString().slice(0, 19).replace('T', ' ');
+      console.log(start_date);
+      console.log(end_date);
       var sql3 = "INSERT INTO events (start_date, end_date, description) VALUES (?, ?, ?)";
-      con.query(sql3, [start_date, end_date, description]);
+      await con2.query(sql3, [start_date, end_date, description]);
     }
     res.json({status: "OK", data: "Task has been added successfully."});
   });
 });
 
-function getDatesUntil2050(days) {
+function getDatesUntilNextYear(days) {
   var d = new Date();
-  var year_i = null;
+  var year_i = d.getFullYear();
 
   var days = days.split(",");
   days = days.map(Number);
 
-  while (year_i != 2050) {
-    dates_to_push = [];
-    
-    // Get all the days of the current year that are in the array "days"
-    while (d.getFullYear() === year_i) {
-      var wd = d.getDay() - 1;
-      if (days.includes(wd)) {
-        var pushDate = new Date(d.getTime());
-        dates_to_push.push(pushDate);
-      }
-      d.setDate(d.getDate() + 1);
-    }
+  dates_to_push = [];
 
-    year_i = d.getFullYear() + 1;
-    d.setFullYear(year_i);
-    d.setDate(1);
-    d.setMonth(0);
+  // Get all the days of the current year that are in the array "days"
+  while (d.getFullYear() === year_i) {
+    var wd = d.getDay();
+    if (days.includes(wd)) {
+      var pushDate = new Date(d.getTime());
+      dates_to_push.push(pushDate);
+    }
+    d.setDate(d.getDate() + 1);
   }
+
+  return dates_to_push;
 }
 
 async function getTaskChecks(task_id, dti, dtf) {
