@@ -2,7 +2,6 @@
 
 - Create calendar
     - Create calendar page
-- Change "add-recurrent-task" call to insert events until 2050.
 - Create page to generate random tasks
 - Change "cancel-task" call with a modal to select the weekdays you want to cancel and to remove the recurrent checks and events for that week.
 
@@ -14,3 +13,4 @@
 - Fix bug where you can't select text on the table rows.
 - Create option to uncancel a task.
 - Create motivational text for github tasks.
+- Change calendar styling.
