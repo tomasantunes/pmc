@@ -17,6 +17,8 @@ window.bootstrap = require('bootstrap');
 export default function Home() {
   const [lastUid, setLastUid] = useState(4);
   const [selectedIntervals, setSelectedIntervals] = useState([]);
+  const [firstDay, setFirstDay] = useState(moment().day(1));
+  const [selectedWeek, setSelectedWeek] = useState(moment());
 
   async function addEvent(interval) {
     const newEvent = {
@@ -73,6 +75,14 @@ export default function Home() {
     });
   }
 
+  function previousWeek() {
+    setSelectedWeek(moment(selectedWeek).add('-1', 'week'));
+  }
+
+  function nextWeek() {
+    setSelectedWeek(moment(selectedWeek).add('1', 'week'));
+  }
+
   function loadEvents() {
     axios.get(config.BASE_URL + '/api/get-events')
     .then((response) => {
@@ -97,6 +107,12 @@ export default function Home() {
   }
 
   useEffect(() => {
+    console.log(selectedWeek);
+    console.log(moment(selectedWeek).day(1));
+    setFirstDay(moment(selectedWeek).day(1));
+  }, [selectedWeek])
+
+  useEffect(() => {
     loadEvents();
   }, []);
 
@@ -104,13 +120,15 @@ export default function Home() {
     <>
       <Sidebar />
       <div className="page">
+        <button className="btn btn-primary m-2" onClick={previousWeek}>Previous</button>
+        <button className="btn btn-primary m-2" onClick={nextWeek}>Next</button>
         <WeekCalendar
           startTime = {moment({h: 7, m: 0})}
           endTime = {moment({h: 23, m: 0})}
           numberOfDays= {7}
           scaleUnit={60}
           cellHeight={50}
-          firstDay={moment().day(1)}
+          firstDay={firstDay}
           selectedIntervals = {selectedIntervals}
           onIntervalSelect = {handleSelect}
           onIntervalUpdate = {handleEventUpdate}
