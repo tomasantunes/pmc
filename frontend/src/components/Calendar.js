@@ -126,8 +126,8 @@ export default function Home() {
           startTime = {moment({h: 7, m: 0})}
           endTime = {moment({h: 23, m: 0})}
           numberOfDays= {7}
-          scaleUnit={60}
-          cellHeight={50}
+          scaleUnit={30}
+          cellHeight={25}
           firstDay={firstDay}
           selectedIntervals = {selectedIntervals}
           onIntervalSelect = {handleSelect}
