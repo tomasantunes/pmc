@@ -6,6 +6,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import GithubTasks from './components/GithubTasks';
 import Motivation from './components/Motivation';
 import Calendar from './components/Calendar';
+import RandomTask from './components/RandomTask';
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
         <Route path="/github-tasks" element={<GithubTasks />} />
         <Route path="/motivation" element={<Motivation />} />
         <Route path="/calendar" element={<Calendar />} />
+        <Route path="/random-task" element={<RandomTask />} />
       </Routes>
     </Router>
   );

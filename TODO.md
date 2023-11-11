@@ -1,7 +1,5 @@
 # TODO
 
-- Create calendar
-    - Create next and previous button to change week on calendar.
 - Create page to generate random tasks
 
 

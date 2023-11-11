@@ -798,6 +798,17 @@ app.get("/api/get-events", (req, res) => {
   });
 });
 
+app.get("/api/get-random-task", (req, res) => {
+  var sql = "SELECT description FROM tasks WHERE is_done = 0 ORDER BY RAND() LIMIT 1";
+  con.query(sql, function (err, result) {
+    if (err) {
+      console.log(err);
+      res.json({status: "NOK", error: err});
+    }
+    res.json({status: "OK", data: result[0].description});
+  });
+});
+
 app.post("/api/check-login", (req, res) => {
   var user = req.body.user;
   var pass = req.body.pass;
@@ -867,6 +878,15 @@ app.get('/motivation', (req, res) => {
 });
 
 app.get('/calendar', (req, res) => {
+  if(req.session.isLoggedIn) {
+    res.sendFile(path.resolve(__dirname) + '/frontend/build/index.html');
+  }
+  else {
+    res.redirect('/login');
+  }
+});
+
+app.get('/random-task', (req, res) => {
   if(req.session.isLoggedIn) {
     res.sendFile(path.resolve(__dirname) + '/frontend/build/index.html');
   }
