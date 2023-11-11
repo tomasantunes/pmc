@@ -788,9 +788,8 @@ function nextDate(dayIndex) {
 }
 
 app.get("/api/get-events", (req, res) => {
-  var sunday = nextDate(0).toISOString().slice(0, 10);
-  var sql = "SELECT description AS value, start_date AS start, end_date AS end FROM events WHERE DATE(end_date) <= ?";
-  con.query(sql, [sunday], function (err, result) {
+  var sql = "SELECT description AS value, start_date AS start, end_date AS end FROM events";
+  con.query(sql, function (err, result) {
     if (err) {
       console.log(err);
       res.json({status: "NOK", error: err});

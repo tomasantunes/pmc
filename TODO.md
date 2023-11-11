@@ -15,3 +15,4 @@
 - Create motivational text for github tasks.
 - Change calendar styling.
 - Change "cancel-task" call with a modal to select the weekdays you want to cancel and to remove the recurrent checks and events for that week.
+- Generate event when you create a simple task
