@@ -123,3 +123,13 @@ tbody {
     table-layout: fixed;
     width: 500px;
 }
+
+.customEvent {
+    background-color: #66bfff;
+    color: white;
+    height: 100%;
+}
+
+.small-text {
+    font-size: 12px;
+}

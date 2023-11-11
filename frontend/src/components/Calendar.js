@@ -6,6 +6,7 @@ import axios from 'axios';
 import config from '../config.json';
 import moment from 'moment';
 import WeekCalendar from 'react-week-calendar';
+import CustomEvent from './CustomEvent';
 import 'react-week-calendar/dist/style.css';
 
 window.jQuery = $;
@@ -114,6 +115,7 @@ export default function Home() {
           onIntervalSelect = {handleSelect}
           onIntervalUpdate = {handleEventUpdate}
           onIntervalRemove = {handleEventRemove}
+          eventComponent={CustomEvent}
         />
       </div>
     </>
