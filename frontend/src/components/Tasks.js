@@ -178,7 +178,17 @@ export default function Tasks({folder_id, folder}) {
 
   function submitAddTask(e) {
     e.preventDefault();
-    axios.post(config.BASE_URL + "/api/add-task", {folder_id: folder_id, description: newTask.description, start_time: newTask.start_time.toISOString().slice(0, 19).replace('T', ' '), end_time: newTask.end_time.toISOString().slice(0, 19).replace('T', ' '), sort_index: tasks.length})
+    var st = newTask.start_time;
+    var et = newTask.end_time;
+    if (newTask.start_time == null || newTask.end_time == null) {
+      st = "";
+      et = "";
+    }
+    else {
+      st = st.toISOString().slice(0, 19).replace('T', ' ');
+      et = et.toISOString().slice(0, 19).replace('T', ' ');
+    }
+    axios.post(config.BASE_URL + "/api/add-task", {folder_id: folder_id, description: newTask.description, start_time: st, end_time: et, sort_index: tasks.length})
     .then(function(response) {
       if (response.data.status == "OK") {
         loadTasks();

@@ -609,6 +609,12 @@ app.post("/api/add-task", (req, res) => {
   var start_time = req.body.start_time;
   var end_time = req.body.end_time;
   var sort_index = req.body.sort_index;
+
+  if (typeof start_time == "undefined" || start_time == "" || typeof end_time == "undefined" || end_time == "") {
+    start_time = new Date('1970-01-01Z00:00:00:000').toISOString().slice(0, 19).replace('T', ' ');
+    end_time = new Date('1970-01-01Z00:00:00:000').toISOString().slice(0, 19).replace('T', ' ');
+  }
+
   var sql = "INSERT INTO tasks (folder_id, description, start_time, end_time, is_done, sort_index) VALUES (?, ?, ?, ?, 0, ?)";
   con.query(sql, [folder_id, description, start_time, end_time, sort_index], async function (err, result) {
     if (err) {
