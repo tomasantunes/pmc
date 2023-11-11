@@ -70,8 +70,8 @@ export default function Tasks({folder_id, folder}) {
   const [editTask, setEditTask] = useState({
     task_id: 0,
     description: "",
-    start_time: "",
-    end_time: ""
+    start_time: null,
+    end_time: null
   });
   const [hideDone, setHideDone] = useState(folder.hide_done == 1 ? true : false);
   
@@ -203,6 +203,7 @@ export default function Tasks({folder_id, folder}) {
 
   function submitEditTask(e) {
     e.preventDefault();
+    console.log(editTask);
     axios.post(config.BASE_URL + "/api/edit-task", {...editTask, start_time: editTask.start_time.toISOString().slice(0, 19).replace('T', ' '), end_time: editTask.end_time.toISOString().slice(0, 19).replace('T', ' ')})
     .then(function(response) {
       if (response.data.status == "OK") {
@@ -239,7 +240,9 @@ export default function Tasks({folder_id, folder}) {
         setEditTask({
           task_id: task_id,
           description: task.description,
-          time: task.time
+          time: task.time,
+          start_time: moment(task.start_time).toDate(),
+          end_time: moment(task.end_time).toDate()
         });
         setSelectedStartTime(moment(task.start_time).toDate());
         setSelectedEndTime(moment(task.end_time).toDate());
