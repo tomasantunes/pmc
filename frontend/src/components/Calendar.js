@@ -124,7 +124,7 @@ export default function Home() {
         <button className="btn btn-primary m-2" onClick={nextWeek}>Next</button>
         <WeekCalendar
           startTime = {moment({h: 7, m: 0})}
-          endTime = {moment({h: 23, m: 0})}
+          endTime = {moment({h: 23, m: 59})}
           numberOfDays= {7}
           scaleUnit={30}
           cellHeight={25}
@@ -133,6 +133,7 @@ export default function Home() {
           onIntervalSelect = {handleSelect}
           onIntervalUpdate = {handleEventUpdate}
           onIntervalRemove = {handleEventRemove}
+          eventComponent = {CustomEvent}
         />
       </div>
     </>
