@@ -18,7 +18,7 @@ const CustomEvent = (props) => {
         $('[data-toggle="tooltip"]').tooltip()
     }, []);
     return (
-        <div className="customEvent" data-toggle="tooltip" data-placement="bottom" title={start_t + " - " + end_t + "\n" + props.value} style={{marginTop: marginTop, height: "calc(100% - " + marginBottom + "px)"}}>
+        <div className="customEvent" data-toggle="tooltip" data-placement="bottom" title={start_t + " - " + end_t + props.value} style={{marginTop: marginTop, height: "calc(100% - " + marginBottom + "px)"}}>
         </div>
     );
 };

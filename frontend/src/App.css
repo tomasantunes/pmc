@@ -133,3 +133,7 @@ tbody {
 .small-text {
     font-size: 12px;
 }
+
+.weekCalendar__content {
+    max-height: none !important;
+}
