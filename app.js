@@ -208,7 +208,7 @@ app.get("/api/get-tasks-from-folder", (req, res) => {
     return;
   }
   var folder_id = req.query.folder_id;
-  var sql = "SELECT *, CONCAT(DATE_FORMAT(start_time, '%H:%i'), ' - ', DATE_FORMAT(end_time, '%H:%i')) AS time FROM tasks WHERE folder_id = ? ORDER BY sort_index ASC";
+  var sql = "SELECT *, CONCAT(start_time, ' - ', end_time) AS time FROM tasks WHERE folder_id = ? ORDER BY sort_index ASC";
   con.query(sql, [folder_id], function (err, result) {
     if (err) {
       console.log(err);
@@ -649,8 +649,8 @@ app.post("/api/edit-task", (req, res) => {
   }
   var task_id = req.body.task_id;
   var description = req.body.description;
-  var start_time = req.body.start_time;
-  var end_time = req.body.end_time;
+  var start_time = req.body.start_time.toISOString().slice(0, 19).replace('T', ' ');
+  var end_time = req.body.end_time.toISOString().slice(0, 19).replace('T', ' ');
 
   var sql = "UPDATE tasks SET description = ?, start_time = ?, end_time = ? WHERE id = ?";
   con.query(sql, [description, start_time, end_time, task_id], function (err, result) {
