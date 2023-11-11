@@ -10,6 +10,7 @@ var session = require('express-session');
 const { Octokit } = require("@octokit/rest");
 const OpenAI = require("openai");
 var axios = require('axios');
+var moment = require("moment");
 
 var app = express();
 
@@ -335,6 +336,15 @@ app.post("/api/add-recurrent-task", (req, res) => {
     for (var i in dates) {
       var sql2 = "INSERT INTO recurrent_checks (task_id, date, is_done) VALUES (?, ?, 0)";
       con.query(sql2, [result.insertId, dates[i].toISOString().slice(0, 10)]);
+
+      var start_date = dates[i];
+      var st = start_time.split(":");
+      start_date.setHours(st[0], st[1], 0);
+      var end_date = dates[i];
+      var et = end_time.split(":");
+      end_date.setHours(et[0], et[1], 0);
+      var sql3 = "INSERT INTO events (start_date, end_date, description) VALUES (?, ?, ?)";
+      con.query(sql3, [start_date, end_date, description]);
     }
     res.json({status: "OK", data: "Task has been added successfully."});
   });
@@ -755,6 +765,39 @@ app.post("/api/delete-task", (req, res) => {
   });
 });
 
+app.post("/api/add-event", (req, res) => {
+  var start_date = req.body.start;
+  var end_date = req.body.end;
+  var description = req.body.value;
+
+  var sql = "INSERT INTO events (start_date, end_date, description) VALUES (?, ?, ?)";
+  con.query(sql, [start_date, end_date, description], function (err, result) {
+    if (err) {
+      console.log(err);
+      res.json({status: "NOK", error: err});
+    }
+    res.json({status: "OK", data: {message: "Event has been added successfully.", id: result.insertId}});
+  });
+});
+
+function nextDate(dayIndex) {
+  var today = new Date();
+  today.setDate(today.getDate() + (dayIndex - 1 - today.getDay() + 7) % 7 + 1);
+  return today;
+}
+
+app.get("/api/get-events", (req, res) => {
+  var sunday = nextDate(0).toISOString().slice(0, 10);
+  var sql = "SELECT description AS value, start_date AS start, end_date AS end FROM events WHERE DATE(end_date) <= ?";
+  con.query(sql, [sunday], function (err, result) {
+    if (err) {
+      console.log(err);
+      res.json({status: "NOK", error: err});
+    }
+    res.json({status: "OK", data: result});
+  });
+});
+
 app.post("/api/check-login", (req, res) => {
   var user = req.body.user;
   var pass = req.body.pass;
@@ -815,6 +858,15 @@ app.get('/github-tasks', (req, res) => {
 });
 
 app.get('/motivation', (req, res) => {
+  if(req.session.isLoggedIn) {
+    res.sendFile(path.resolve(__dirname) + '/frontend/build/index.html');
+  }
+  else {
+    res.redirect('/login');
+  }
+});
+
+app.get('/calendar', (req, res) => {
   if(req.session.isLoggedIn) {
     res.sendFile(path.resolve(__dirname) + '/frontend/build/index.html');
   }
