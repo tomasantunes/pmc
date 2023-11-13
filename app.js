@@ -841,6 +841,7 @@ app.post("/api/add-event", (req, res) => {
 function nextDate(dayIndex) {
   var today = new Date();
   today.setDate(today.getDate() + (dayIndex - 1 - today.getDay() + 7) % 7 + 1);
+  today.setHours(23, 59, 59);
   return today;
 }
 
