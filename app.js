@@ -844,9 +844,29 @@ function nextDate(dayIndex) {
   return today;
 }
 
+function previousDate(dayIndex) {
+  var today = new Date();
+  today.setDate(today.getDate() + (dayIndex - 1 - today.getDay() - 7) % 7 - 1);
+  return today;
+}
+
 app.get("/api/get-events", (req, res) => {
   var sql = "SELECT description AS value, start_date AS start, end_date AS end FROM events";
   con.query(sql, function (err, result) {
+    if (err) {
+      console.log(err);
+      res.json({status: "NOK", error: err});
+    }
+    res.json({status: "OK", data: result});
+  });
+});
+
+app.get("/api/get-schedule", (req, res) => {
+  var last_monday = previousDate(1);
+  var next_sunday = nextDate(7);
+
+  var sql = "SELECT * FROM events WHERE start_date BETWEEN ? AND ? ORDER BY start_date ASC";
+  con.query(sql, [last_monday, next_sunday], function (err, result) {
     if (err) {
       console.log(err);
       res.json({status: "NOK", error: err});
@@ -935,6 +955,15 @@ app.get('/motivation', (req, res) => {
 });
 
 app.get('/calendar', (req, res) => {
+  if(req.session.isLoggedIn) {
+    res.sendFile(path.resolve(__dirname) + '/frontend/build/index.html');
+  }
+  else {
+    res.redirect('/login');
+  }
+});
+
+app.get('/schedule', (req, res) => {
   if(req.session.isLoggedIn) {
     res.sendFile(path.resolve(__dirname) + '/frontend/build/index.html');
   }
