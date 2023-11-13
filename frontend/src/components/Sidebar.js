@@ -105,6 +105,7 @@ export default function Sidebar() {
           <ul className="menu">
               <li><Link to="/home">Home</Link></li>
               <li><Link to="/calendar">Calendar</Link></li>
+              <li><Link to="/schedule">Schedule</Link></li>
               <li><Link to="/random-task">Random Task</Link></li>
               <li><Link to="/github-tasks">Github Tasks</Link></li>
               <li><Link to="/motivation">Motivation</Link></li>

@@ -7,6 +7,7 @@ import GithubTasks from './components/GithubTasks';
 import Motivation from './components/Motivation';
 import Calendar from './components/Calendar';
 import RandomTask from './components/RandomTask';
+import Schedule from './components/Schedule';
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
         <Route path="/motivation" element={<Motivation />} />
         <Route path="/calendar" element={<Calendar />} />
         <Route path="/random-task" element={<RandomTask />} />
+        <Route path="/schedule" element={<Schedule />} />
       </Routes>
     </Router>
   );

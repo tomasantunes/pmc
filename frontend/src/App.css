@@ -137,3 +137,13 @@ tbody {
 .weekCalendar__content {
     max-height: none !important;
 }
+
+.col-table {
+	display: table;
+}
+.col-table tbody tr {
+	display: table-cell;
+}
+.col-table tbody tr td {
+	display: block;
+}
