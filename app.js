@@ -844,10 +844,10 @@ function nextDate(dayIndex) {
   return today;
 }
 
-function previousDate(dayIndex) {
-  var today = new Date();
-  today.setDate(today.getDate() + (dayIndex - 1 - today.getDay() - 7) % 7 - 1);
-  return today;
+function previousMonday() {
+  var d = new Date();
+  d.setDate(d.getDate() + 1 - (d.getDay() || 7));
+  return d;
 }
 
 app.get("/api/get-events", (req, res) => {
@@ -862,7 +862,7 @@ app.get("/api/get-events", (req, res) => {
 });
 
 app.get("/api/get-schedule", (req, res) => {
-  var last_monday = previousDate(1);
+  var last_monday = previousMonday();
   var next_sunday = nextDate(7);
 
   var sql = "SELECT * FROM events WHERE start_date BETWEEN ? AND ? ORDER BY start_date ASC";
