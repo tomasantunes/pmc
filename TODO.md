@@ -1,5 +1,9 @@
 # TODO
 
+- Implement node-cron to have email alarms for tasks (there must be a checkbox on the task form to activate the alarm).
+- Set a cronjob to generate events every month.
+- Implement deletion of events.
+
 ## LATER
 
 - Create chart with number of tasks done on the last 15 days.
