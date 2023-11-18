@@ -374,11 +374,13 @@ export default function Tasks({folder_id, folder}) {
     .then(function(response) {
       if (response.data.status == "OK") {
         var task = response.data.data;
+        console.log(task.start_time);
+        console.log(task.end_time);
         setEditTask({
           task_id: task.id,
           description: task.description,
-          start_time: moment(task.start_time, "HH:mm"),
-          end_time: moment(task.end_time, "HH:mm"),
+          start_time: moment(task.start_time, 'YYYY-MM-DD HH:ss'),
+          end_time: moment(task.end_time, 'YYYY-MM-DD HH:ss'),
           days: task.days
         });
         
@@ -452,6 +454,7 @@ export default function Tasks({folder_id, folder}) {
   }
 
   function changeNewTaskStartTime(time) {
+    console.log(time);
     setNewTask({
       ...newTask,
       start_time: time
@@ -459,6 +462,7 @@ export default function Tasks({folder_id, folder}) {
   }
 
   function changeNewTaskEndTime(time) {
+    console.log(time);
     setNewTask({
       ...newTask,
       end_time: time
@@ -475,14 +479,14 @@ export default function Tasks({folder_id, folder}) {
   function changeEditTaskStartTime(time) {
     setEditTask({
       ...editTask,
-      time: time
+      start_time: time
     });
   }
 
   function changeEditTaskEndTime(time) {
     setEditTask({
       ...editTask,
-      time: time
+      end_time: time
     });
   }
 
@@ -503,7 +507,17 @@ export default function Tasks({folder_id, folder}) {
     var days = selectedWeekDays.map((item) => {
       return item.value;
     }).join(",");
-    axios.post(config.BASE_URL + "/api/edit-recurrent-task", {...editTask, days: days, start_time: editTask.start_time.format("HH:mm"), end_time: editTask.end_time.format("HH:mm")})
+    var st;
+    var et;
+    if (editTask.start_time == null && editTask.end_time == null) {
+      st = "";
+      et = "";
+    }
+    else {
+      st = editTask.start_time.format("HH:mm");
+      et = editTask.end_time.format("HH:mm");
+    }
+    axios.post(config.BASE_URL + "/api/edit-recurrent-task", {...editTask, days: days, start_time: st, end_time: et})
     .then(function(response) {
       if (response.data.status == "OK") {
         loadTasks();
