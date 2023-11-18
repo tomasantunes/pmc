@@ -1,8 +1,6 @@
 # TODO
 
-- Implement node-cron to have email alarms for tasks (there must be a checkbox on the task form to activate the alarm).
-- Set a cronjob to generate events every month.
-- Implement deletion of events.
+- Allow the user to add recurrent tasks without setting a time.
 
 ## LATER
 
@@ -15,3 +13,6 @@
 - Change calendar styling.
 - Change "cancel-task" call with a modal to select the weekdays you want to cancel and to remove the recurrent checks and events for that week.
 - Generate event when you create a simple task
+- Implement node-cron to have email alarms for tasks (there must be a checkbox on the task form to activate the alarm).
+- Set a cronjob to generate events every month.
+- Implement deletion of events.
