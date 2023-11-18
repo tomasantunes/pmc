@@ -106,8 +106,8 @@ export default function Tasks({folder_id, folder}) {
     sort_index: 0,
     task_type: "daily",
     days: "",
-    start_time: moment(),
-    end_time: moment()
+    start_time: null,
+    end_time: null
   });
   const [editTask, setEditTask] = useState({
     task_id: "",
