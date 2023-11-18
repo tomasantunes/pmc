@@ -377,9 +377,11 @@ export default function Tasks({folder_id, folder}) {
         setEditTask({
           task_id: task.id,
           description: task.description,
-          time: task.time,
+          start_time: moment(task.start_time, "HH:mm"),
+          end_time: moment(task.end_time, "HH:mm"),
           days: task.days
         });
+        
         if (task.days != "") {
           var days = task.days.split(",");
           days = days.map(Number);
