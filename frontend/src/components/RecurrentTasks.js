@@ -332,7 +332,18 @@ export default function Tasks({folder_id, folder}) {
       return item.value;
     }).join(",");
 
-    axios.post(config.BASE_URL + "/api/add-recurrent-task", {...newTask, sort_index: tasks.length, days: days, start_time: newTask.start_time.format("HH:mm"), end_time: newTask.end_time.format("HH:mm")})
+    var st;
+    var et;
+    if (newTask.start_time == null || newTask.end_time == null) {
+      st = "";
+      et = "";
+    }
+    else {
+      st = newTask.start_time.format("HH:mm");
+      et = newTask.end_time.format("HH:mm");
+    }
+
+    axios.post(config.BASE_URL + "/api/add-recurrent-task", {...newTask, sort_index: tasks.length, days: days, start_time: st, end_time: et})
     .then(function(response) {
       if (response.data.status == "OK") {
         loadTasks();
@@ -509,7 +520,7 @@ export default function Tasks({folder_id, folder}) {
     }).join(",");
     var st;
     var et;
-    if (editTask.start_time == null && editTask.end_time == null) {
+    if (editTask.start_time == null || editTask.end_time == null) {
       st = "";
       et = "";
     }
