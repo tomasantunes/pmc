@@ -1,9 +1,10 @@
 # TODO
 
-- Allow the user to add recurrent tasks without setting a time.
+- On temp tasks there is a bug where clicking "Hide Done" doesn't do anything and logs you out.
 
 ## LATER
 
+- Allow the user to add recurrent tasks without setting a time.
 - Create chart with number of tasks done on the last 15 days.
 - Display a percentage score for total tasks done and not done.
 - Add an option to change a task's folder.
