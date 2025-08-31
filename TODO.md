@@ -1,5 +1,6 @@
 # TODO
 
+- Create a new page called "Dynamic Tasks" where you have a to-do list for each day of the year.
 - On temp tasks there is a bug where clicking "Hide Done" doesn't do anything and logs you out.
 - Make app responsive
 - Fix 1970 dates on the interface
