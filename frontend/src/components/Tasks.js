@@ -55,6 +55,18 @@ function TBody(props) {
   )
 }
 
+function TBodyPlain(props) {
+  return (
+    <tbody {...props} className="table-group-divider">
+      {props.data.map((task, i) => {
+        return (
+          <TRow key={task.id} index={i} task_id={task.id} description={task.description} time={task.time} is_done={task.is_done} updateTaskDone={props.updateTaskDone} openEditTask={props.openEditTask} deleteTask={props.deleteTask} />
+        )
+      })}
+    </tbody>
+  )
+}
+
 const SortableTBody = SortableContainer(TBody);
 
 export default function Tasks({folder_id, folder}) {
@@ -62,6 +74,7 @@ export default function Tasks({folder_id, folder}) {
   const [tasks, setTasks] = useState([]);
   const [selectedStartTime, setSelectedStartTime] = useState(dt);
   const [selectedEndTime, setSelectedEndTime] = useState(dt);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [newTask, setNewTask] = useState({
     description: "",
     start_time: dt,
@@ -389,6 +402,13 @@ export default function Tasks({folder_id, folder}) {
 
   useEffect(() => {
     loadTasks();
+
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    window.addEventListener("resize", handleResize);
+    handleResize();
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
   return (
     <>
@@ -415,7 +435,11 @@ export default function Tasks({folder_id, folder}) {
                   <th style={{width: "20%"}}>Actions</th>
               </tr>
           </thead>
-          <SortableTBody data={tasks} onSortEnd={handleSort} updateTaskDone={updateTaskDone} openEditTask={openEditTask} deleteTask={deleteTask} shouldCancelStart={cancelSort} />
+          {!isMobile ?
+            <SortableTBody data={tasks} onSortEnd={handleSort} updateTaskDone={updateTaskDone} openEditTask={openEditTask} deleteTask={deleteTask} shouldCancelStart={cancelSort} />
+          :
+            <TBodyPlain data={tasks} onSortEnd={handleSort} updateTaskDone={updateTaskDone} openEditTask={openEditTask} deleteTask={deleteTask} shouldCancelStart={cancelSort} />
+          }
       </table>
       <div class="modal addTaskModal" tabindex="-1">
         <div class="modal-dialog">
@@ -452,7 +476,7 @@ export default function Tasks({folder_id, folder}) {
                 </div>
                 <div className="form-group">
                     <div style={{textAlign: "right"}}>
-                        <button type="submit" className="btn btn-primary">Add</button>
+                      <button type="submit" className="btn btn-primary">Add</button>
                     </div>
                 </div>
               </form>

@@ -1,12 +1,38 @@
 .sidebar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 300px;
-    background-color: #154775;
-    color: white;
-    min-height: 100vh;
-    padding: 25px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 300px;
+  background-color: #154775;
+  color: white;
+  min-height: 100vh;
+  padding: 25px;
+  transition: transform 0.3s ease-in-out;
+  z-index: 999;
+}
+
+.mobile-nav {
+  background-color: #154775;
+  padding: 10px 15px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+}
+
+.content {
+  margin-left: 300px;
+  padding: 20px;
+}
+
+.mobile-nav .brand {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: white;
 }
 
 .bg-blue {
@@ -146,4 +172,27 @@ tbody {
 }
 .col-table tbody tr td {
 	display: block;
+}
+
+@media (max-width: 767.98px) {
+  .sidebar {
+    transform: translateX(-100%);
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+  }
+
+  .content {
+    margin-left: 0;
+    margin-top: 60px; /* space for mobile navbar */
+  }
+
+  .page {
+    margin-left: 0;
+  }
+
+  .tasks {
+    width: 100%;
+  }
 }

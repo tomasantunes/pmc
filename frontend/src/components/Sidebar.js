@@ -18,6 +18,7 @@ export default function Sidebar() {
     type: "",
   });
   const [selectedFolderType, setSelectedFolderType] = useState();
+  const [collapseSidebarMobile, setCollapseSidebarMobile] = useState(true);
   var navigate = useNavigate();
 
   const folderTypes = [
@@ -100,7 +101,13 @@ export default function Sidebar() {
   }, []);
   return (
     <>
-      <div className="sidebar">
+      <nav className="mobile-nav d-md-none">
+        <span className="brand">PMC</span>
+        <button id="menu-toggle" className="btn text-white" onClick={() => setCollapseSidebarMobile(!collapseSidebarMobile)}>
+          <i className="fa-solid fa-bars fa-lg"></i> 
+        </button>
+      </nav>
+      <div className={collapseSidebarMobile ? "sidebar": "sidebar open"}>
           <h1><b>PMC</b></h1>
           <ul className="menu">
               <li><Link to="/home">Home</Link></li>

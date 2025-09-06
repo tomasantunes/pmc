@@ -1,5 +1,6 @@
 # TODO
 
+- Figure out why the mobile version of Simple Tasks has 150px extra width.
 - Allow the user to add recurrent tasks without setting a time.
 
 ## LATER
