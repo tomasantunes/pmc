@@ -22,4 +22,5 @@ npm install --legacy-peer-deps
 npm run build
 cd ..
 npm start
+Go to localhost:4002
 ```
