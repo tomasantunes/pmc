@@ -6,6 +6,8 @@
 - On temp tasks there is a bug where clicking "Hide Done" doesn't do anything and logs you out.
 - Make app responsive
 - Fix 1970 dates on the interface
+- Create a section called ScienceRPG Data which fetches info from the ScienceRPG application and displays it on the dashboard.
+- Come up with an hourly value for your RPG time and a conversion rate between Experience Points and time spent. Finally, calculate your bill for your amount of XP.
 
 ## LATER
 
