@@ -260,6 +260,7 @@ app.post("/api/set-hide-done", (req, res) => {
     if (err) {
       console.log(err);
       res.json({status: "NOK", error: err.message});
+      return;
     }
     res.json({status: "OK", data: "Folder has been updated successfully."});
   });
