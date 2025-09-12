@@ -25,7 +25,7 @@ function TRow(props) {
     <tr {...props}>
       <td><input type="checkbox" checked={props.is_done} onChange={(e) => { props.updateTaskDone(e, props.task_id); }} /></td>
       <td className={props.is_done ? "strikethrough" : ""}>{props.description}</td>
-      <td>{props.time}</td>
+      <td>{props.time != "1970-01-01 00:00:00 - 1970-01-01 00:00:00" ? props.time : ""}</td>
       <td>
       <div class="dropdown">
         <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">

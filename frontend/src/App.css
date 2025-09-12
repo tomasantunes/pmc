@@ -115,7 +115,7 @@ tbody {
 
 .buttons-menu {
     text-align: right;
-    width: 500px;
+    width: 100%;
     margin: 0 auto;
 }
 
@@ -185,11 +185,13 @@ tbody {
 
   .content {
     margin-left: 0;
-    margin-top: 60px; /* space for mobile navbar */
+    margin-top: 75px; /* space for mobile navbar */
   }
 
   .page {
     margin-left: 0;
+    padding: 0;
+    margin-top: 75px; /* space for mobile navbar */
   }
 
   .tasks {
