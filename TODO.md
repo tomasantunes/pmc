@@ -1,5 +1,6 @@
 # TODO
 
+- On Simple Tasks, set the default value for the time to be empty.
 - Allow the user to add recurrent tasks without setting a time.
 - Create a new page called "Dynamic Tasks" where you have a to-do list for each day of the year.
 - Fix 1970 dates on recurrent task.
