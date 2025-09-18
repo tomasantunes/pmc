@@ -197,4 +197,8 @@ tbody {
   .tasks {
     width: 100%;
   }
+
+  .small-table {
+    width: 100%;
+  }
 }
