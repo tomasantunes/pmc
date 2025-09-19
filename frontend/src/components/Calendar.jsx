@@ -1,18 +1,12 @@
 import React, {useEffect, useState} from 'react';
 import Sidebar from './Sidebar';
 import Stats from './Stats';
-import $ from 'jquery';
 import axios from 'axios';
 import config from '../config.json';
 import moment from 'moment';
 import WeekCalendar from 'react-week-calendar';
 import CustomEvent from './CustomEvent';
 import 'react-week-calendar/dist/style.css';
-
-window.jQuery = $;
-window.$ = $;
-global.jQuery = $;
-window.bootstrap = require('bootstrap');
 
 export default function Home() {
   const [lastUid, setLastUid] = useState(4);

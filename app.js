@@ -964,15 +964,15 @@ app.get("/", function(req, res) {
   res.redirect("/home");
 });
 
-app.use(express.static(path.resolve(__dirname) + '/frontend/build'));
+app.use(express.static(path.resolve(__dirname) + '/frontend/dist'));
 
 app.get('/login', (req, res) => {
-  res.sendFile(path.resolve(__dirname) + '/frontend/build/index.html');
+  res.sendFile(path.resolve(__dirname) + '/frontend/dist/index.html');
 });
 
 app.get('/home', (req, res) => {
   if(req.session.isLoggedIn) {
-    res.sendFile(path.resolve(__dirname) + '/frontend/build/index.html');
+    res.sendFile(path.resolve(__dirname) + '/frontend/dist/index.html');
   }
   else {
     res.redirect('/login');
@@ -981,7 +981,7 @@ app.get('/home', (req, res) => {
 
 app.get('/github-tasks', (req, res) => {
   if(req.session.isLoggedIn) {
-    res.sendFile(path.resolve(__dirname) + '/frontend/build/index.html');
+    res.sendFile(path.resolve(__dirname) + '/frontend/dist/index.html');
   }
   else {
     res.redirect('/login');
@@ -990,7 +990,7 @@ app.get('/github-tasks', (req, res) => {
 
 app.get('/motivation', (req, res) => {
   if(req.session.isLoggedIn) {
-    res.sendFile(path.resolve(__dirname) + '/frontend/build/index.html');
+    res.sendFile(path.resolve(__dirname) + '/frontend/dist/index.html');
   }
   else {
     res.redirect('/login');
@@ -999,7 +999,7 @@ app.get('/motivation', (req, res) => {
 
 app.get('/calendar', (req, res) => {
   if(req.session.isLoggedIn) {
-    res.sendFile(path.resolve(__dirname) + '/frontend/build/index.html');
+    res.sendFile(path.resolve(__dirname) + '/frontend/dist/index.html');
   }
   else {
     res.redirect('/login');
@@ -1008,7 +1008,7 @@ app.get('/calendar', (req, res) => {
 
 app.get('/schedule', (req, res) => {
   if(req.session.isLoggedIn) {
-    res.sendFile(path.resolve(__dirname) + '/frontend/build/index.html');
+    res.sendFile(path.resolve(__dirname) + '/frontend/dist/index.html');
   }
   else {
     res.redirect('/login');
@@ -1017,7 +1017,7 @@ app.get('/schedule', (req, res) => {
 
 app.get('/random-task', (req, res) => {
   if(req.session.isLoggedIn) {
-    res.sendFile(path.resolve(__dirname) + '/frontend/build/index.html');
+    res.sendFile(path.resolve(__dirname) + '/frontend/dist/index.html');
   }
   else {
     res.redirect('/login');
@@ -1026,7 +1026,7 @@ app.get('/random-task', (req, res) => {
 
 app.get('/folder/:id', (req, res) => {
   if(req.session.isLoggedIn) {
-    res.sendFile(path.resolve(__dirname) + '/frontend/build/index.html');
+    res.sendFile(path.resolve(__dirname) + '/frontend/dist/index.html');
   }
   else {
     res.redirect('/login');

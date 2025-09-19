@@ -2,15 +2,8 @@ import React, {useEffect, useState} from 'react';
 import Tasks from './Tasks';
 import RecurrentTasks from './RecurrentTasks';
 import TasksList from './TasksList';
-import $ from 'jquery';
 import axios from 'axios';
 import config from '../config';
-
-window.jQuery = $;
-window.$ = $;
-global.jQuery = $;
-window.bootstrap = require('bootstrap');
-var bootprompt = require('bootprompt');
 
 export default function TasksPage({folder_id}) {
   const [folder, setFolder] = useState({});
@@ -48,14 +41,16 @@ export default function TasksPage({folder_id}) {
   }
 
   function openEditFolderName() {
-    bootprompt.prompt({
-      title: "Edit Folder Name",
-      value: folder.name
-    }, (result) => {
-      if (result == null) {
-        return;
+    Swal.fire({
+      title: 'Edit Folder Name',
+      input: 'text',
+      inputLabel: 'Folder Name',
+      inputPlaceholder: 'Type your folder name here...',
+      showCancelButton: true,
+    }).then((result) => {
+      if (result.isConfirmed) {
+        submitEditFolderName(result.value);
       }
-      submitEditFolderName(result);
     });
   }
 

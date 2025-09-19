@@ -1,19 +1,10 @@
 import React, {useState, useEffect} from 'react';
 import axios from 'axios';
 import config from '../config';
-import $ from 'jquery';
 import {useNavigate} from 'react-router-dom';
-import {
-  SortableContainer,
-  SortableElement,
-  arrayMove
-} from "react-sortable-hoc";
-
-window.jQuery = $;
-window.$ = $;
-global.jQuery = $;
-window.bootstrap = require('bootstrap');
-var bootprompt = require('bootprompt');
+import Swal from 'sweetalert2'
+import withReactContent from 'sweetalert2-react-content'
+const MySwal = withReactContent(Swal)
 
 function TRow(props) {
   return (
@@ -34,8 +25,6 @@ function TRow(props) {
   )
 }
 
-const SortableTRow = SortableElement(TRow);
-
 function TBody(props) {
   return (
     <tbody {...props} className="table-group-divider">
@@ -48,7 +37,17 @@ function TBody(props) {
   )
 }
 
-const SortableTBody = SortableContainer(TBody);
+function TBodyPlain(props) {
+  return (
+    <tbody {...props} className="table-group-divider">
+      {props.data.map((task, i) => {
+        return (
+          <TRow key={task.id} index={i} task_id={task.id} description={task.description} openEditTask={props.openEditTask} deleteTask={props.deleteTask} />
+        )
+      })}
+    </tbody>
+  )
+}
 
 export default function Tasks({folder_id, folder}) {
   const [tasks, setTasks] = useState([]);
@@ -64,6 +63,7 @@ export default function Tasks({folder_id, folder}) {
 
   var navigate = useNavigate();
 
+  /*
   const handleSort = ({ oldIndex, newIndex }) => {
     setTasks(prevState => {
       var new_arr = arrayMove(prevState, oldIndex, newIndex);
@@ -96,6 +96,7 @@ export default function Tasks({folder_id, folder}) {
     }
     return false;
   }
+  */
 
   function loadTasks() {
     setTasks([]);
@@ -161,11 +162,13 @@ export default function Tasks({folder_id, folder}) {
   }
 
   function openAddTask() {
-    $(".addTaskModal").modal("show");
+    var modal = bootstrap.Modal.getOrCreateInstance(document.querySelector('.addTaskModal'))
+    modal.show();
   }
 
   function closeAddTask() {
-    $(".addTaskModal").modal("hide");
+    var modal = bootstrap.Modal.getOrCreateInstance(document.querySelector('.addTaskModal'))
+    modal.hide();
   }
 
   function openEditTask(task_id) {
@@ -178,7 +181,8 @@ export default function Tasks({folder_id, folder}) {
           description: task.description,
           time: task.time
         });
-        $(".editTaskModal").modal("show");
+        var modal = bootstrap.Modal.getOrCreateInstance(document.querySelector('.editTaskModal'))
+        modal.show();
       }
       else {
         alert(response.data.error);
@@ -190,15 +194,21 @@ export default function Tasks({folder_id, folder}) {
   }
 
   function closeEditTask() {
-    $(".editTaskModal").modal("hide");
+    var modal = bootstrap.Modal.getOrCreateInstance(document.querySelector('.editTaskModal'))
+    modal.hide();
   }
 
   function deleteTask(task_id) {
-    bootprompt.confirm({
+    MySwal.fire({
       title: "Are you sure?",
-      message: "Are you sure you want to delete this task?"
-    }, (result) => {
-      if (result) {
+      text: "Are you sure you want to delete this task?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes"
+    }).then((result) => {
+      if (result.isConfirmed) {
         axios.post(config.BASE_URL + "/api/delete-task", {task_id: task_id})
         .then(function(response) {
           if (response.data.status == "OK") {
@@ -216,11 +226,16 @@ export default function Tasks({folder_id, folder}) {
   }
 
   function deleteFolder() {
-    bootprompt.confirm({
+    MySwal.fire({
       title: "Are you sure?",
-      message: "Are you sure you want to delete this folder?"
-    }, (result) => {
-      if (result) {
+      text: "Are you sure you want to delete this folder?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes"
+    }).then((result) => {
+      if (result.isConfirmed) {
         axios.post(config.BASE_URL + "/api/delete-folder", {folder_id: folder_id})
         .then(function(response) {
           if (response.data.status == "OK") {
@@ -274,7 +289,7 @@ export default function Tasks({folder_id, folder}) {
                   <th style={{width: "25%"}}>Actions</th>
               </tr>
           </thead>
-          <SortableTBody data={tasks} onSortEnd={handleSort} openEditTask={openEditTask} deleteTask={deleteTask} shouldCancelStart={cancelSort} />
+          <TBodyPlain data={tasks} openEditTask={openEditTask} deleteTask={deleteTask} />
       </table>
       <div class="modal addTaskModal" tabindex="-1">
         <div class="modal-dialog">

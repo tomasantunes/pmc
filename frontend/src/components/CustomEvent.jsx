@@ -1,10 +1,4 @@
 import React, {useEffect} from 'react';
-import $ from 'jquery';
-
-window.jQuery = $;
-window.$ = $;
-global.jQuery = $;
-window.bootstrap = require('bootstrap');
 
 const CustomEvent = (props) => {
     var start_m = Number(props.start.format("m"));
