@@ -2,21 +2,12 @@ import React, {useState, useEffect} from 'react';
 import {useNavigate} from 'react-router-dom';
 import axios from 'axios';
 import config from '../config';
-import $ from 'jquery';
-import {
-  SortableContainer,
-  SortableElement,
-  arrayMove
-} from "react-sortable-hoc";
 import TimePicker from 'rc-time-picker';
 import 'rc-time-picker/assets/index.css';
 import moment from 'moment';
-
-window.jQuery = $;
-window.$ = $;
-global.jQuery = $;
-window.bootstrap = require('bootstrap');
-var bootprompt = require('bootprompt');
+import Swal from 'sweetalert2'
+import withReactContent from 'sweetalert2-react-content'
+const MySwal = withReactContent(Swal)
 
 function TRow(props) {
   const [checks, setChecks] = useState([]);
@@ -80,21 +71,17 @@ function TRow(props) {
   )
 }
 
-const SortableTRow = SortableElement(TRow);
-
-function TBody(props) {
+function TBodyPlain(props) {
   return (
     <tbody {...props} className="table-group-divider">
       {props.data.map((task, i) => {
         return (
-          <SortableTRow key={task.id} index={i} task_id={task.id} description={task.description} time={task.time} checks={task.checks} type={task.type} checks_visible={task.checks_visible} updateTaskDone={props.updateTaskDone} openEditTask={props.openEditTask} deleteTask={props.deleteTask} cancelTask={props.cancelTask} />
+          <TRow key={task.id} index={i} task_id={task.id} description={task.description} time={task.time} checks={task.checks} type={task.type} checks_visible={task.checks_visible} updateTaskDone={props.updateTaskDone} openEditTask={props.openEditTask} deleteTask={props.deleteTask} cancelTask={props.cancelTask} />
         )
       })}
     </tbody>
   )
 }
-
-const SortableTBody = SortableContainer(TBody);
 
 export default function Tasks({folder_id, folder}) {
   const [tasks, setTasks] = useState([]);
@@ -136,6 +123,7 @@ export default function Tasks({folder_id, folder}) {
     {value: 0, label: "Sunday"},
   ];
 
+  /*
   const handleSort = ({ oldIndex, newIndex }) => {
     setTasks(prevState => {
       var new_arr = arrayMove(prevState, oldIndex, newIndex);
@@ -161,6 +149,7 @@ export default function Tasks({folder_id, folder}) {
       });
     }
   }
+  
 
   function cancelSort(e) {
     if (e.target.className == "dropdown-item" || e.target.className == "dropdown-menu" || e.target.tagName == "INPUT" || e.target.tagName == "A" || e.target.tagName == "BUTTON") {
@@ -168,6 +157,7 @@ export default function Tasks({folder_id, folder}) {
     }
     return false;
   }
+  */
 
   function toggleMonday(e) {
     setMondayChecked(e.target.checked);
@@ -347,7 +337,8 @@ export default function Tasks({folder_id, folder}) {
     .then(function(response) {
       if (response.data.status == "OK") {
         loadTasks();
-        $(".addTaskModal").modal("hide");
+        var modal = bootstrap.Modal.getOrCreateInstance(document.querySelector('.addTaskModal'))
+        modal.hide();
         setNewTask({
           description: "",
           time: "",
@@ -368,15 +359,18 @@ export default function Tasks({folder_id, folder}) {
   }
 
   function openAddTask() {
-    $(".addTaskModal").modal("show");
+    var modal = bootstrap.Modal.getOrCreateInstance(document.querySelector('.addTaskModal'))
+    modal.show();
   }
 
   function closeAddTask() {
-    $(".addTaskModal").modal("hide");
+    var modal = bootstrap.Modal.getOrCreateInstance(document.querySelector('.addTaskModal'))
+    modal.hide();
   }
 
   function closeEditTask() {
-    $(".editTaskModal").modal("hide");
+    var modal = bootstrap.Modal.getOrCreateInstance(document.querySelector('.editTaskModal'))
+    modal.hide();
   }
 
   function openEditTask(task_id) {
@@ -411,8 +405,8 @@ export default function Tasks({folder_id, folder}) {
         else {
           setSelectedWeekDays([]);
         }
-        $(".editTaskModal").modal("show");
-
+        var modal = bootstrap.Modal.getOrCreateInstance(document.querySelector('.editTaskModal'))
+        modal.show();
       }
       else {
         alert(response.data.error);
@@ -532,7 +526,8 @@ export default function Tasks({folder_id, folder}) {
     .then(function(response) {
       if (response.data.status == "OK") {
         loadTasks();
-        $(".editTaskModal").modal("hide");
+        var modal = bootstrap.Modal.getOrCreateInstance(document.querySelector('.editTaskModal'))
+        modal.hide();
         setEditTask({
           task_id: 0,
           description: "",
@@ -552,11 +547,16 @@ export default function Tasks({folder_id, folder}) {
   }
 
   function deleteTask(task_id) {
-    bootprompt.confirm({
+    MySwal.fire({
       title: "Are you sure?",
-      message: "Are you sure you want to delete this task?"
-    }, (result) => {
-      if (result) {
+      text: "Are you sure you want to delete this task?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes"
+    }).then((result) => {
+      if (result.isConfirmed) {
         axios.post(config.BASE_URL + "/api/delete-task", {task_id: task_id})
         .then(function(response) {
           if (response.data.status == "OK") {
@@ -574,11 +574,16 @@ export default function Tasks({folder_id, folder}) {
   }
 
   function deleteFolder() {
-    bootprompt.confirm({
+    MySwal.fire({
       title: "Are you sure?",
-      message: "Are you sure you want to delete this folder?"
-    }, (result) => {
-      if (result) {
+      text: "Are you sure you want to delete this folder?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes"
+    }).then((result) => {
+      if (result.isConfirmed) {
         axios.post(config.BASE_URL + "/api/delete-folder", {folder_id: folder_id})
         .then(function(response) {
           if (response.data.status == "OK") {
@@ -795,7 +800,7 @@ export default function Tasks({folder_id, folder}) {
                   <th style={{width: "10%"}}>Actions</th>
               </tr>
           </thead>
-          <SortableTBody data={tasks} onSortEnd={handleSort} updateTaskDone={updateTaskDone} openEditTask={openEditTask} deleteTask={deleteTask} cancelTask={cancelTask} shouldCancelStart={cancelSort} />
+          <TBodyPlain data={tasks} updateTaskDone={updateTaskDone} openEditTask={openEditTask} deleteTask={deleteTask} cancelTask={cancelTask} />
       </table>
       <div class="modal addTaskModal" tabindex="-1">
         <div class="modal-dialog">

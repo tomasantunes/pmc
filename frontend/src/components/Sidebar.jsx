@@ -1,15 +1,8 @@
 import React, {useEffect, useState} from 'react';
 import axios from 'axios';
 import config from '../config';
-import $ from 'jquery';
 import Select from 'react-select';
 import {Link, useNavigate} from 'react-router-dom';
-
-window.jQuery = $;
-window.$ = $;
-global.jQuery = $;
-window.bootstrap = require('bootstrap');
-var bootprompt = require('bootprompt');
 
 export default function Sidebar() {
   const [folders, setFolders] = useState([]);
@@ -63,11 +56,13 @@ export default function Sidebar() {
   }
 
   function openAddFolder() {
-    $('.addFolderModal').modal('show');
+    var modal = bootstrap.Modal.getOrCreateInstance(document.querySelector('.addFolderModal'))
+    modal.show();
   }
 
   function closeAddFolder() {
-    $('.addFolderModal').modal('hide');
+    var modal = bootstrap.Modal.getOrCreateInstance(document.querySelector('.addFolderModal'))
+    modal.hide();
     setNewFolder({
       name: "",
       type: "",

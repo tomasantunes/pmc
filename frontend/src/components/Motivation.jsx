@@ -1,13 +1,7 @@
 import React, {useState, useEffect} from 'react';
 import Sidebar from './Sidebar';
-import $ from 'jquery';
 import axios from 'axios';
 import config from '../config';
-
-window.jQuery = $;
-window.$ = $;
-global.jQuery = $;
-window.bootstrap = require('bootstrap');
 
 export default function Motivation() {
   const [motivationalText, setMotivationalText] = useState('');
