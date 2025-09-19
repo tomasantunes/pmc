@@ -4,6 +4,7 @@
 - Allow the user to add recurrent tasks without setting a time.
 - Create a new page called "Dynamic Tasks" where you have a to-do list for each day of the year.
 - Fix 1970 dates on recurrent task.
+- Fix error where adding a task doesn't take into account the hidden tasks when defining the index of the new task based on the length of the tasks array.
 
 ## LATER
 
