@@ -2,8 +2,9 @@
 
 - On Simple Tasks, set the default value for the time to be empty.
 - Allow the user to add recurrent tasks without setting a time.
-- Create a new page called "Dynamic Tasks" where you have a to-do list for each day of the year.
+- Create a new page called "Daily To-Dos" where you have a to-do list for each day of the year.
 - Fix 1970 dates on recurrent task.
+- Fix empty times on weekly recurrent tasks.
 - Fix error where adding a task doesn't take into account the hidden tasks when defining the index of the new task based on the length of the tasks array.
 
 ## LATER
@@ -21,3 +22,4 @@
 - Implement node-cron to have email alarms for tasks (there must be a checkbox on the task form to activate the alarm).
 - Set a cronjob to generate events every month.
 - Implement deletion of events.
+- Add Monthly Recurrent Tasks feature.
