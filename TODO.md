@@ -6,6 +6,8 @@
 - Fix 1970 dates on recurrent task.
 - Fix empty times on weekly recurrent tasks.
 - Fix error where adding a task doesn't take into account the hidden tasks when defining the index of the new task based on the length of the tasks array.
+- Show number of tasks on top of the lists.
+- Add favicon.
 
 ## LATER
 
