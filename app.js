@@ -16,6 +16,7 @@ var tasksRouter = require('./routes/tasks');
 var githubRouter = require('./routes/github');
 var calendarRouter = require('./routes/calendar');
 var scheduleRouter = require('./routes/schedule');
+var catchAllRouter = require('./routes/catch-all');
 
 var app = express();
 
@@ -46,6 +47,8 @@ app.use('/', scheduleRouter);
 app.use('/', indexRouter);
 app.use(express.static(path.resolve(__dirname) + '/frontend/dist'));
 app.use('/', viewsRouter);
+app.use(catchAllRouter);
+
 
 
 // catch 404 and forward to error handler
