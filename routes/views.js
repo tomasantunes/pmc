@@ -7,6 +7,7 @@ router.get('/login', (req, res) => {
 });
 
 router.get('/home', (req, res) => {
+  console.log("Is Logged In: ", req.session.isLoggedIn);
   if(req.session.isLoggedIn) {
     res.sendFile(path.join(__dirname, '../frontend/dist/index.html'));
   }
