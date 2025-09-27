@@ -6,8 +6,6 @@ var logger = require('morgan');
 var secretConfig = require('./secret-config');
 var session = require('express-session');
 
-var indexRouter = require('./routes/index');
-var viewsRouter = require('./routes/views');
 var authRouter = require('./routes/auth');
 var dashboardRouter = require('./routes/dashboard');
 var foldersRouter = require('./routes/folders');
@@ -16,7 +14,6 @@ var tasksRouter = require('./routes/tasks');
 var githubRouter = require('./routes/github');
 var calendarRouter = require('./routes/calendar');
 var scheduleRouter = require('./routes/schedule');
-var catchAllRouter = require('./routes/catch-all');
 
 var app = express();
 
@@ -36,6 +33,8 @@ app.use(session({
   saveUninitialized: true
 }));
 
+
+app.use(express.static(path.resolve(__dirname) + '/frontend/dist'));
 app.use('/', authRouter);
 app.use('/', dashboardRouter);
 app.use('/', foldersRouter);
@@ -44,12 +43,6 @@ app.use('/', tasksRouter);
 app.use('/', githubRouter);
 app.use('/', calendarRouter);
 app.use('/', scheduleRouter);
-app.use('/', indexRouter);
-app.use(express.static(path.resolve(__dirname) + '/frontend/dist'));
-app.use('/', viewsRouter);
-app.use(catchAllRouter);
-
-
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
