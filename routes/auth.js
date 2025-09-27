@@ -36,4 +36,13 @@ router.post("/api/check-login", (req, res) => {
   });
 });
 
+router.post("/check-login", (req, res) => {
+  if (req.session.isLoggedIn) {
+    res.json({status: "OK"});
+  }
+  else {
+    res.json({status: "NOK"});
+  }
+});
+
 module.exports = router;
