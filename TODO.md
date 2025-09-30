@@ -8,6 +8,7 @@
 - Fix error where adding a task doesn't take into account the hidden tasks when defining the index of the new task based on the length of the tasks array.
 - Show number of tasks on top of the lists.
 - Add favicon.
+- Verify why the datetime picker from simple tasks saves a time one hour before.
 
 ## LATER
 
