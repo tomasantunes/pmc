@@ -8,7 +8,7 @@ function getRangeOfDates(startDate, stopDate) {
   var currentDate = startDate;
   while (currentDate <= stopDate) {
       dateArray.push(new Date (currentDate));
-      currentDate = currentDate.addDays(1);
+      currentDate = addDays(currentDate, 1);
   }
   return dateArray;
 }
