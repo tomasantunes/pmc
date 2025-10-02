@@ -4,6 +4,7 @@ import config from '../config';
 import {useNavigate} from 'react-router-dom';
 import DateTimePicker from 'react-datetime-picker'
 import moment from 'moment';
+import {toLocaleISOString} from '../libs/utils';
 import 'react-datetime-picker/dist/DateTimePicker.css';
 import 'react-calendar/dist/Calendar.css';
 import 'react-clock/dist/Clock.css';
@@ -16,7 +17,7 @@ function TRow(props) {
     <tr {...props}>
       <td><input type="checkbox" checked={props.is_done} onChange={(e) => { props.updateTaskDone(e, props.task_id); }} /></td>
       <td className={props.is_done ? "strikethrough" : ""}>{props.description}</td>
-      <td>{props.time != "1970-01-01 00:00:00 - 1970-01-01 00:00:00" ? props.time : ""}</td>
+      <td>{props.time}</td>
       <td>
       <div class="dropdown">
         <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
@@ -47,13 +48,13 @@ function TBodyPlain(props) {
 export default function Tasks({folder_id, folder}) {
   var dt = new Date();
   const [tasks, setTasks] = useState([]);
-  const [selectedStartTime, setSelectedStartTime] = useState(dt);
-  const [selectedEndTime, setSelectedEndTime] = useState(dt);
+  const [selectedStartTime, setSelectedStartTime] = useState(null);
+  const [selectedEndTime, setSelectedEndTime] = useState(null);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [newTask, setNewTask] = useState({
     description: "",
-    start_time: dt,
-    end_time: dt
+    start_time: null,
+    end_time: null
   });
   const [editTask, setEditTask] = useState({
     task_id: 0,
@@ -61,7 +62,10 @@ export default function Tasks({folder_id, folder}) {
     start_time: null,
     end_time: null
   });
+  const [showNew, setShowNew] = useState(false);
+  const [showEdit, setShowEdit] = useState(false);
   const [hideDone, setHideDone] = useState(folder.hide_done == 1 ? true : false);
+  const [totalTasks, setTotalTasks] = useState(0);
   
 
   var navigate = useNavigate();
@@ -102,11 +106,11 @@ export default function Tasks({folder_id, folder}) {
   */
 
   function loadTasks() {
-    setTasks([]);
     axios.get(config.BASE_URL + "/api/get-tasks-from-folder", {params: {folder_id: folder_id}})
     .then(function(response) {
       if (response.data.status == "OK") {
         var tasks_arr = response.data.data;
+        setTotalTasks(tasks_arr.length);
         if (folder.hide_done == 1) {
           tasks_arr = tasks_arr.filter(task => task.is_done == false);
         }
@@ -122,7 +126,7 @@ export default function Tasks({folder_id, folder}) {
   }
 
   function updateTaskDone(e, task_id) {
-    axios.post(config.BASE_URL + "/api/update-task-done", {task_id: task_id, is_done: e.target.checked, date_done: new Date().toISOString().slice(0, 19).replace('T', ' ')})
+    axios.post(config.BASE_URL + "/api/update-task-done", {task_id: task_id, is_done: e.target.checked, date_done: toLocaleISOString(new Date()).slice(0, 19).replace('T', ' ')})
     .then(function(response) {
       if (response.data.status == "OK") {
         loadTasks();
@@ -170,26 +174,28 @@ export default function Tasks({folder_id, folder}) {
     e.preventDefault();
     var st = newTask.start_time;
     var et = newTask.end_time;
+    console.log(st);
+    console.log(et);
     if (newTask.start_time == null || newTask.end_time == null) {
       st = "";
       et = "";
     }
     else {
-      st = st.toISOString().slice(0, 19).replace('T', ' ');
-      et = et.toISOString().slice(0, 19).replace('T', ' ');
+      st = toLocaleISOString(st).slice(0, 19).replace('T', ' ');
+      et = toLocaleISOString(et).slice(0, 19).replace('T', ' ');
     }
-    axios.post(config.BASE_URL + "/api/add-task", {folder_id: folder_id, description: newTask.description, start_time: st, end_time: et, sort_index: tasks.length})
+    axios.post(config.BASE_URL + "/api/add-task", {folder_id: folder_id, description: newTask.description, start_time: st, end_time: et, sort_index: totalTasks})
     .then(function(response) {
       if (response.data.status == "OK") {
         loadTasks();
         dt = new Date();
         setNewTask({
           description: "",
-          start_time: dt,
-          end_time: dt
+          start_time: null,
+          end_time: null
         });
-        setSelectedStartTime(dt);
-        setSelectedEndTime(dt);
+        setSelectedStartTime(null);
+        setSelectedEndTime(null);
         closeAddTask();
       }
       else {
@@ -210,8 +216,8 @@ export default function Tasks({folder_id, folder}) {
       et = "";
     }
     else {
-      st = st.toISOString().slice(0, 19).replace('T', ' ');
-      et = et.toISOString().slice(0, 19).replace('T', ' ');
+      st = toLocaleISOString(st).slice(0, 19).replace('T', ' ');
+      et = toLocaleISOString(et).slice(0, 19).replace('T', ' ');
     }
     axios.post(config.BASE_URL + "/api/edit-task", {...editTask, start_time: st, end_time: et})
     .then(function(response) {
@@ -236,11 +242,13 @@ export default function Tasks({folder_id, folder}) {
   function openAddTask() {
     var modal = bootstrap.Modal.getOrCreateInstance(document.querySelector('.addTaskModal'))
     modal.show();
+    setShowNew(true);
   }
 
   function closeAddTask() {
     var modal = bootstrap.Modal.getOrCreateInstance(document.querySelector('.addTaskModal'))
     modal.hide();
+    setShowNew(false);
   }
 
   function openEditTask(task_id) {
@@ -259,6 +267,7 @@ export default function Tasks({folder_id, folder}) {
         setSelectedEndTime(moment(task.end_time).toDate());
         var modal = bootstrap.Modal.getOrCreateInstance(document.querySelector('.editTaskModal'))
         modal.show();
+        setShowEdit(true);
       }
       else {
         alert(response.data.error);
@@ -272,6 +281,7 @@ export default function Tasks({folder_id, folder}) {
   function closeEditTask() {
     var modal = bootstrap.Modal.getOrCreateInstance(document.querySelector('.editTaskModal'))
     modal.hide();
+    setShowEdit(false);
   }
 
   function deleteTask(task_id) {
@@ -342,39 +352,6 @@ export default function Tasks({folder_id, folder}) {
     });
   }
 
-  function changeEditTaskStartTime(time) {
-    setSelectedStartTime(time);
-    setEditTask({
-      ...editTask,
-      start_time: time
-    });
-  }
-
-  function changeEditTaskEndTime(time) {
-    setSelectedEndTime(time);
-    setEditTask({
-      ...editTask,
-      end_time: time
-    });
-  }
-
-  function changeNewTaskStartTime(time) {
-    console.log(time);
-    setSelectedStartTime(time);
-    setNewTask({
-      ...newTask,
-      start_time: time
-    });
-  }
-
-  function changeNewTaskEndTime(time) {
-    setSelectedEndTime(time);
-    setNewTask({
-      ...newTask,
-      end_time: time
-    });
-  }
-
   function toggleHideDone() {
     axios.post("/api/set-hide-done", {folder_id: folder_id, hide_done: !hideDone})
     .then(function(response) {
@@ -392,8 +369,43 @@ export default function Tasks({folder_id, folder}) {
   }
 
   useEffect(() => {
-    loadTasks();
+    if (selectedStartTime && showNew) {
+      setNewTask(prev => ({
+        ...prev,
+        start_time: selectedStartTime
+      }));
+    }
+  }, [selectedStartTime]);
 
+  useEffect(() => {
+    if (selectedEndTime && showNew) {
+      setNewTask(prev => ({
+        ...prev,
+        end_time: selectedEndTime
+      }));
+    }
+  }, [selectedEndTime]);
+
+  useEffect(() => {
+    if (selectedStartTime && showEdit) {
+      setEditTask(prev => ({
+        ...prev,
+        start_time: selectedStartTime
+      }));
+    }
+  }, [selectedStartTime]);
+
+  useEffect(() => {
+    if (selectedEndTime && showEdit) {
+      setEditTask(prev => ({
+        ...prev,
+        end_time: selectedEndTime
+      }));
+    }
+  }, [selectedEndTime]);
+
+  useEffect(() => {
+    loadTasks();
     const handleResize = () => {
       setIsMobile(window.innerWidth < 768);
     };
@@ -447,7 +459,7 @@ export default function Tasks({folder_id, folder}) {
                   <label className="control-label">Start</label>
                   <div>
                     <DateTimePicker
-                      onChange={changeNewTaskStartTime}
+                      onChange={setSelectedStartTime}
                       value={selectedStartTime}
                     />
                   </div>
@@ -456,7 +468,7 @@ export default function Tasks({folder_id, folder}) {
                   <label className="control-label">End</label>
                   <div>
                     <DateTimePicker
-                      onChange={changeNewTaskEndTime}
+                      onChange={setSelectedEndTime}
                       value={selectedEndTime}
                     />
                   </div>
@@ -490,7 +502,7 @@ export default function Tasks({folder_id, folder}) {
                   <label className="control-label">Start</label>
                   <div>
                     <DateTimePicker
-                      onChange={changeEditTaskStartTime}
+                      onChange={setSelectedStartTime}
                       value={selectedStartTime}
                     />
                   </div>
@@ -499,7 +511,7 @@ export default function Tasks({folder_id, folder}) {
                   <label className="control-label">End</label>
                   <div>
                     <DateTimePicker
-                      onChange={changeEditTaskEndTime}
+                      onChange={setSelectedEndTime}
                       value={selectedEndTime}
                     />
                   </div>

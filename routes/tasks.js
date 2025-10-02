@@ -27,6 +27,12 @@ router.get("/api/get-tasks-from-folder", (req, res) => {
       console.log(err);
       res.json({status: "NOK", error: err.message});
     }
+
+    for (var i in result) {
+      if (result[i].time == "1970-01-01 01:00:00 - 1970-01-01 01:00:00" || result[i].time == "1970-01-01 00:00:00 - 1970-01-01 00:00:00") {
+        result[i].time = "";
+      }
+    }
     res.json({status: "OK", data: result});
   });
 });
@@ -221,13 +227,16 @@ router.post("/api/add-task", (req, res) => {
   var end_time = req.body.end_time;
   var sort_index = req.body.sort_index;
 
-  if (typeof start_time == "undefined" || start_time == "" || typeof end_time == "undefined" || end_time == "") {
-    start_time = new Date('1970-01-01Z00:00:00:000').toISOString().slice(0, 19).replace('T', ' ');
-    end_time = new Date('1970-01-01Z00:00:00:000').toISOString().slice(0, 19).replace('T', ' ');
+  console.log(start_time);
+  console.log(end_time);
+
+  if (typeof start_time == "undefined" || start_time == "" || start_time == null || typeof end_time == "undefined" || end_time == "" || end_time == null) {
+    start_time = utils.toLocaleISOString(new Date('1970-01-01Z00:00:00:000')).slice(0, 19).replace('T', ' ');
+    end_time = utils.toLocaleISOString(new Date('1970-01-01Z00:00:00:000')).slice(0, 19).replace('T', ' ');
   }
 
-  var sql = "INSERT INTO tasks (folder_id, description, start_time, end_time, is_done, sort_index) VALUES (?, ?, ?, ?, 0, ?)";
-  con.query(sql, [folder_id, description, start_time, end_time, sort_index], async function (err, result) {
+  var sql = "INSERT INTO tasks (folder_id, description, start_time, end_time, is_done, sort_index) VALUES (?, ?, ?, ?, ?, ?)";
+  con.query(sql, [folder_id, description, start_time, end_time, 0, sort_index], async function (err, result) {
     if (err) {
       console.log(err);
       res.json({status: "NOK", error: err.message});
