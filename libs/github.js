@@ -12,7 +12,7 @@ function getOctokit() {
             debug: () => {},
             info: () => {},
             warn: console.warn,
-            error: console.error
+            error: console.log
         },
         request: {
             agent: undefined,
