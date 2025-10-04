@@ -111,6 +111,10 @@ export default function Tasks({folder_id, folder}) {
   const [fridayChecked, setFridayChecked] = useState(false);
   const [saturdayChecked, setSaturdayChecked] = useState(false);
   const [sundayChecked, setSundayChecked] = useState(false);
+  const [selectedStartTime, setSelectedStartTime] = useState(null);
+  const [selectedEndTime, setSelectedEndTime] = useState(null);
+  const [showNew, setShowNew] = useState(false);
+  const [showEdit, setShowEdit] = useState(false);
   var navigate = useNavigate();
 
   const weekDays = [
@@ -458,40 +462,10 @@ export default function Tasks({folder_id, folder}) {
     });
   }
 
-  function changeNewTaskStartTime(time) {
-    console.log(time);
-    setNewTask({
-      ...newTask,
-      start_time: time
-    });
-  }
-
-  function changeNewTaskEndTime(time) {
-    console.log(time);
-    setNewTask({
-      ...newTask,
-      end_time: time
-    });
-  }
-
   function changeEditTaskDescription(e) {
     setEditTask({
       ...editTask,
       description: e.target.value
-    });
-  }
-
-  function changeEditTaskStartTime(time) {
-    setEditTask({
-      ...editTask,
-      start_time: time
-    });
-  }
-
-  function changeEditTaskEndTime(time) {
-    setEditTask({
-      ...editTask,
-      end_time: time
     });
   }
 
@@ -761,6 +735,42 @@ export default function Tasks({folder_id, folder}) {
   }
 
   useEffect(() => {
+    if (selectedStartTime && showNew) {
+      setNewTask({
+        ...newTask,
+        start_time: selectedStartTime
+      });
+    }
+  }, [selectedStartTime, showNew]);
+
+  useEffect(() => {
+    if (selectedEndTime && showNew) {
+      setNewTask({
+        ...newTask,
+        end_time: selectedEndTime
+      });
+    }
+  }, [selectedEndTime, showNew]);
+
+  useEffect(() => {
+    if (selectedStartTime && showEdit) {
+      setEditTask({
+        ...newTask,
+        start_time: selectedStartTime
+      });
+    }
+  }, [selectedStartTime, showEdit]);
+
+  useEffect(() => {
+    if (selectedEndTime && showEdit) {
+      setEditTask({
+        ...newTask,
+        end_time: selectedEndTime
+      });
+    }
+  }, [selectedEndTime, showEdit]);
+
+  useEffect(() => {
     if (dates.length > 0) {
       loadTasks();
     }
@@ -820,13 +830,13 @@ export default function Tasks({folder_id, folder}) {
                 <div className="form-group py-2">
                   <label className="control-label">Start Time</label>
                   <div>
-                      <TimePicker value={newTask.start_time} onChange={changeNewTaskStartTime} showSecond={false} />
+                      <TimePicker value={selectedStartTime} onChange={setSelectedStartTime} showSecond={false} />
                   </div>
                 </div>
                 <div className="form-group py-2">
                   <label className="control-label">End Time</label>
                   <div>
-                      <TimePicker value={newTask.end_time} onChange={changeNewTaskEndTime} showSecond={false} />
+                      <TimePicker value={selectedEndTime} onChange={setSelectedEndTime} showSecond={false} />
                   </div>
                 </div>
                 <div className="form-group py-2">
@@ -881,13 +891,13 @@ export default function Tasks({folder_id, folder}) {
                 <div className="form-group py-2">
                   <label className="control-label">Start Time</label>
                   <div>
-                      <TimePicker value={editTask.start_time} onChange={changeEditTaskStartTime} showSecond={false} />
+                      <TimePicker value={selectedStartTime} onChange={setSelectedStartTime} showSecond={false} />
                   </div>
                 </div>
                 <div className="form-group py-2">
                   <label className="control-label">End Time</label>
                   <div>
-                      <TimePicker value={editTask.end_time} onChange={changeEditTaskEndTime} showSecond={false} />
+                      <TimePicker value={selectedEndTime} onChange={setSelectedEndTime} showSecond={false} />
                   </div>
                 </div>
                 <div className="form-group py-2">
