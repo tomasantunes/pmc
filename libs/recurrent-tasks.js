@@ -1,0 +1,52 @@
+var database = require('./database');
+
+var { con, con2 } = database.getMySQLConnections();
+
+async function getTaskChecks(task_id, dti, dtf) {
+  var sql = "SELECT * FROM recurrent_checks WHERE task_id = ? AND date BETWEEN ? AND ?";
+  const [rows, fields] = await con2.execute(sql, [task_id, dti, dtf]);
+  return rows;
+}
+
+async function checkIfTaskIsCancelled(task_id, dt) {
+  var sql = "SELECT * FROM recurrent_checks WHERE task_id = ? AND date = ?";
+  var [rows, fields] = await con2.execute(sql, [task_id, dt]);
+  if (rows.length > 0) {
+    if (rows[0].is_cancelled == 1) {
+      return true;
+    }
+    else {
+      return false;
+    }
+  }
+  else {
+    return false;
+  }
+}
+
+async function checkIfTaskIsToday(task) {
+  var today = new Date();
+  var dd = today.getDate();
+  var wd = today.getDay() - 1;
+  var mm = today.getMonth() + 1;
+
+  var is_cancelled = await checkIfTaskIsCancelled(task.id, today.toISOString().slice(0, 10));
+
+  var days = task.days.split(",");
+  days = days.map(Number);
+  if (days.includes(wd) && !is_cancelled) {
+    return true;
+  }
+  return false;
+}
+
+module.exports = {
+    checkIfTaskIsCancelled,
+    checkIfTaskIsToday,
+    getTaskChecks,
+    default: {
+        checkIfTaskIsCancelled,
+        checkIfTaskIsToday,
+        getTaskChecks
+    }
+};
