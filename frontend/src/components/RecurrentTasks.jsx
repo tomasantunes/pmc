@@ -2,8 +2,6 @@ import React, {useState, useEffect} from 'react';
 import {useNavigate} from 'react-router-dom';
 import axios from 'axios';
 import config from '../config';
-import TimePicker from 'rc-time-picker';
-import 'rc-time-picker/assets/index.css';
 import moment from 'moment';
 import Swal from 'sweetalert2'
 import withReactContent from 'sweetalert2-react-content'
@@ -830,13 +828,13 @@ export default function Tasks({folder_id, folder}) {
                 <div className="form-group py-2">
                   <label className="control-label">Start Time</label>
                   <div>
-                      <TimePicker value={selectedStartTime} onChange={setSelectedStartTime} showSecond={false} />
+                      
                   </div>
                 </div>
                 <div className="form-group py-2">
                   <label className="control-label">End Time</label>
                   <div>
-                      <TimePicker value={selectedEndTime} onChange={setSelectedEndTime} showSecond={false} />
+
                   </div>
                 </div>
                 <div className="form-group py-2">
@@ -891,13 +889,13 @@ export default function Tasks({folder_id, folder}) {
                 <div className="form-group py-2">
                   <label className="control-label">Start Time</label>
                   <div>
-                      <TimePicker value={selectedStartTime} onChange={setSelectedStartTime} showSecond={false} />
+
                   </div>
                 </div>
                 <div className="form-group py-2">
                   <label className="control-label">End Time</label>
                   <div>
-                      <TimePicker value={selectedEndTime} onChange={setSelectedEndTime} showSecond={false} />
+
                   </div>
                 </div>
                 <div className="form-group py-2">

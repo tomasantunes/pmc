@@ -2,15 +2,12 @@ import React, {useState, useEffect} from 'react';
 import axios from 'axios';
 import config from '../config';
 import {useNavigate} from 'react-router-dom';
-import DateTimePicker from 'react-datetime-picker'
 import moment from 'moment';
 import {toLocaleISOString} from '../libs/utils';
-import 'react-datetime-picker/dist/DateTimePicker.css';
-import 'react-calendar/dist/Calendar.css';
-import 'react-clock/dist/Clock.css';
-import Swal from 'sweetalert2'
-import withReactContent from 'sweetalert2-react-content'
-const MySwal = withReactContent(Swal)
+import DateTimePicker from '../libs/bs5-datetime/DateTimePicker';
+import Swal from 'sweetalert2';
+import withReactContent from 'sweetalert2-react-content';
+const MySwal = withReactContent(Swal);
 
 function TRow(props) {
   return (
@@ -48,20 +45,14 @@ function TBodyPlain(props) {
 export default function Tasks({folder_id, folder}) {
   var dt = new Date();
   const [tasks, setTasks] = useState([]);
-  const [selectedStartTime, setSelectedStartTime] = useState(null);
-  const [selectedEndTime, setSelectedEndTime] = useState(null);
+  const [selectedNewStartTime, setSelectedNewStartTime] = useState(null);
+  const [selectedNewEndTime, setSelectedNewEndTime] = useState(null);
+  const [selectedEditStartTime, setSelectedEditStartTime] = useState(null);
+  const [selectedEditEndTime, setSelectedEditEndTime] = useState(null);
+  const [newTaskDescription, setNewTaskDescription] = useState("");
+  const [editTaskDescription, setEditTaskDescription] = useState("");
+  const [editTaskId, setEditTaskId] = useState(null);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-  const [newTask, setNewTask] = useState({
-    description: "",
-    start_time: null,
-    end_time: null
-  });
-  const [editTask, setEditTask] = useState({
-    task_id: 0,
-    description: "",
-    start_time: null,
-    end_time: null
-  });
   const [showNew, setShowNew] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
   const [hideDone, setHideDone] = useState(folder.hide_done == 1 ? true : false);
@@ -172,30 +163,22 @@ export default function Tasks({folder_id, folder}) {
 
   function submitAddTask(e) {
     e.preventDefault();
-    var st = newTask.start_time;
-    var et = newTask.end_time;
+    var st = selectedNewStartTime;
+    var et = selectedNewEndTime;
     console.log(st);
     console.log(et);
-    if (newTask.start_time == null || newTask.end_time == null) {
+    if (st == null || et == null) {
       st = "";
       et = "";
     }
-    else {
-      st = toLocaleISOString(st).slice(0, 19).replace('T', ' ');
-      et = toLocaleISOString(et).slice(0, 19).replace('T', ' ');
-    }
-    axios.post(config.BASE_URL + "/api/add-task", {folder_id: folder_id, description: newTask.description, start_time: st, end_time: et, sort_index: totalTasks})
+    axios.post(config.BASE_URL + "/api/add-task", {folder_id: folder_id, description: newTaskDescription, start_time: st, end_time: et, sort_index: totalTasks})
     .then(function(response) {
       if (response.data.status == "OK") {
         loadTasks();
         dt = new Date();
-        setNewTask({
-          description: "",
-          start_time: null,
-          end_time: null
-        });
-        setSelectedStartTime(null);
-        setSelectedEndTime(null);
+        setNewTaskDescription("");
+        setSelectedNewStartTime(null);
+        setSelectedNewEndTime(null);
         closeAddTask();
       }
       else {
@@ -209,25 +192,20 @@ export default function Tasks({folder_id, folder}) {
 
   function submitEditTask(e) {
     e.preventDefault();
-    var st = editTask.start_time;
-    var et = editTask.end_time;
-    if (editTask.start_time == null || editTask.end_time == null) {
+    var st = selectedEditStartTime;
+    var et = selectedEditEndTime;
+    if (st == null || et == null) {
       st = "";
       et = "";
     }
-    else {
-      st = toLocaleISOString(st).slice(0, 19).replace('T', ' ');
-      et = toLocaleISOString(et).slice(0, 19).replace('T', ' ');
-    }
-    axios.post(config.BASE_URL + "/api/edit-task", {...editTask, start_time: st, end_time: et})
+    axios.post(config.BASE_URL + "/api/edit-task", {id: editTaskId, start_time: st, end_time: et})
     .then(function(response) {
       if (response.data.status == "OK") {
         loadTasks();
-        setEditTask({
-          task_id: 0,
-          description: "",
-          time: ""
-        });
+        setEditTaskId(null);
+        setEditTaskDescription("");
+        setSelectedEditStartTime(null);
+        setSelectedEditEndTime(null);
         closeEditTask();
       }
       else {
@@ -256,15 +234,10 @@ export default function Tasks({folder_id, folder}) {
     .then(function(response) {
       if (response.data.status == "OK") {
         var task = response.data.data;
-        setEditTask({
-          task_id: task_id,
-          description: task.description,
-          time: task.time,
-          start_time: moment(task.start_time).toDate(),
-          end_time: moment(task.end_time).toDate()
-        });
-        setSelectedStartTime(moment(task.start_time).toDate());
-        setSelectedEndTime(moment(task.end_time).toDate());
+        setEditTaskId(task.task_id);
+        setEditTaskDescription(task.description);
+        setSelectedEditStartTime(moment(task.start_time).format('YYYY-MM-DD HH:mm'));
+        setSelectedEditEndTime(moment(task.end_time).format('YYYY-MM-DD HH:mm'));
         var modal = bootstrap.Modal.getOrCreateInstance(document.querySelector('.editTaskModal'))
         modal.show();
         setShowEdit(true);
@@ -339,17 +312,11 @@ export default function Tasks({folder_id, folder}) {
   }
 
   function changeNewTaskDescription(e) {
-    setNewTask({
-      ...newTask,
-      description: e.target.value
-    });
+    setNewTaskDescription(e.target.value);
   }
 
   function changeEditTaskDescription(e) {
-    setEditTask({
-      ...editTask,
-      description: e.target.value
-    });
+    setEditTaskDescription(e.target.value);
   }
 
   function toggleHideDone() {
@@ -367,42 +334,6 @@ export default function Tasks({folder_id, folder}) {
       console.log(err);
     });
   }
-
-  useEffect(() => {
-    if (selectedStartTime && showNew) {
-      setNewTask(prev => ({
-        ...prev,
-        start_time: selectedStartTime
-      }));
-    }
-  }, [selectedStartTime]);
-
-  useEffect(() => {
-    if (selectedEndTime && showNew) {
-      setNewTask(prev => ({
-        ...prev,
-        end_time: selectedEndTime
-      }));
-    }
-  }, [selectedEndTime]);
-
-  useEffect(() => {
-    if (selectedStartTime && showEdit) {
-      setEditTask(prev => ({
-        ...prev,
-        start_time: selectedStartTime
-      }));
-    }
-  }, [selectedStartTime]);
-
-  useEffect(() => {
-    if (selectedEndTime && showEdit) {
-      setEditTask(prev => ({
-        ...prev,
-        end_time: selectedEndTime
-      }));
-    }
-  }, [selectedEndTime]);
 
   useEffect(() => {
     loadTasks();
@@ -452,25 +383,19 @@ export default function Tasks({folder_id, folder}) {
                 <div className="form-group py-2">
                   <label className="control-label">Description</label>
                   <div>
-                      <input type="text" className="form-control input-lg" name="description" value={newTask.description} onChange={changeNewTaskDescription}/>
+                      <input type="text" className="form-control input-lg" name="description" value={newTaskDescription} onChange={changeNewTaskDescription}/>
                   </div>
                 </div>
                 <div className="form-group py-2">
                   <label className="control-label">Start</label>
-                  <div>
-                    <DateTimePicker
-                      onChange={setSelectedStartTime}
-                      value={selectedStartTime}
-                    />
-                  </div>
+                    <div>
+                      <DateTimePicker defaultValue={selectedNewStartTime} onChange={setSelectedNewStartTime} />
+                    </div>
                 </div>
                 <div className="form-group py-2">
                   <label className="control-label">End</label>
                   <div>
-                    <DateTimePicker
-                      onChange={setSelectedEndTime}
-                      value={selectedEndTime}
-                    />
+                    <DateTimePicker defaultValue={selectedNewEndTime} onChange={setSelectedNewEndTime} />
                   </div>
                 </div>
                 <div className="form-group">
@@ -495,25 +420,19 @@ export default function Tasks({folder_id, folder}) {
                 <div className="form-group py-2">
                   <label className="control-label">Description</label>
                   <div>
-                      <input type="text" className="form-control input-lg" name="description" value={editTask.description} onChange={changeEditTaskDescription}/>
+                      <input type="text" className="form-control input-lg" name="description" value={editTaskDescription} onChange={changeEditTaskDescription}/>
                   </div>
                 </div>
                 <div className="form-group py-2">
                   <label className="control-label">Start</label>
                   <div>
-                    <DateTimePicker
-                      onChange={setSelectedStartTime}
-                      value={selectedStartTime}
-                    />
+                    <DateTimePicker defaultValue={selectedEditStartTime} onChange={setSelectedEditStartTime} />
                   </div>
                 </div>
                 <div className="form-group py-2">
                   <label className="control-label">End</label>
                   <div>
-                    <DateTimePicker
-                      onChange={setSelectedEndTime}
-                      value={selectedEndTime}
-                    />
+                    <DateTimePicker defaultValue={selectedEditEndTime} onChange={setSelectedEditEndTime} />
                   </div>
                 </div>
                 <div className="form-group">
