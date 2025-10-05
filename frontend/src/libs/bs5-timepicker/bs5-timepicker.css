@@ -1,0 +1,31 @@
+.tp-input-group {
+  display: inline-flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+.tp-separator {
+  display: inline-block;
+  padding: 0 .25rem;
+  font-weight: 600;
+  user-select: none;
+}
+.tp-number {
+  width: 4.5rem; /* small fixed width for number inputs */
+}
+/* compact small-screen adjustments */
+@media (max-width: 420px) {
+  .tp-number { width: 3.2rem; }
+}
+
+/* Focus / validation hints (lean on Bootstrap colours) */
+.tp-number.is-invalid { box-shadow: 0 0 0 .2rem rgba(220,53,69,.15); }
+.tp-number:focus { outline: none; box-shadow: 0 0 0 .15rem rgba(13,110,253,.15); }
+
+/* optional small AM/PM toggle */
+.tp-ampm {
+  display: inline-flex;
+  align-items: center;
+}
+.tp-ampm .btn {
+  padding: .275rem .5rem;
+}

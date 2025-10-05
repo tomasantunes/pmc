@@ -3,8 +3,9 @@ import {useNavigate} from 'react-router-dom';
 import axios from 'axios';
 import config from '../config';
 import moment from 'moment';
-import Swal from 'sweetalert2'
-import withReactContent from 'sweetalert2-react-content'
+import TimePicker from '../libs/bs5-timepicker/TimePicker';
+import Swal from 'sweetalert2';
+import withReactContent from 'sweetalert2-react-content';
 const MySwal = withReactContent(Swal)
 
 function TRow(props) {
@@ -85,23 +86,6 @@ export default function Tasks({folder_id, folder}) {
   const [tasks, setTasks] = useState([]);
   const [days, setDays] = useState([]);
   const [dates, setDates] = useState([]);
-  const [newTask, setNewTask] = useState({
-    description: "",
-    folder_id: folder_id,
-    sort_index: 0,
-    task_type: "daily",
-    days: "",
-    start_time: null,
-    end_time: null
-  });
-  const [editTask, setEditTask] = useState({
-    task_id: "",
-    description: "",
-    start_time: "",
-    end_time: "",
-    days: ""
-  });
-  const [selectedWeekDays, setSelectedWeekDays] = useState([]);
   const [mondayChecked, setMondayChecked] = useState(false);
   const [tuesdayChecked, setTuesdayChecked] = useState(false);
   const [wednesdayChecked, setWednesdayChecked] = useState(false);
@@ -109,8 +93,21 @@ export default function Tasks({folder_id, folder}) {
   const [fridayChecked, setFridayChecked] = useState(false);
   const [saturdayChecked, setSaturdayChecked] = useState(false);
   const [sundayChecked, setSundayChecked] = useState(false);
-  const [selectedStartTime, setSelectedStartTime] = useState(null);
-  const [selectedEndTime, setSelectedEndTime] = useState(null);
+  const [selectedNewStartTime, setSelectedNewStartTime] = useState("");
+  const [selectedNewEndTime, setSelectedNewEndTime] = useState("");
+  const [newTaskDescription, setNewTaskDescription] = useState("");
+  const [newTaskFolderId, setNewTaskFolderId] = useState(folder_id);
+  const [newTaskSortIndex, setNewTaskSortIndex] = useState(0);
+  const [newTaskType, setNewTaskType] = useState("daily");
+  const [newTaskDays, setNewTaskDays] = useState([]);
+  const [selectedEditStartTime, setSelectedEditStartTime] = useState("");
+  const [selectedEditEndTime, setSelectedEditEndTime] = useState("");
+  const [editTaskId, setEditTaskId] = useState(null);
+  const [editTaskDescription, setEditTaskDescription] = useState("");
+  const [editTaskFolderId, setEditTaskFolderId] = useState(folder_id);
+  const [editTaskSortIndex, setEditTaskSortIndex] = useState(null);
+  const [editTaskType, setEditTaskType] = useState("daily");
+  const [editTaskDays, setEditTaskDays] = useState([]);
   const [showNew, setShowNew] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
   var navigate = useNavigate();
@@ -164,140 +161,281 @@ export default function Tasks({folder_id, folder}) {
   function toggleMonday(e) {
     setMondayChecked(e.target.checked);
     if (e.target.checked) {
-      setSelectedWeekDays((prev) => {
-        var new_arr = prev;
-        new_arr.push(weekDays[0]);
-        return new_arr;
-      });
+      if (showNew) {
+        console.log("add monday");
+        setNewTaskDays((prev) => {
+          var new_arr = prev;
+          new_arr.push(weekDays[0]);
+          return new_arr;
+        });
+      }
+      else if (showEdit) {
+        setEditTaskDays((prev) => {
+          var new_arr = prev;
+          new_arr.push(weekDays[0]);
+          return new_arr;
+        });
+      }
     }
     else {
-      setSelectedWeekDays((prev) => {
-        var new_arr = prev;
-        new_arr = new_arr.filter((item) => {
-          return item.value != 1;
+      if (showNew) {
+        setNewTaskDays((prev) => {
+          var new_arr = prev;
+          new_arr = new_arr.filter((item) => {
+            return item.value != 1;
+          });
+          return new_arr;
         });
-        return new_arr;
-      });
+      }
+      else if (showEdit) {
+        setEditTaskDays((prev) => {
+          var new_arr = prev;
+          new_arr = new_arr.filter((item) => {
+            return item.value != 1;
+          });
+          return new_arr;
+        });
+      }
     }
   }
 
   function toggleTuesday(e) {
     setTuesdayChecked(e.target.checked);
     if (e.target.checked) {
-      setSelectedWeekDays((prev) => {
-        var new_arr = prev;
-        new_arr.push(weekDays[1]);
-        return new_arr;
-      });
+      if (showNew) {
+        setNewTaskDays((prev) => {
+          var new_arr = prev;
+          new_arr.push(weekDays[1]);
+          return new_arr;
+        });
+      }
+      else if (showEdit) {
+        setEditTaskDays((prev) => {
+          var new_arr = prev;
+          new_arr.push(weekDays[1]);
+          return new_arr;
+        });
+      }
     }
     else {
-      setSelectedWeekDays((prev) => {
-        var new_arr = prev;
-        new_arr = new_arr.filter((item) => {
-          return item.value != 2;
-        });
-        return new_arr;
+      if (showNew) {
+        setNewTaskDays((prev) => {
+          var new_arr = prev;
+          new_arr = new_arr.filter((item) => {
+            return item.value != 2;
+          });
+          return new_arr;
       });
+      }
+      else if (showEdit) {
+        setEditTaskDays((prev) => {
+          var new_arr = prev;
+          new_arr = new_arr.filter((item) => {
+            return item.value != 2;
+          });
+          return new_arr;
+        });
+      }
     }
   }
 
   function toggleWednesday(e) {
     setWednesdayChecked(e.target.checked);
     if (e.target.checked) {
-      setSelectedWeekDays((prev) => {
-        var new_arr = prev;
-        new_arr.push(weekDays[2]);
-        return new_arr;
-      });
+      if (showNew) {
+        setNewTaskDays((prev) => {
+          var new_arr = prev;
+          new_arr.push(weekDays[2]);
+          return new_arr;
+        });
+      }
+      else if (showEdit) {
+        setEditTaskDays((prev) => {
+          var new_arr = prev;
+          new_arr.push(weekDays[2]);
+          return new_arr;
+        });
+      }
     }
     else {
-      setSelectedWeekDays((prev) => {
-        var new_arr = prev;
-        new_arr = new_arr.filter((item) => {
-          return item.value != 3;
+      if (showNew) {
+        setNewTaskDays((prev) => {
+          var new_arr = prev;
+          new_arr = new_arr.filter((item) => {
+            return item.value != 3;
+          });
+          return new_arr;
         });
-        return new_arr;
-      });
+      }
+      else if (showEdit) {
+        setEditTaskDays((prev) => {
+          var new_arr = prev;
+          new_arr = new_arr.filter((item) => {
+            return item.value != 3;
+          });
+          return new_arr;
+        });
+      }
     }
   }
 
   function toggleThursday(e) {
     setThursdayChecked(e.target.checked);
     if (e.target.checked) {
-      setSelectedWeekDays((prev) => {
-        var new_arr = prev;
-        new_arr.push(weekDays[3]);
-        return new_arr;
-      });
+      if (showNew) {
+        setNewTaskDays((prev) => {
+          var new_arr = prev;
+          new_arr.push(weekDays[3]);
+          return new_arr;
+        });
+      }
+      else if (showEdit) {
+        setEditTaskDays((prev) => {
+          var new_arr = prev;
+          new_arr.push(weekDays[3]);
+          return new_arr;
+        });
+      }
     }
     else {
-      setSelectedWeekDays((prev) => {
-        var new_arr = prev;
-        new_arr = new_arr.filter((item) => {
-          return item.value != 4;
+      if (showNew) {
+        setNewTaskDays((prev) => {
+          var new_arr = prev;
+          new_arr = new_arr.filter((item) => {
+            return item.value != 4;
+          });
+          return new_arr;
         });
-        return new_arr;
-      });
+      }
+      else if (showEdit) {
+        setEditTaskDays((prev) => {
+          var new_arr = prev;
+          new_arr = new_arr.filter((item) => {
+            return item.value != 4;
+          });
+          return new_arr;
+        });
+      }
     }
   }
 
   function toggleFriday(e) {
     setFridayChecked(e.target.checked);
     if (e.target.checked) {
-      setSelectedWeekDays((prev) => {
-        var new_arr = prev;
-        new_arr.push(weekDays[4]);
-        return new_arr;
-      });
+      if (showNew) {
+        setNewTaskDays((prev) => {
+          var new_arr = prev;
+          new_arr.push(weekDays[4]);
+          return new_arr;
+        });
+      }
+      else if (showEdit) {
+        setEditTaskDays((prev) => {
+          var new_arr = prev;
+          new_arr.push(weekDays[4]);
+          return new_arr;
+        });
+      }
     }
     else {
-      setSelectedWeekDays((prev) => {
-        var new_arr = prev;
-        new_arr = new_arr.filter((item) => {
-          return item.value != 5;
+      if (showNew) {
+        setNewTaskDays((prev) => {
+          var new_arr = prev;
+          new_arr = new_arr.filter((item) => {
+            return item.value != 5;
+          });
+          return new_arr;
         });
-        return new_arr;
-      });
+      }
+      else if (showEdit) {
+        setEditTaskDays((prev) => {
+          var new_arr = prev;
+          new_arr = new_arr.filter((item) => {
+            return item.value != 5;
+          });
+          return new_arr;
+        });
+      }
     }
   }
 
   function toggleSaturday(e) {
     setSaturdayChecked(e.target.checked);
     if (e.target.checked) {
-      setSelectedWeekDays((prev) => {
-        var new_arr = prev;
-        new_arr.push(weekDays[5]);
-        return new_arr;
-      });
+      if (showNew) {
+        setNewTaskDays((prev) => {
+          var new_arr = prev;
+          new_arr.push(weekDays[5]);
+          return new_arr;
+        });
+      }
+      else if (showEdit) {
+        setEditTaskDays((prev) => {
+          var new_arr = prev;
+          new_arr.push(weekDays[5]);
+          return new_arr;
+        });
+      }
     }
     else {
-      setSelectedWeekDays((prev) => {
-        var new_arr = prev;
-        new_arr = new_arr.filter((item) => {
-          return item.value != 6;
+      if (showNew) {
+        setNewTaskDays((prev) => {
+          var new_arr = prev;
+          new_arr = new_arr.filter((item) => {
+            return item.value != 6;
+          });
+          return new_arr;
         });
-        return new_arr;
-      });
+      }
+      else if (showEdit) {
+        setEditTaskDays((prev) => {
+          var new_arr = prev;
+          new_arr = new_arr.filter((item) => {
+            return item.value != 6;
+          });
+          return new_arr;
+        });
+      }
     }
   }
 
   function toggleSunday(e) {
     setSundayChecked(e.target.checked);
     if (e.target.checked) {
-      setSelectedWeekDays((prev) => {
-        var new_arr = prev;
-        new_arr.push(weekDays[6]);
-        return new_arr;
-      });
+      if (showNew) {
+        setNewTaskDays((prev) => {
+          var new_arr = prev;
+          new_arr.push(weekDays[6]);
+          return new_arr;
+        });
+      }
+      else if (showEdit) {
+        setEditTaskDays((prev) => {
+          var new_arr = prev;
+          new_arr.push(weekDays[6]);
+          return new_arr;
+        });
+      }
     }
     else {
-      setSelectedWeekDays((prev) => {
-        var new_arr = prev;
-        new_arr = new_arr.filter((item) => {
-          return item.value != 0;
+      if (showNew) {
+        setNewTaskDays((prev) => {
+          var new_arr = prev;
+          new_arr = new_arr.filter((item) => {
+            return item.value != 0;
+          });
+          return new_arr;
         });
-        return new_arr;
-      });
+      }
+      else if (showEdit) {
+        setEditTaskDays((prev) => {
+          var new_arr = prev;
+          new_arr = new_arr.filter((item) => {
+            return item.value != 0;
+          });
+          return new_arr;
+        });
+      }
     }
   }
 
@@ -320,35 +458,31 @@ export default function Tasks({folder_id, folder}) {
 
   function submitAddTask(e) {
     e.preventDefault();
-    var days = selectedWeekDays.map((item) => {
+    var days = newTaskDays.map((item) => {
       return item.value;
     }).join(",");
 
-    var st;
-    var et;
-    if (newTask.start_time == null || newTask.end_time == null) {
-      st = "";
-      et = "";
-    }
-    else {
-      st = newTask.start_time.format("HH:mm");
-      et = newTask.end_time.format("HH:mm");
-    }
-
-    axios.post(config.BASE_URL + "/api/add-recurrent-task", {...newTask, sort_index: tasks.length, days: days, start_time: st, end_time: et})
+    axios.post(config.BASE_URL + "/api/add-recurrent-task", {
+      task_type: newTaskType, 
+      sort_index: newTaskSortIndex, 
+      days: days, 
+      start_time: moment(selectedNewStartTime, "HH:mm").set({year: 1970, month: 0, date: 1}).format("YYYY-MM-DD HH:mm"), 
+      end_time: moment(selectedNewEndTime, "HH:mm").set({year: 1970, month: 0, date: 1}).format("YYYY-MM-DD HH:mm"),
+      description: newTaskDescription,
+      folder_id: newTaskFolderId
+    })
     .then(function(response) {
       if (response.data.status == "OK") {
         loadTasks();
         var modal = bootstrap.Modal.getOrCreateInstance(document.querySelector('.addTaskModal'))
         modal.hide();
-        setNewTask({
-          description: "",
-          time: "",
-          folder_id: folder_id,
-          sort_index: 0,
-          days: ""
-        });
-        setSelectedWeekDays([]);
+        setNewTaskFolderId(folder_id);
+        setNewTaskSortIndex(0);
+        setNewTaskType("daily");
+        setNewTaskDays("");
+        setNewTaskDescription("");
+        setSelectedNewStartTime("");
+        setSelectedNewEndTime("");
         clearWeekDayChecks();
       }
       else {
@@ -363,16 +497,19 @@ export default function Tasks({folder_id, folder}) {
   function openAddTask() {
     var modal = bootstrap.Modal.getOrCreateInstance(document.querySelector('.addTaskModal'))
     modal.show();
+    setShowNew(true);
   }
 
   function closeAddTask() {
     var modal = bootstrap.Modal.getOrCreateInstance(document.querySelector('.addTaskModal'))
     modal.hide();
+    setShowNew(false);
   }
 
   function closeEditTask() {
     var modal = bootstrap.Modal.getOrCreateInstance(document.querySelector('.editTaskModal'))
     modal.hide();
+    setShowEdit(false);
   }
 
   function openEditTask(task_id) {
@@ -381,15 +518,14 @@ export default function Tasks({folder_id, folder}) {
     .then(function(response) {
       if (response.data.status == "OK") {
         var task = response.data.data;
-        console.log(task.start_time);
-        console.log(task.end_time);
-        setEditTask({
-          task_id: task.id,
-          description: task.description,
-          start_time: moment(task.start_time, 'YYYY-MM-DD HH:ss'),
-          end_time: moment(task.end_time, 'YYYY-MM-DD HH:ss'),
-          days: task.days
-        });
+        console.log(task);
+        setSelectedEditStartTime(moment(task.start_time, 'YYYY-MM-DD HH:mm:ss').format('HH:mm'));
+        setSelectedEditEndTime(moment(task.end_time, 'YYYY-MM-DD HH:mm:ss').format('HH:mm'));
+        setEditTaskId(task.id);
+        setEditTaskDescription(task.description);
+        setEditTaskFolderId(task.folder_id);
+        setEditTaskSortIndex(task.sort_index);
+        setEditTaskType(task.type);
         
         if (task.days != "") {
           var days = task.days.split(",");
@@ -402,13 +538,14 @@ export default function Tasks({folder_id, folder}) {
             setWeekDayCheck(days[i]);
             selected_days.push(week_day);
           }
-          setSelectedWeekDays(selected_days);
+          setEditTaskDays(selected_days);
         }
         else {
-          setSelectedWeekDays([]);
+          setEditTaskDays([]);
         }
         var modal = bootstrap.Modal.getOrCreateInstance(document.querySelector('.editTaskModal'))
         modal.show();
+        setShowEdit(true);
       }
       else {
         alert(response.data.error);
@@ -454,17 +591,11 @@ export default function Tasks({folder_id, folder}) {
   }
 
   function changeNewTaskDescription(e) {
-    setNewTask({
-      ...newTask,
-      description: e.target.value
-    });
+    setNewTaskDescription(e.target.value);
   }
 
   function changeEditTaskDescription(e) {
-    setEditTask({
-      ...editTask,
-      description: e.target.value
-    });
+    setEditTaskDescription(e.target.value);
   }
 
   function changeEditTaskWeekDays(items) {
@@ -472,29 +603,25 @@ export default function Tasks({folder_id, folder}) {
     for (var i in items) {
       days.push(items[i].value);
     }
-    setEditTask({
-      ...editTask,
-      days: days.join(",")
-    });
-    setSelectedWeekDays(items);
+    setEditTaskDays(items);
   }
 
   function submitEditTask(e) {
     e.preventDefault();
-    var days = selectedWeekDays.map((item) => {
+    var days = editTaskDays.map((item) => {
       return item.value;
     }).join(",");
-    var st;
-    var et;
-    if (editTask.start_time == null || editTask.end_time == null) {
-      st = "";
-      et = "";
-    }
-    else {
-      st = editTask.start_time.format("HH:mm");
-      et = editTask.end_time.format("HH:mm");
-    }
-    axios.post(config.BASE_URL + "/api/edit-recurrent-task", {...editTask, days: days, start_time: st, end_time: et})
+
+    axios.post(config.BASE_URL + "/api/edit-recurrent-task", {
+      task_id: editTaskId, 
+      days: days,
+      start_time: moment(selectedEditStartTime, "HH:mm").set({year: 1970, month: 0, date: 1}).format("YYYY-MM-DD HH:mm"), 
+      end_time: moment(selectedEditEndTime, "HH:mm").set({year: 1970, month: 0, date: 1}).format("YYYY-MM-DD HH:mm"), 
+      description: editTaskDescription, 
+      folder_id: editTaskFolderId, 
+      sort_index: editTaskSortIndex, 
+      task_type: editTaskType
+    })
     .then(function(response) {
       if (response.data.status == "OK") {
         loadTasks();
@@ -591,9 +718,6 @@ export default function Tasks({folder_id, folder}) {
 
   function updateTaskDone(e, task_id, index) {
     var dt = toLocaleISOString(dates[index]).split('T')[0];
-    console.log(dates[index]);
-    console.log(dt);
-    console.log(index);
     axios.post(config.BASE_URL + "/api/update-recurrent-task-done", {task_id: task_id, is_done: e.target.checked, date: dt})
     .then(function(response) {
       if (response.data.status == "OK") {
@@ -733,40 +857,8 @@ export default function Tasks({folder_id, folder}) {
   }
 
   useEffect(() => {
-    if (selectedStartTime && showNew) {
-      setNewTask({
-        ...newTask,
-        start_time: selectedStartTime
-      });
-    }
-  }, [selectedStartTime, showNew]);
-
-  useEffect(() => {
-    if (selectedEndTime && showNew) {
-      setNewTask({
-        ...newTask,
-        end_time: selectedEndTime
-      });
-    }
-  }, [selectedEndTime, showNew]);
-
-  useEffect(() => {
-    if (selectedStartTime && showEdit) {
-      setEditTask({
-        ...newTask,
-        start_time: selectedStartTime
-      });
-    }
-  }, [selectedStartTime, showEdit]);
-
-  useEffect(() => {
-    if (selectedEndTime && showEdit) {
-      setEditTask({
-        ...newTask,
-        end_time: selectedEndTime
-      });
-    }
-  }, [selectedEndTime, showEdit]);
+    setNewTaskSortIndex(tasks.length);
+  }, [tasks]);
 
   useEffect(() => {
     if (dates.length > 0) {
@@ -822,19 +914,29 @@ export default function Tasks({folder_id, folder}) {
                 <div className="form-group py-2">
                   <label className="control-label">Description</label>
                   <div>
-                      <input type="text" className="form-control input-lg" name="description" value={newTask.description} onChange={changeNewTaskDescription}/>
+                      <input type="text" className="form-control input-lg" name="description" value={newTaskDescription} onChange={changeNewTaskDescription}/>
                   </div>
                 </div>
                 <div className="form-group py-2">
                   <label className="control-label">Start Time</label>
                   <div>
-                      
+                      <TimePicker
+                        format="24"
+                        minuteStep={5}
+                        defaultValue={selectedNewStartTime}
+                        onChange={(str, obj) => setSelectedNewStartTime(str)}
+                      />
                   </div>
                 </div>
                 <div className="form-group py-2">
                   <label className="control-label">End Time</label>
                   <div>
-
+                      <TimePicker
+                        format="24"
+                        minuteStep={5}
+                        defaultValue={selectedNewEndTime}
+                        onChange={(str, obj) => setSelectedNewEndTime(str)}
+                      />
                   </div>
                 </div>
                 <div className="form-group py-2">
@@ -883,19 +985,29 @@ export default function Tasks({folder_id, folder}) {
                 <div className="form-group py-2">
                   <label className="control-label">Description</label>
                   <div>
-                      <input type="text" className="form-control input-lg" name="description" value={editTask.description} onChange={changeEditTaskDescription}/>
+                      <input type="text" className="form-control input-lg" name="description" value={editTaskDescription} onChange={changeEditTaskDescription}/>
                   </div>
                 </div>
                 <div className="form-group py-2">
                   <label className="control-label">Start Time</label>
                   <div>
-
+                    <TimePicker
+                      format="24"
+                      minuteStep={5}
+                      defaultValue={selectedEditStartTime}
+                      onChange={(str, obj) => setSelectedEditStartTime(str)}
+                    />
                   </div>
                 </div>
                 <div className="form-group py-2">
                   <label className="control-label">End Time</label>
                   <div>
-
+                    <TimePicker
+                      format="24"
+                      minuteStep={5}
+                      defaultValue={selectedEditEndTime}
+                      onChange={(str, obj) => setSelectedEditEndTime(str)}
+                    />
                   </div>
                 </div>
                 <div className="form-group py-2">

@@ -60,23 +60,17 @@ router.post("/api/add-recurrent-task", (req, res) => {
   var end_time2;
   var has_time = false;
   if (typeof start_time == "undefined" || start_time == "" || typeof end_time == "undefined" || end_time == "") {
-    start_time2 = new Date('1970-01-01Z00:00:00:000').toISOString().slice(0, 19).replace('T', ' ');
-    end_time2 = new Date('1970-01-01Z00:00:00:000').toISOString().slice(0, 19).replace('T', ' ');
+    start_time2 = utils.toLocaleISOString(new Date('1970-01-01Z00:00:00:000')).slice(0, 19).replace('T', ' ');
+    end_time2 = utils.toLocaleISOString(new Date('1970-01-01Z00:00:00:000')).slice(0, 19).replace('T', ' ');
   }
   else {
-    var dt1 = new Date();
-    var t1 = start_time.split(":");
-    dt1.setHours(t1[0], t1[1], 0);
-    start_time2 = dt1.toISOString().slice(0, 19).replace('T', ' ');
-    var dt2 = new Date();
-    var t2 = end_time.split(":");
-    dt2.setHours(t2[0], t2[1], 0);
-    end_time2 = dt2.toISOString().slice(0, 19).replace('T', ' ');
+    start_time2 = start_time;
+    end_time2 = end_time;
     has_time = true;
   }
   
-  var sql = "INSERT INTO tasks (folder_id, description, start_time, end_time, type, days, sort_index, is_done) VALUES (?, ?, ?, ?, ?, ?, ?, 0)";
-  con.query(sql, [folder_id, description, start_time2, end_time2, "recurrent", days, sort_index], async function (err, result) {
+  var sql = "INSERT INTO tasks (folder_id, description, start_time, end_time, type, days, sort_index, is_done) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+  con.query(sql, [folder_id, description, start_time2, end_time2, "recurrent", days, sort_index, 0], async function (err, result) {
     if (err) {
       console.log(err);
       res.json({status: "NOK", error: err.message});
@@ -90,11 +84,11 @@ router.post("/api/add-recurrent-task", (req, res) => {
 
       if (has_time) {
         var start_date = dates[i];
-        var st = start_time.split(":");
+        var st = start_time.split(" ")[1].split(":");
         start_date.setHours(st[0], st[1], 0);
         start_date = start_date.toISOString().slice(0, 19).replace('T', ' ');
         var end_date = dates[i];
-        var et = end_time.split(":");
+        var et = end_time.split(" ")[1].split(":");
         end_date.setHours(et[0], et[1], 0);
         end_date = end_date.toISOString().slice(0, 19).replace('T', ' ');
         console.log(start_date);
@@ -159,18 +153,12 @@ router.post("/api/edit-recurrent-task", (req, res) => {
   var end_time2;
   var has_time = false;
   if (typeof start_time == "undefined" || start_time == "" || typeof end_time == "undefined" || end_time == "") {
-    start_time2 = new Date('1970-01-01Z00:00:00:000').toISOString().slice(0, 19).replace('T', ' ');
-    end_time2 = new Date('1970-01-01Z00:00:00:000').toISOString().slice(0, 19).replace('T', ' ');
+    start_time2 = utils.toLocaleISOString(new Date('1970-01-01Z00:00:00:000')).slice(0, 19).replace('T', ' ');
+    end_time2 = utils.toLocaleISOString(new Date('1970-01-01Z00:00:00:000')).slice(0, 19).replace('T', ' ');
   }
   else {
-    var dt1 = new Date();
-    var t1 = start_time.split(":");
-    dt1.setHours(t1[0], t1[1], 0);
-    start_time2 = dt1.toISOString().slice(0, 19).replace('T', ' ');
-    var dt2 = new Date();
-    var t2 = end_time.split(":");
-    dt2.setHours(t2[0], t2[1], 0);
-    end_time2 = dt2.toISOString().slice(0, 19).replace('T', ' ');
+    start_time2 = start_time;
+    end_time2 = end_time;
     has_time = true;
   }
 
@@ -194,11 +182,11 @@ router.post("/api/edit-recurrent-task", (req, res) => {
 
       if (has_time) {
         var start_date = dates[i];
-        var st = start_time.split(":");
+        var st = start_time.split(" ")[1].split(":");
         start_date.setHours(st[0], st[1], 0);
         start_date = start_date.toISOString().slice(0, 19).replace('T', ' ');
         var end_date = dates[i];
-        var et = end_time.split(":");
+        var et = end_time.split(" ")[1].split(":");
         end_date.setHours(et[0], et[1], 0);
         end_date = end_date.toISOString().slice(0, 19).replace('T', ' ');
         var sql3 = "INSERT INTO events (task_id, start_date, end_date, description) VALUES (?, ?, ?, ?)";
