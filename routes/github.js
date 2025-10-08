@@ -13,7 +13,7 @@ router.get("/api/get-github-tasks", async (req, res) => {
   let text = "";
 
   try {
-    const { data: repos } = await octokit.rest.repos.listForAuthenticatedUser({
+    const repos = await octokit.paginate(octokit.repos.listForAuthenticatedUser, {
       per_page: 100,
     });
 
@@ -51,6 +51,46 @@ router.get("/api/get-github-tasks", async (req, res) => {
     return res.json({ status: "OK", data: text });
   } catch (err) {
     console.error("Top-level Octokit error:", err);
+    return res.status(500).json({
+      status: "NOK",
+      error: "Failed to fetch repositories.",
+    });
+  }
+});
+
+router.get("/api/get-github-issues", async (req, res) => {
+  if (!req.session.isLoggedIn) {
+    return res.json({ status: "NOK", error: "Invalid Authorization." });
+  }
+
+  let text = "";
+
+  try {
+    // 1. Get all your repos (including private ones if token allows)
+    const repos = await octokit.paginate(octokit.repos.listForAuthenticatedUser, {
+      per_page: 100,
+    });
+
+    for (const repo of repos) {
+      // 2. Get open issues for each repo
+      const issues = await octokit.paginate(octokit.issues.listForRepo, {
+        owner: repo.owner.login,
+        repo: repo.name,
+        state: "open",
+        per_page: 100,
+      });
+
+      if (issues.length > 0) {
+        text += `<h3>${repo.name}</h3><br/><br/>`;
+        for (const issue of issues) {
+          text += issue.title + "<br/>";
+        }
+        text += "<br/><br/>";
+      }
+    }
+    return res.json({ status: "OK", data: text });
+  } catch (error) {
+    console.error("Top-level Octokit error:", error);
     return res.status(500).json({
       status: "NOK",
       error: "Failed to fetch repositories.",
