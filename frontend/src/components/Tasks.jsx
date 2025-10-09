@@ -57,6 +57,8 @@ export default function Tasks({folder_id, folder}) {
   const [showEdit, setShowEdit] = useState(false);
   const [hideDone, setHideDone] = useState(folder.hide_done == 1 ? true : false);
   const [totalTasks, setTotalTasks] = useState(0);
+  const [nrTasksNotDone, setNrTasksNotDone] = useState(0);
+  const [nrTasksDone, setNrTasksDone] = useState(0);
   
 
   var navigate = useNavigate();
@@ -101,10 +103,14 @@ export default function Tasks({folder_id, folder}) {
     .then(function(response) {
       if (response.data.status == "OK") {
         var tasks_arr = response.data.data;
-        setTotalTasks(tasks_arr.length);
+        var nr_total_tasks = tasks_arr.length;
+        setTotalTasks(nr_total_tasks);
         if (folder.hide_done == 1) {
           tasks_arr = tasks_arr.filter(task => task.is_done == false);
         }
+        var nr_tasks_not_done = tasks_arr.length;
+        setNrTasksNotDone(tasks_arr.length);
+        setNrTasksDone(nr_total_tasks - nr_tasks_not_done);
         setTasks(tasks_arr);
       }
       else {
@@ -346,16 +352,25 @@ export default function Tasks({folder_id, folder}) {
   }, []);
   return (
     <>
-      <div className="buttons-menu my-3">
-        <button className="btn btn-success" onClick={openAddTask}>Add Task</button>
-        <div class="dropdown">
-          <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
-            Options
-          </button>
-          <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-            <li><a class="dropdown-item" href="#" onClick={deleteFolder}>Delete folder</a></li>
-            <li><a class="dropdown-item" href="#" onClick={toggleHideDone}>{hideDone ? "Show Done" : "Hide Done"}</a></li>
-          </ul>
+      <div className="row">
+        <div className="col-md-6">
+          <p><b>Total Tasks:</b> {totalTasks}</p>
+          <p><b>Tasks Done:</b> {nrTasksDone}</p>
+          <p><b>Tasks Not Done:</b> {nrTasksNotDone}</p>
+        </div>
+        <div className="col-md-6">
+          <div className="buttons-menu my-3">
+            <button className="btn btn-success" onClick={openAddTask}>Add Task</button>
+            <div class="dropdown">
+              <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                Options
+              </button>
+              <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                <li><a class="dropdown-item" href="#" onClick={deleteFolder}>Delete folder</a></li>
+                <li><a class="dropdown-item" href="#" onClick={toggleHideDone}>{hideDone ? "Show Done" : "Hide Done"}</a></li>
+              </ul>
+            </div>
+          </div>
         </div>
       </div>
       <table className="table table-striped table-bordered align-middle tasks">
