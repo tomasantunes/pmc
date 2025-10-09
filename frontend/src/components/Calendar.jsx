@@ -7,6 +7,7 @@ import moment from 'moment';
 import DateTimePicker from '../libs/bs5-datetime/DateTimePicker';
 import FullCalendar from '@fullcalendar/react';
 import timeGridPlugin from '@fullcalendar/timegrid';
+import listPlugin from '@fullcalendar/list';
 import interactionPlugin from '@fullcalendar/interaction';
 import {toLocaleISOString} from '../libs/utils';
 
@@ -15,6 +16,7 @@ export default function Home() {
   const [newEventTitle, setNewEventTitle] = useState("");
   const [selectedNewStartTime, setSelectedNewStartTime] = useState(null);
   const [selectedNewEndTime, setSelectedNewEndTime] = useState(null);
+  const [events, setEvents] = useState([]);
 
 
   const handleSelect = (info) => {
@@ -24,14 +26,26 @@ export default function Home() {
     openAddEvent();
   };
 
+  const handleDateClick = (info) => {
+    setNewEventTitle("");
+    setSelectedNewStartTime(moment(info.date).format("YYYY-MM-DD HH:mm"));
+    setSelectedNewEndTime(moment(info.date).add(1, "hour").format("YYYY-MM-DD HH:mm"));
+    openAddEvent();
+  };
+
+  const handleChangeView = (viewName) => {
+    const calendarApi = calendarRef.current.getApi();
+    calendarApi.changeView(viewName);
+  };
+
   function openAddEvent() {
-    var myModal = new bootstrap.Modal(document.querySelector('.addEventModal'));
-    myModal.show();
+    var modal = bootstrap.Modal.getOrCreateInstance(document.querySelector('.addEventModal'))
+    modal.show();
   }
 
   function closeAddEvent() {
-    var myModal = bootstrap.Modal.getInstance(document.querySelector('.addEventModal'));
-    myModal.hide();
+    var modal = bootstrap.Modal.getOrCreateInstance(document.querySelector('.addEventModal'))
+    modal.hide();
     setNewEventTitle("");
     setSelectedNewStartTime(null);
     setSelectedNewEndTime(null);
@@ -47,7 +61,6 @@ export default function Home() {
       end: moment(selectedNewEndTime, "YYYY-MM-DD HH:mm").toDate(),
     });
 
-    /*
     axios.post(config.BASE_URL + "/api/add-event", {
       start: selectedNewStartTime,
       end: selectedNewEndTime,
@@ -64,21 +77,46 @@ export default function Home() {
     .catch((error) => {
       alert("Error: " + error.message);
     });
-    */
-
-    closeAddEvent();
   }
+
+  function loadEvents() {
+    axios.get(config.BASE_URL + "/api/get-events")
+    .then((response) => {
+      if (response.data.status == "OK") {
+        const formattedEvents = response.data.data.map((e) => ({
+          title: e.value,
+          start: new Date(e.start),
+          end: new Date(e.end),
+        }));
+        setEvents(formattedEvents);
+      }
+    })
+    .catch((error) => {
+      alert("Error: " + error.message);
+    });
+  }
+
+  useEffect(() => {
+    loadEvents();
+  }, []);
 
   return (
     <>
       <Sidebar />
       <div className="page">
+        <h2>Calendar</h2>
+        <div className="mb-2">
+          <button className="btn btn-primary me-2" onClick={() => handleChangeView("timeGridWeek")}>Week View</button>
+          <button className="btn btn-primary" onClick={() => handleChangeView("listWeek")}>List View</button>
+        </div>
         <FullCalendar
           ref={calendarRef}
-          plugins={[timeGridPlugin, interactionPlugin]}
+          plugins={[timeGridPlugin, listPlugin, interactionPlugin]}
           initialView="timeGridWeek"
           selectable={true}
           select={handleSelect}
+          events={events}
+          dateClick={handleDateClick}
         />
       </div>
       <div class="modal addEventModal" tabindex="-1">
