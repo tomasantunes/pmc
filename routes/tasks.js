@@ -92,9 +92,6 @@ router.post("/api/add-task", (req, res) => {
   var end_time = req.body.end_time;
   var sort_index = req.body.sort_index;
 
-  console.log(start_time);
-  console.log(end_time);
-
   if (typeof start_time == "undefined" || start_time == "" || start_time == null || typeof end_time == "undefined" || end_time == "" || end_time == null) {
     start_time = utils.toLocaleISOString(new Date('1970-01-01Z00:00:00:000')).slice(0, 19).replace('T', ' ');
     end_time = utils.toLocaleISOString(new Date('1970-01-01Z00:00:00:000')).slice(0, 19).replace('T', ' ');
