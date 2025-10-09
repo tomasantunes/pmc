@@ -108,6 +108,9 @@ export default function Tasks({folder_id, folder}) {
   const [editTaskSortIndex, setEditTaskSortIndex] = useState(null);
   const [editTaskType, setEditTaskType] = useState("daily");
   const [editTaskDays, setEditTaskDays] = useState([]);
+  const [totalTasks, setTotalTasks] = useState(0);
+  const [nrTasksDone, setNrTasksDone] = useState(0);
+  const [nrTasksPending, setNrTasksPending] = useState(0);
   const [showNew, setShowNew] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
   var navigate = useNavigate();
@@ -762,15 +765,27 @@ export default function Tasks({folder_id, folder}) {
   }
 
   function loadTasks() {
-    setTasks([]);
     axios.get(config.BASE_URL + "/api/get-recurrent-tasks", {params: {folder_id: folder_id, dti: toLocaleISOString(dates[0]).split('T')[0], dtf: toLocaleISOString(dates[6]).split('T')[0]}})
     .then(async function(response) {
       if (response.data.status == "OK") {
         var data = response.data.data;
+        var count_tasks = 0;
+        var count_tasks_done = 0;
+        var count_tasks_pending = 0;
+        var today = new Date();
         for (var i in data) {
           var checks = [];
           var checks_visible = await getChecksVisible(data[i]);
           for (var j in data[i].checks) {
+            if (compareDates(new Date(data[i].checks[j].date.split("T")[0]), today)) {
+              count_tasks++;
+            }
+            if (compareDates(new Date(data[i].checks[j].date.split("T")[0]), today) && data[i].checks[j].is_done) {
+              count_tasks_done++;
+            }
+            if (compareDates(new Date(data[i].checks[j].date.split("T")[0]), today) && !data[i].checks[j].is_done) {
+              count_tasks_pending++;
+            }
             for (var k in dates) {
               if (compareDates(new Date(data[i].checks[j].date.split("T")[0]), dates[k]) && data[i].checks[j].is_done) {
                 checks.push(Number(k));
@@ -781,6 +796,9 @@ export default function Tasks({folder_id, folder}) {
           data[i].checks_visible = checks_visible;
         }
         var new_data = data;
+        setTotalTasks(count_tasks);
+        setNrTasksDone(count_tasks_done);
+        setNrTasksPending(count_tasks_pending);
         setTasks(new_data);
       }
       else {
@@ -789,6 +807,7 @@ export default function Tasks({folder_id, folder}) {
     })
     .catch(function(err) {
       console.log(err);
+      alert(err.message);
     });
   }
 
@@ -872,17 +891,26 @@ export default function Tasks({folder_id, folder}) {
   }, []);
   return (
     <>
-      <div className="buttons-menu-recurrent my-3">
-        <button className="btn btn-primary" onClick={previousWeek}><i class="fa-solid fa-arrow-left"></i></button>
-        <button className="btn btn-primary" onClick={nextWeek}><i class="fa-solid fa-arrow-right"></i></button>
-        <button className="btn btn-success" onClick={openAddTask}>Add Task</button>
-        <div class="dropdown">
-          <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
-            Options
-          </button>
-          <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-            <li><a class="dropdown-item" href="#" onClick={deleteFolder}>Delete folder</a></li>
-          </ul>
+      <div className="row">
+        <div className="col-md-6">
+          <p><b>Total tasks today:</b> {totalTasks}</p>
+          <p><b>Tasks done today:</b> {nrTasksDone}</p>
+          <p><b>Tasks pending today:</b> {nrTasksPending}</p>
+        </div>
+        <div className="col-md-6">
+          <div className="buttons-menu-recurrent my-3">
+            <button className="btn btn-primary" onClick={previousWeek}><i class="fa-solid fa-arrow-left"></i></button>
+            <button className="btn btn-primary" onClick={nextWeek}><i class="fa-solid fa-arrow-right"></i></button>
+            <button className="btn btn-success" onClick={openAddTask}>Add Task</button>
+            <div class="dropdown">
+              <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                Options
+              </button>
+              <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                <li><a class="dropdown-item" href="#" onClick={deleteFolder}>Delete folder</a></li>
+              </ul>
+            </div>
+          </div>
         </div>
       </div>
       <table className="table table-striped table-bordered align-middle recurrent-tasks">
