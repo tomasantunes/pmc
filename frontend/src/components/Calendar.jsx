@@ -33,6 +33,14 @@ export default function Home() {
     openAddEvent();
   };
 
+  function newEvent() {
+    setNewEventTitle("");
+    const now = moment();
+    setSelectedNewStartTime(now.format("YYYY-MM-DD HH:mm"));
+    setSelectedNewEndTime(now.add(1, "hour").format("YYYY-MM-DD HH:mm"));
+    openAddEvent();
+  }
+
   const handleChangeView = (viewName) => {
     const calendarApi = calendarRef.current.getApi();
     calendarApi.changeView(viewName);
@@ -105,9 +113,14 @@ export default function Home() {
       <Sidebar />
       <div className="page">
         <h2>Calendar</h2>
-        <div className="mb-2">
-          <button className="btn btn-primary me-2" onClick={() => handleChangeView("timeGridWeek")}>Week View</button>
-          <button className="btn btn-primary" onClick={() => handleChangeView("listWeek")}>List View</button>
+        <div className="row mb-2">
+          <div className="col-md-6">
+            <button className="btn btn-primary me-2" onClick={() => handleChangeView("timeGridWeek")}>Week View</button>
+            <button className="btn btn-primary" onClick={() => handleChangeView("listWeek")}>List View</button>
+          </div>
+          <div className="col-md-6 text-end">
+            <button className="btn btn-primary" onClick={newEvent}>New Event</button>
+          </div>
         </div>
         <FullCalendar
           ref={calendarRef}
