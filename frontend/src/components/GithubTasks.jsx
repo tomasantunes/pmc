@@ -4,60 +4,35 @@ import axios from 'axios';
 import config from '../config';
 
 export default function Home() {
-  const [githubTasks, setGithubTasks] = useState('');
-  const [githubIssues, setGithubIssues] = useState('');
+  const [githubRepos, setGithubRepos] = useState({});
   const [isLoading, setIsLoading] = useState(false);
-  const [loadingIssues, setLoadingIssues] = useState(false);
-  const [loadingTasks, setLoadingTasks] = useState(false);
-
-  function loadGithubIssues() {
-    setLoadingIssues(true);
-    axios.get(config.BASE_URL + "/api/get-github-issues")
-    .then(function(response) {
-      setLoadingIssues(false);
-      if (response.data.status == "OK") {
-        setGithubIssues(response.data.data);
-      }
-      else {
-        alert("Error loading Github Issues");
-      }
-    })
-    .catch(function(err) {
-      setLoadingIssues(false);
-      alert(err);
-    });
-  }
 
   function loadGithubTasks() {
-    setLoadingTasks(true);
+    setIsLoading(true);
     axios.get(config.BASE_URL + "/api/get-github-tasks")
     .then(function(response) {
-      setLoadingTasks(false);
+      setIsLoading(false);
       if (response.data.status == "OK") {
-        setGithubTasks(response.data.data);
+        setGithubRepos(response.data.data);
       }
       else {
         alert("Error loading Github Tasks");
       }
     })
     .catch(function(err) {
-      setLoadingTasks(false);
+      setIsLoading(false);
       alert(err);
     });
   }
 
   useEffect(() => {
-    setIsLoading(loadingIssues || loadingTasks);
-  }, [loadingIssues, loadingTasks]);
-
-  useEffect(() => {
-    loadGithubIssues();
     loadGithubTasks();
   }, []);
   return (
     <>
       <Sidebar />
       <div className="page">
+        <h2>Github Tasks</h2>
         {isLoading &&
           <div style={{textAlign: "center"}}>
             <div class="spinner-border" role="status">
@@ -65,10 +40,21 @@ export default function Home() {
             </div>
           </div>
         }
-        <h2>Github Issues</h2>
-        <div dangerouslySetInnerHTML={{__html: githubIssues}}></div>
-        <h2>Github Tasks</h2>
-        <div dangerouslySetInnerHTML={{__html: githubTasks}}></div>
+        {Object.keys(githubRepos).length === 0 && !isLoading &&
+          <div>No tasks found in your repositories.</div>
+        }
+        {Object.keys(githubRepos).map((repoName) => (
+          <div key={repoName} style={{marginBottom: "20px"}}>
+            <h4><a href={githubRepos[repoName].repo_url} target="_blank">{githubRepos[repoName].repo_name}</a></h4>
+            <ul className="github-tasks-list">
+              {githubRepos[repoName].tasks.map((task, index) => (
+                <li key={index}>
+                  {task.url ? <a href={task.url} target="_blank">{task.title}</a> : task.title}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
       </div>
     </>
   )

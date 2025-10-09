@@ -174,6 +174,28 @@ tbody {
 	display: block;
 }
 
+.github-tasks-list {
+    list-style-type: none;
+    padding: 0;
+}
+
+.github-tasks-list li {
+    margin: 10px 0;
+    padding: 10px;
+    border: 1px solid #888;
+    border-radius: 5px;
+    background-color: #ccc;
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+    color: black;
+    font-weight: bold;
+}
+
+.github-tasks-list li a, .github-tasks-list li a:visited, .github-tasks-list li a:active, .github-tasks-list li a:hover, .github-tasks-list li a:focus {
+    color: black;
+    text-decoration: underline;
+    font-weight: bold;
+}
+
 @media (max-width: 767.98px) {
   .sidebar {
     transform: translateX(-100%);
