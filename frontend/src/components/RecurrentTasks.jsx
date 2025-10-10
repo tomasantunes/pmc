@@ -63,6 +63,7 @@ function TRow(props) {
             <li><a class="dropdown-item" href="#" onClick={() => { props.openEditTask(props.task_id) }}>Edit</a></li>
             <li><a class="dropdown-item" href="#" onClick={() => { props.deleteTask(props.task_id) }}>Delete</a></li>
             <li><a class="dropdown-item" href="#" onClick={() => { props.cancelTask(props.task_id) }}>Cancel Today's Task</a></li>
+            <li><a class="dropdown-item" href="#" onClick={() => { props.restartTask(props.task_id) }}>Restart Task</a></li>
             </ul>
         </div>
       </td>
@@ -75,7 +76,7 @@ function TBodyPlain(props) {
     <tbody {...props} className="table-group-divider">
       {props.data.map((task, i) => {
         return (
-          <TRow key={task.id} index={i} task_id={task.id} description={task.description} time={task.time} checks={task.checks} type={task.type} checks_visible={task.checks_visible} updateTaskDone={props.updateTaskDone} openEditTask={props.openEditTask} deleteTask={props.deleteTask} cancelTask={props.cancelTask} />
+          <TRow key={task.id} index={i} task_id={task.id} description={task.description} time={task.time} checks={task.checks} type={task.type} checks_visible={task.checks_visible} updateTaskDone={props.updateTaskDone} openEditTask={props.openEditTask} deleteTask={props.deleteTask} cancelTask={props.cancelTask} restartTask={props.restartTask} />
         )
       })}
     </tbody>
@@ -459,6 +460,22 @@ export default function Tasks({folder_id, folder}) {
     });
   }
 
+  function restartTask(task_id) {
+    axios.post(config.BASE_URL + "/api/restart-recurrent-task", {task_id: task_id})
+    .then(function(response) {
+      if (response.data.status == "OK") {
+        loadTasks();
+      }
+      else {
+        alert(response.data.error);
+      }
+    })
+    .catch(function(err) {
+      console.log(err);
+      alert(err.message);
+    });
+  }
+
   function submitAddTask(e) {
     e.preventDefault();
     var days = newTaskDays.map((item) => {
@@ -768,34 +785,38 @@ export default function Tasks({folder_id, folder}) {
     axios.get(config.BASE_URL + "/api/get-recurrent-tasks", {params: {folder_id: folder_id, dti: toLocaleISOString(dates[0]).split('T')[0], dtf: toLocaleISOString(dates[6]).split('T')[0]}})
     .then(async function(response) {
       if (response.data.status == "OK") {
-        var data = response.data.data;
+        var new_data = response.data.data.map(task => ({
+          ...task,
+          checks: [...task.checks],
+        }));
+
         var count_tasks = 0;
         var count_tasks_done = 0;
         var count_tasks_pending = 0;
         var today = new Date();
-        for (var i in data) {
+
+        for (var i in new_data) {
           var checks = [];
-          var checks_visible = await getChecksVisible(data[i]);
-          for (var j in data[i].checks) {
-            if (compareDates(new Date(data[i].checks[j].date.split("T")[0]), today)) {
+          var checks_visible = await getChecksVisible(new_data[i]);
+          for (var j in new_data[i].checks) {
+            const check = new_data[i].checks[j];
+            const checkDate = new Date(check.date.split("T")[0]);
+            if (compareDates(checkDate, today)) {
               count_tasks++;
+              if (check.is_done) count_tasks_done++;
+              else count_tasks_pending++;
             }
-            if (compareDates(new Date(data[i].checks[j].date.split("T")[0]), today) && data[i].checks[j].is_done) {
-              count_tasks_done++;
-            }
-            if (compareDates(new Date(data[i].checks[j].date.split("T")[0]), today) && !data[i].checks[j].is_done) {
-              count_tasks_pending++;
-            }
+
             for (var k in dates) {
-              if (compareDates(new Date(data[i].checks[j].date.split("T")[0]), dates[k]) && data[i].checks[j].is_done) {
+              if (compareDates(checkDate, dates[k]) && check.is_done) {
                 checks.push(Number(k));
               }
             }
           }
-          data[i].checks = checks;
-          data[i].checks_visible = checks_visible;
+          new_data[i].checks = checks;
+          new_data[i].checks_visible = checks_visible;
         }
-        var new_data = data;
+
         setTotalTasks(count_tasks);
         setNrTasksDone(count_tasks_done);
         setNrTasksPending(count_tasks_pending);
@@ -928,7 +949,7 @@ export default function Tasks({folder_id, folder}) {
                   <th style={{width: "10%"}}>Actions</th>
               </tr>
           </thead>
-          <TBodyPlain data={tasks} updateTaskDone={updateTaskDone} openEditTask={openEditTask} deleteTask={deleteTask} cancelTask={cancelTask} />
+          <TBodyPlain data={tasks} updateTaskDone={updateTaskDone} openEditTask={openEditTask} deleteTask={deleteTask} cancelTask={cancelTask} restartTask={restartTask} />
       </table>
       <div class="modal addTaskModal" tabindex="-1">
         <div class="modal-dialog">
