@@ -270,4 +270,51 @@ router.post("/api/cancel-task", (req, res) => {
   });
 });
 
+router.post("/api/uncancel-task", (req, res) => {
+  if (!req.session.isLoggedIn) {
+    res.json({status: "NOK", error: "Invalid Authorization."});
+    return;
+  }
+
+  var task_id = req.body.task_id;
+  var dt = req.body.date;
+
+  var sql = "SELECT * FROM recurrent_checks WHERE task_id = ? AND date = ?";
+  con.query(sql, [task_id, dt], function (err, result) {
+    if (err) {
+      console.log(err);
+      res.json({status: "NOK", error: err.message});
+      return;
+    }
+    if (result.length > 0) {
+      if (result[0].is_done == 1) {
+        res.json({status: "NOK", error: "Task has already been done."});
+        return;
+      }
+      else {
+        var sql2 = "UPDATE recurrent_checks SET is_cancelled = 0 WHERE task_id = ? AND date = ?";
+        con.query(sql2, [task_id, dt], function (err2, result2) {
+          if (err2) {
+            console.log(err2);
+            res.json({status: "NOK", error: err2.message});
+          }
+          res.json({status: "OK", data: "Task has been uncancelled successfully."});
+          return;
+        });
+      }
+    }
+    else {
+      var sql2 = "INSERT INTO recurrent_checks (task_id, date, is_cancelled, is_done) VALUES (?, ?, 0, 0)";
+      con.query(sql2, [task_id, dt], function (err2, result2) {
+        if (err2) {
+          console.log(err2);
+          res.json({status: "NOK", error: err2.message});
+        }
+        res.json({status: "OK", data: "Task has been uncancelled successfully."});
+        return;
+      });
+    }
+  });
+});
+
 module.exports = router;

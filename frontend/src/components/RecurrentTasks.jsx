@@ -8,9 +8,25 @@ import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
 const MySwal = withReactContent(Swal)
 
+const weekDays = [
+  {value: 1, label: "Monday"},
+  {value: 2, label: "Tuesday"},
+  {value: 3, label: "Wednesday"},
+  {value: 4, label: "Thursday"},
+  {value: 5, label: "Friday"},
+  {value: 6, label: "Saturday"},
+  {value: 0, label: "Sunday"},
+];
+
 function TRow(props) {
+  var today = new Date();
+  var current_idx = weekDays.findIndex((d) => {
+    return d.value == today.getDay();
+  });
   const [checks, setChecks] = useState([]);
   const [checksVisible, setChecksVisible] = useState([]);
+  const [checksCancelled, setChecksCancelled] = useState([]);
+  const [currentIdx, setCurrentIdx] = useState(current_idx);
 
   function toggleCheck(e, task_id, index) {
     setChecks((prev) => {
@@ -24,6 +40,7 @@ function TRow(props) {
   useEffect(() => {
     var checks_arr = [];
     var checks_visible_arr = [];
+    var checks_cancelled_arr = [];
     for (var i = 0; i < 7; i++) {
       if (props.checks.includes(i)) {
         checks_arr.push(true);
@@ -38,10 +55,20 @@ function TRow(props) {
       else {
         checks_visible_arr.push(false);
       }
+
+      if (props.checks_cancelled.includes(i)) {
+        checks_cancelled_arr.push(true);
+      }
+      else {
+        checks_cancelled_arr.push(false);
+      }
     }
+    console.log(checks_cancelled_arr);
+    console.log(currentIdx);
     checks_visible_arr.push(checks_visible_arr.splice(0, 1)[0]);
     setChecks(checks_arr);
     setChecksVisible(checks_visible_arr);
+    setChecksCancelled(checks_cancelled_arr);
   }, []);
   return (
     <tr {...props}>
@@ -62,7 +89,11 @@ function TRow(props) {
             <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
             <li><a class="dropdown-item" href="#" onClick={() => { props.openEditTask(props.task_id) }}>Edit</a></li>
             <li><a class="dropdown-item" href="#" onClick={() => { props.deleteTask(props.task_id) }}>Delete</a></li>
+            {!checksCancelled[currentIdx] ?
             <li><a class="dropdown-item" href="#" onClick={() => { props.cancelTask(props.task_id) }}>Cancel Today's Task</a></li>
+            :
+            <li><a class="dropdown-item" href="#" onClick={() => { props.uncancelTask(props.task_id) }}>Uncancel Today's Task</a></li>
+            }
             <li><a class="dropdown-item" href="#" onClick={() => { props.restartTask(props.task_id) }}>Restart Task</a></li>
             </ul>
         </div>
@@ -76,7 +107,7 @@ function TBodyPlain(props) {
     <tbody {...props} className="table-group-divider">
       {props.data.map((task, i) => {
         return (
-          <TRow key={task.id} index={i} task_id={task.id} description={task.description} time={task.time} checks={task.checks} type={task.type} checks_visible={task.checks_visible} updateTaskDone={props.updateTaskDone} openEditTask={props.openEditTask} deleteTask={props.deleteTask} cancelTask={props.cancelTask} restartTask={props.restartTask} />
+          <TRow key={task.id} index={i} task_id={task.id} description={task.description} time={task.time} checks={task.checks} type={task.type} checks_visible={task.checks_visible} checks_cancelled={task.checks_cancelled} updateTaskDone={props.updateTaskDone} openEditTask={props.openEditTask} deleteTask={props.deleteTask} cancelTask={props.cancelTask} uncancelTask={props.uncancelTask} restartTask={props.restartTask} />
         )
       })}
     </tbody>
@@ -115,16 +146,6 @@ export default function Tasks({folder_id, folder}) {
   const [showNew, setShowNew] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
   var navigate = useNavigate();
-
-  const weekDays = [
-    {value: 1, label: "Monday"},
-    {value: 2, label: "Tuesday"},
-    {value: 3, label: "Wednesday"},
-    {value: 4, label: "Thursday"},
-    {value: 5, label: "Friday"},
-    {value: 6, label: "Saturday"},
-    {value: 0, label: "Sunday"},
-  ];
 
   /*
   const handleSort = ({ oldIndex, newIndex }) => {
@@ -448,7 +469,23 @@ export default function Tasks({folder_id, folder}) {
     axios.post(config.BASE_URL + "/api/cancel-task", {task_id: task_id, date: toLocaleISOString(new Date()).split('T')[0]})
     .then(function(response) {
       if (response.data.status == "OK") {
-        loadTasks();
+        window.location.reload();
+      }
+      else {
+        alert(response.data.error);
+      }
+    })
+    .catch(function(err) {
+      console.log(err);
+      alert(err.message);
+    });
+  }
+
+  function uncancelTask(task_id) {
+    axios.post(config.BASE_URL + "/api/uncancel-task", {task_id: task_id, date: toLocaleISOString(new Date()).split('T')[0]})
+    .then(function(response) {
+      if (response.data.status == "OK") {
+        window.location.reload();
       }
       else {
         alert(response.data.error);
@@ -797,6 +834,7 @@ export default function Tasks({folder_id, folder}) {
 
         for (var i in new_data) {
           var checks = [];
+          var checks_cancelled = [];
           var checks_visible = await getChecksVisible(new_data[i]);
           for (var j in new_data[i].checks) {
             const check = new_data[i].checks[j];
@@ -811,9 +849,13 @@ export default function Tasks({folder_id, folder}) {
               if (compareDates(checkDate, dates[k]) && check.is_done) {
                 checks.push(Number(k));
               }
+              if (compareDates(checkDate, dates[k]) && check.is_cancelled) {
+                checks_cancelled.push(Number(k));
+              }
             }
           }
           new_data[i].checks = checks;
+          new_data[i].checks_cancelled = checks_cancelled;
           new_data[i].checks_visible = checks_visible;
         }
 
@@ -949,7 +991,7 @@ export default function Tasks({folder_id, folder}) {
                   <th style={{width: "10%"}}>Actions</th>
               </tr>
           </thead>
-          <TBodyPlain data={tasks} updateTaskDone={updateTaskDone} openEditTask={openEditTask} deleteTask={deleteTask} cancelTask={cancelTask} restartTask={restartTask} />
+          <TBodyPlain data={tasks} updateTaskDone={updateTaskDone} openEditTask={openEditTask} deleteTask={deleteTask} cancelTask={cancelTask} uncancelTask={uncancelTask} restartTask={restartTask} />
       </table>
       <div class="modal addTaskModal" tabindex="-1">
         <div class="modal-dialog">
