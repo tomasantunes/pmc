@@ -1,4 +1,5 @@
 import React, {useEffect, useState} from 'react';
+import {useNavigate} from 'react-router-dom';
 import Tasks from './Tasks';
 import RecurrentTasks from './RecurrentTasks';
 import TasksList from './TasksList';
@@ -7,6 +8,8 @@ import config from '../config';
 
 export default function TasksPage({folder_id}) {
   const [folder, setFolder] = useState({});
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const navigate = useNavigate();
 
   function getFolderInfo(folder_id) {
     axios.get(config.BASE_URL + "/api/get-folder", {
@@ -66,15 +69,38 @@ export default function TasksPage({folder_id}) {
     }
   }
 
+  function checkLogin() {
+    axios.post(config.BASE_URL + "/check-login")
+    .then(response => {
+      if (response.data.status === "OK") {
+        setIsLoggedIn(true);
+      }
+      else {
+        navigate('/login');
+      }
+    })
+    .catch(error => {
+      navigate('/login');
+    });
+  }
+
   useEffect(() => {
+    checkLogin();
     getFolderInfo(folder_id);
   }, []);
-  return (
-    <div className="page">
-        <div style={{textAlign: "center"}}>
-            <h3>{folder.name}<a href="#" className="edit-folder-name-btn" onClick={openEditFolderName}><i class="fa-solid fa-pencil"></i></a></h3>
-        </div>
-        {renderTasksElement()}
-    </div>
-  )
+
+
+  if (isLoggedIn) {
+    return (
+      <div className="page">
+          <div style={{textAlign: "center"}}>
+              <h3>{folder.name}<a href="#" className="edit-folder-name-btn" onClick={openEditFolderName}><i class="fa-solid fa-pencil"></i></a></h3>
+          </div>
+          {renderTasksElement()}
+      </div>
+    );
+  }
+  else {
+    return (<></>);
+  }
 }

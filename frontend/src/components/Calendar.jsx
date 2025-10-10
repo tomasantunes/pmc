@@ -1,4 +1,5 @@
 import React, {useEffect, useState, useRef} from 'react';
+import {useNavigate} from 'react-router-dom';
 import Sidebar from './Sidebar';
 import Stats from './Stats';
 import axios from 'axios';
@@ -17,6 +18,8 @@ export default function Home() {
   const [selectedNewStartTime, setSelectedNewStartTime] = useState(null);
   const [selectedNewEndTime, setSelectedNewEndTime] = useState(null);
   const [events, setEvents] = useState([]);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const navigate = useNavigate();
 
 
   const handleSelect = (info) => {
@@ -104,71 +107,92 @@ export default function Home() {
     });
   }
 
+  function checkLogin() {
+    axios.post(config.BASE_URL + "/check-login")
+    .then(response => {
+      if (response.data.status === "OK") {
+        setIsLoggedIn(true);
+      }
+      else {
+        navigate('/login');
+      }
+    })
+    .catch(error => {
+      navigate('/login');
+    });
+  }
+
   useEffect(() => {
+    checkLogin();
     loadEvents();
   }, []);
 
-  return (
-    <>
-      <Sidebar />
-      <div className="page">
-        <h2>Calendar</h2>
-        <div className="row mb-2">
-          <div className="col-md-6">
-            <button className="btn btn-primary me-2" onClick={() => handleChangeView("timeGridWeek")}>Week View</button>
-            <button className="btn btn-primary" onClick={() => handleChangeView("listWeek")}>List View</button>
-          </div>
-          <div className="col-md-6 text-end">
-            <button className="btn btn-primary" onClick={newEvent}>New Event</button>
-          </div>
-        </div>
-        <FullCalendar
-          ref={calendarRef}
-          plugins={[timeGridPlugin, listPlugin, interactionPlugin]}
-          initialView="timeGridWeek"
-          selectable={true}
-          select={handleSelect}
-          events={events}
-          dateClick={handleDateClick}
-        />
-      </div>
-      <div class="modal addEventModal" tabindex="-1">
-        <div class="modal-dialog">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title">Add Event</h5>
-              <button type="button" class="btn-close" onClick={closeAddEvent} aria-label="Close"></button>
+  if (isLoggedIn) {
+    return (
+      <>
+        <Sidebar />
+        <div className="page">
+          <h2>Calendar</h2>
+          <div className="row mb-2">
+            <div className="col-md-6">
+              <button className="btn btn-primary me-2" onClick={() => handleChangeView("timeGridWeek")}>Week View</button>
+              <button className="btn btn-primary" onClick={() => handleChangeView("listWeek")}>List View</button>
             </div>
-            <div class="modal-body">
-              <form onSubmit={submitAddEvent}>
-                <div className="form-group py-2">
-                  <label className="control-label">Title</label>
-                  <div>
-                      <input type="text" className="form-control input-lg" name="description" value={newEventTitle} onChange={(e) => setNewEventTitle(e.target.value)}/>
-                  </div>
-                </div>
-                <div className="form-group py-2">
-                  <label className="control-label">Start</label>
-                  <div>
-                    <DateTimePicker value={selectedNewStartTime} defaultValue={selectedNewStartTime} onChange={setSelectedNewStartTime} />
-                  </div>
-                </div>
-                <div className="form-group py-2">
-                  <label className="control-label">End</label>
-                  <div>
-                    <DateTimePicker value={selectedNewEndTime} defaultValue={selectedNewEndTime} onChange={setSelectedNewEndTime} />
-                  </div>
-                </div>
-                <div className="form-group">
-                    <div style={{textAlign: "right"}}>
-                      <button type="submit" className="btn btn-primary">Add</button>
+            <div className="col-md-6 text-end">
+              <button className="btn btn-primary" onClick={newEvent}>New Event</button>
+            </div>
+          </div>
+          <FullCalendar
+            ref={calendarRef}
+            plugins={[timeGridPlugin, listPlugin, interactionPlugin]}
+            initialView="timeGridWeek"
+            selectable={true}
+            select={handleSelect}
+            events={events}
+            dateClick={handleDateClick}
+          />
+        </div>
+        <div class="modal addEventModal" tabindex="-1">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title">Add Event</h5>
+                <button type="button" class="btn-close" onClick={closeAddEvent} aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                <form onSubmit={submitAddEvent}>
+                  <div className="form-group py-2">
+                    <label className="control-label">Title</label>
+                    <div>
+                        <input type="text" className="form-control input-lg" name="description" value={newEventTitle} onChange={(e) => setNewEventTitle(e.target.value)}/>
                     </div>
-                </div>
-              </form>
+                  </div>
+                  <div className="form-group py-2">
+                    <label className="control-label">Start</label>
+                    <div>
+                      <DateTimePicker value={selectedNewStartTime} defaultValue={selectedNewStartTime} onChange={setSelectedNewStartTime} />
+                    </div>
+                  </div>
+                  <div className="form-group py-2">
+                    <label className="control-label">End</label>
+                    <div>
+                      <DateTimePicker value={selectedNewEndTime} defaultValue={selectedNewEndTime} onChange={setSelectedNewEndTime} />
+                    </div>
+                  </div>
+                  <div className="form-group">
+                      <div style={{textAlign: "right"}}>
+                        <button type="submit" className="btn btn-primary">Add</button>
+                      </div>
+                  </div>
+                </form>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    </>
-  )
+      </>
+    )
+  }
+  else {
+    return (<></>);
+  }
 }
