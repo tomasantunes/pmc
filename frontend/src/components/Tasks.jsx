@@ -21,8 +21,8 @@ function TRow(props) {
           Actions
         </button>
         <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-          <li><a class="dropdown-item" href="#" onClick={() => { props.openEditTask(props.task_id) }}>Edit</a></li>
-          <li><a class="dropdown-item" href="#" onClick={() => { props.deleteTask(props.task_id) }}>Delete</a></li>
+          <li><a class="dropdown-item" href="javascript:void(0)" onClick={() => { props.openEditTask(props.task_id) }}>Edit</a></li>
+          <li><a class="dropdown-item" href="javascript:void(0)" onClick={() => { props.deleteTask(props.task_id) }}>Delete</a></li>
         </ul>
       </div>
       </td>
@@ -271,7 +271,7 @@ export default function Tasks({folder_id, folder}) {
       showCancelButton: true,
       confirmButtonColor: "#3085d6",
       cancelButtonColor: "#d33",
-      confirmButtonText: "Yes"
+      confirmButtonText: "Yes",
     }).then((result) => {
       if (result.isConfirmed) {
         axios.post(config.BASE_URL + "/api/delete-task", {task_id: task_id})
