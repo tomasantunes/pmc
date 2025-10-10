@@ -20,6 +20,7 @@ router.get("/api/get-recurrent-tasks", (req, res) => {
     if (err) {
       console.log(err);
       res.json({status: "NOK", error: err.message});
+      return;
     }
 
     for (var i in result) {
@@ -74,6 +75,7 @@ router.post("/api/add-recurrent-task", (req, res) => {
     if (err) {
       console.log(err);
       res.json({status: "NOK", error: err.message});
+      return;
     }
     
     var dates = utils.getDatesUntilNextYear(days);
@@ -91,8 +93,6 @@ router.post("/api/add-recurrent-task", (req, res) => {
         var et = end_time.split(" ")[1].split(":");
         end_date.setHours(et[0], et[1], 0);
         end_date = end_date.toISOString().slice(0, 19).replace('T', ' ');
-        console.log(start_date);
-        console.log(end_date);
         var sql3 = "INSERT INTO events (task_id, start_date, end_date, description) VALUES (?, ?, ?, ?)";
         await con2.query(sql3, [result.insertId, start_date, end_date, description]);
       }
@@ -114,6 +114,7 @@ router.post("/api/update-recurrent-task-done", (req, res) => {
     if (err) {
       console.log(err);
       res.json({status: "NOK", error: err.message});
+      return;
     }
     if (result.length > 0) {
       var sql2 = "UPDATE recurrent_checks SET is_done = ? WHERE task_id = ? AND date = ?";
@@ -167,6 +168,7 @@ router.post("/api/edit-recurrent-task", (req, res) => {
     if (err) {
       console.log(err);
       res.json({status: "NOK", error: err.message});
+      return;
     }
 
     var sql2 = "DELETE FROM recurrent_checks WHERE task_id = ? AND date > DATE(NOW())";
@@ -196,6 +198,29 @@ router.post("/api/edit-recurrent-task", (req, res) => {
 
     res.json({status: "OK", data: "Task has been updated successfully."});
   });
+});
+
+router.post("/api/restart-recurrent-task", async (req, res) => {
+  if (!req.session.isLoggedIn) {
+    res.json({status: "NOK", error: "Invalid Authorization."});
+    return;
+  }
+
+  var task_id = req.body.task_id;
+  var now = new Date();
+  var now_date = utils.toLocaleISOString(now).slice(0, 10);
+  var now_datetime = utils.toLocaleISOString(now);
+
+  var sql = "DELETE FROM recurrent_checks WHERE task_id = ? AND date < ?";
+  await con2.query(sql, [task_id, now_date]);
+
+  var sql2 = "DELETE FROM events WHERE task_id = ? AND start_date < DATE(NOW())";
+  await con2.query(sql2, [task_id]);
+
+  var sql3 = "UPDATE tasks SET created_at = ? WHERE id = ?";
+  await con2.query(sql3, [now_datetime, task_id]);
+
+  res.json({status: "OK", data: "Recurrent task has been restarted."})
 });
 
 router.post("/api/cancel-task", (req, res) => {
