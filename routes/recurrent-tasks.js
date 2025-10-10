@@ -29,8 +29,8 @@ router.get("/api/get-recurrent-tasks", (req, res) => {
       result[i].checks = checks;
 
       var dt_range = utils.getRangeOfDates(new Date(dti), new Date(dtf));
-      for (var i in dt_range) {
-        var dt = dt_range[i];
+      for (var j in dt_range) {
+        var dt = dt_range[j];
         var wd = dt.getDay();
         var is_cancelled = await recurrentTasks.checkIfTaskIsCancelled(task_id, dt.toISOString().slice(0, 10));
         if (is_cancelled) {
@@ -242,6 +242,7 @@ router.post("/api/cancel-task", (req, res) => {
     if (result.length > 0) {
       if (result[0].is_done == 1) {
         res.json({status: "NOK", error: "Task has already been done."});
+        return;
       }
       else {
         var sql2 = "UPDATE recurrent_checks SET is_cancelled = 1 WHERE task_id = ? AND date = ?";
@@ -251,6 +252,7 @@ router.post("/api/cancel-task", (req, res) => {
             res.json({status: "NOK", error: err2.message});
           }
           res.json({status: "OK", data: "Task has been cancelled successfully."});
+          return;
         });
       }
     }
@@ -262,6 +264,7 @@ router.post("/api/cancel-task", (req, res) => {
           res.json({status: "NOK", error: err2.message});
         }
         res.json({status: "OK", data: "Task has been cancelled successfully."});
+        return;
       });
     }
   });
