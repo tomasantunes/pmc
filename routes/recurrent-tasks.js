@@ -40,6 +40,10 @@ router.get("/api/get-recurrent-tasks", (req, res) => {
           result[i].days = days.join(",");
         }
       }
+
+      if (result[i].start_time == "1970-01-01 00:00:00" && result[i].end_time == "1970-01-01 00:00:00") {
+        result[i].time = "";
+      }
     }
     res.json({status: "OK", data: result});
   });
@@ -60,9 +64,10 @@ router.post("/api/add-recurrent-task", (req, res) => {
   var start_time2;
   var end_time2;
   var has_time = false;
-  if (typeof start_time == "undefined" || start_time == "" || typeof end_time == "undefined" || end_time == "") {
-    start_time2 = utils.toLocaleISOString(new Date('1970-01-01Z00:00:00:000')).slice(0, 19).replace('T', ' ');
-    end_time2 = utils.toLocaleISOString(new Date('1970-01-01Z00:00:00:000')).slice(0, 19).replace('T', ' ');
+
+  if (typeof start_time == "undefined" || start_time == "" || typeof end_time == "undefined" || end_time == "" || start_time == "Invalid date" || end_time == "Invalid date") {
+    start_time2 = "1970-01-01 00:00";
+    end_time2 = "1970-01-01 00:00";
   }
   else {
     start_time2 = start_time;
