@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import {useNavigate} from 'react-router-dom';
 import axios from 'axios';
 import config from '../config';
@@ -125,15 +125,23 @@ export default function Tasks({folder_id, folder}) {
   const [fridayChecked, setFridayChecked] = useState(false);
   const [saturdayChecked, setSaturdayChecked] = useState(false);
   const [sundayChecked, setSundayChecked] = useState(false);
-  const [selectedNewStartTime, setSelectedNewStartTime] = useState("");
-  const [selectedNewEndTime, setSelectedNewEndTime] = useState("");
+  const newStartTimeRef = useRef(null);
+  const newEndTimeRef = useRef(null);
+  const editStartTimeRef = useRef(null);
+  const editEndTimeRef = useRef(null);
+  const [enableNewStartTime, setEnableNewStartTime] = useState(false);
+  const [enableNewEndTime, setEnableNewEndTime] = useState(false);
+  const [enableEditStartTime, setEnableEditStartTime] = useState(false);
+  const [enableEditEndTime, setEnableEditEndTime] = useState(false);
+  const [selectedNewStartTime, setSelectedNewStartTime] = useState("00:00");
+  const [selectedNewEndTime, setSelectedNewEndTime] = useState("00:00");
   const [newTaskDescription, setNewTaskDescription] = useState("");
   const [newTaskFolderId, setNewTaskFolderId] = useState(folder_id);
   const [newTaskSortIndex, setNewTaskSortIndex] = useState(0);
   const [newTaskType, setNewTaskType] = useState("daily");
   const [newTaskDays, setNewTaskDays] = useState([]);
-  const [selectedEditStartTime, setSelectedEditStartTime] = useState("");
-  const [selectedEditEndTime, setSelectedEditEndTime] = useState("");
+  const [selectedEditStartTime, setSelectedEditStartTime] = useState("00:00");
+  const [selectedEditEndTime, setSelectedEditEndTime] = useState("00:00");
   const [editTaskId, setEditTaskId] = useState(null);
   const [editTaskDescription, setEditTaskDescription] = useState("");
   const [editTaskFolderId, setEditTaskFolderId] = useState(folder_id);
@@ -182,6 +190,22 @@ export default function Tasks({folder_id, folder}) {
     return false;
   }
   */
+
+  function changeEnableNewStartTime(e) {
+    setEnableNewStartTime(e.target.checked);
+  }
+
+  function changeEnableNewEndTime(e) {
+    setEnableNewEndTime(e.target.checked);
+  }
+
+  function changeEnableEditStartTime(e) {
+    setEnableEditStartTime(e.target.checked);
+  }
+
+  function changeEnableEditEndTime(e) {
+    setEnableEditEndTime(e.target.checked);
+  }
 
   function toggleMonday(e) {
     setMondayChecked(e.target.checked);
@@ -519,12 +543,23 @@ export default function Tasks({folder_id, folder}) {
       return item.value;
     }).join(",");
 
+    var start_time = "";
+    var end_time = "";
+
+    if (enableNewStartTime == true) {
+      start_time = selectedNewStartTime;
+    }
+
+    if (enableNewEndTime == true) {
+      end_time = selectedNewEndTime;
+    }
+
     axios.post(config.BASE_URL + "/api/add-recurrent-task", {
       task_type: newTaskType, 
       sort_index: newTaskSortIndex, 
       days: days, 
-      start_time: moment(selectedNewStartTime, "HH:mm").set({year: 1970, month: 0, date: 1}).format("YYYY-MM-DD HH:mm"), 
-      end_time: moment(selectedNewEndTime, "HH:mm").set({year: 1970, month: 0, date: 1}).format("YYYY-MM-DD HH:mm"),
+      start_time: moment(start_time, "HH:mm").set({year: 1970, month: 0, date: 1}).format("YYYY-MM-DD HH:mm"), 
+      end_time: moment(end_time, "HH:mm").set({year: 1970, month: 0, date: 1}).format("YYYY-MM-DD HH:mm"),
       description: newTaskDescription,
       folder_id: newTaskFolderId
     })
@@ -669,11 +704,22 @@ export default function Tasks({folder_id, folder}) {
       return item.value;
     }).join(",");
 
+    var start_time = "";
+    var end_time = "";
+
+    if (enableEditStartTime == true) {
+      start_time = selectedEditStartTime;
+    }
+
+    if (enableEditEndTime == true) {
+      end_time = selectedEditEndTime;
+    }
+
     axios.post(config.BASE_URL + "/api/edit-recurrent-task", {
       task_id: editTaskId, 
       days: days,
-      start_time: moment(selectedEditStartTime, "HH:mm").set({year: 1970, month: 0, date: 1}).format("YYYY-MM-DD HH:mm"), 
-      end_time: moment(selectedEditEndTime, "HH:mm").set({year: 1970, month: 0, date: 1}).format("YYYY-MM-DD HH:mm"), 
+      start_time: moment(start_time, "HH:mm").set({year: 1970, month: 0, date: 1}).format("YYYY-MM-DD HH:mm"), 
+      end_time: moment(end_time, "HH:mm").set({year: 1970, month: 0, date: 1}).format("YYYY-MM-DD HH:mm"), 
       description: editTaskDescription, 
       folder_id: editTaskFolderId, 
       sort_index: editTaskSortIndex, 
@@ -949,6 +995,30 @@ export default function Tasks({folder_id, folder}) {
   }, [dates]);
 
   useEffect(() => {
+    if (newStartTimeRef.current) {
+      newStartTimeRef.current.setActive(enableNewStartTime);
+    }
+  }, [enableNewStartTime]);
+
+  useEffect(() => {
+    if (newEndTimeRef.current) {
+      newEndTimeRef.current.setActive(enableNewEndTime);
+    }
+  }, [enableNewEndTime]);
+
+  useEffect(() => {
+    if (editStartTimeRef.current) {
+      editStartTimeRef.current.setActive(enableEditStartTime);
+    }
+  }, [enableEditStartTime]);
+
+  useEffect(() => {
+    if (editEndTimeRef.current) {
+      editEndTimeRef.current.setActive(enableEditEndTime);
+    }
+  }, [enableEditEndTime]);
+
+  useEffect(() => {
     setDays(getDays());
     setDates(getDates());
   }, []);
@@ -1011,23 +1081,35 @@ export default function Tasks({folder_id, folder}) {
                 <div className="form-group py-2">
                   <label className="control-label">Start Time</label>
                   <div>
-                      <TimePicker
-                        format="24"
-                        minuteStep={5}
-                        defaultValue={selectedNewStartTime}
-                        onChange={(str, obj) => setSelectedNewStartTime(str)}
-                      />
+                    <input type="checkbox" checked={enableNewStartTime} onChange={changeEnableNewStartTime} />
+                    <TimePicker
+                      ref={newStartTimeRef}
+                      format="24"
+                      minuteStep={5}
+                      defaultValue={selectedNewStartTime}
+                      onChange={(str, obj) => setSelectedNewStartTime(str)}
+                      className="mx-2"
+                      onReady={(pickerInstance) => {
+                        pickerInstance.setActive(false);
+                      }}
+                    />
                   </div>
                 </div>
                 <div className="form-group py-2">
                   <label className="control-label">End Time</label>
                   <div>
-                      <TimePicker
-                        format="24"
-                        minuteStep={5}
-                        defaultValue={selectedNewEndTime}
-                        onChange={(str, obj) => setSelectedNewEndTime(str)}
-                      />
+                    <input type="checkbox" checked={enableNewEndTime} onChange={changeEnableNewEndTime} />
+                    <TimePicker
+                      ref={newEndTimeRef}
+                      format="24"
+                      minuteStep={5}
+                      defaultValue={selectedNewEndTime}
+                      onChange={(str, obj) => setSelectedNewEndTime(str)}
+                      className="mx-2"
+                      onReady={(pickerInstance) => {
+                        pickerInstance.setActive(false);
+                      }}
+                    />
                   </div>
                 </div>
                 <div className="form-group py-2">
@@ -1082,22 +1164,34 @@ export default function Tasks({folder_id, folder}) {
                 <div className="form-group py-2">
                   <label className="control-label">Start Time</label>
                   <div>
+                    <input type="checkbox" checked={enableEditStartTime} onChange={changeEnableEditStartTime} />
                     <TimePicker
+                      ref={editStartTimeRef}
                       format="24"
                       minuteStep={5}
                       defaultValue={selectedEditStartTime}
                       onChange={(str, obj) => setSelectedEditStartTime(str)}
+                      className="mx-2"
+                      onReady={(pickerInstance) => {
+                        pickerInstance.setActive(false);
+                      }}
                     />
                   </div>
                 </div>
                 <div className="form-group py-2">
                   <label className="control-label">End Time</label>
                   <div>
+                    <input type="checkbox" checked={enableEditEndTime} onChange={changeEnableEditEndTime} />
                     <TimePicker
+                      ref={editEndTimeRef}
                       format="24"
                       minuteStep={5}
                       defaultValue={selectedEditEndTime}
                       onChange={(str, obj) => setSelectedEditEndTime(str)}
+                      className="mx-2"
+                      onReady={(pickerInstance) => {
+                        pickerInstance.setActive(false);
+                      }}
                     />
                   </div>
                 </div>
