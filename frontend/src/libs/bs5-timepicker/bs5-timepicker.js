@@ -252,6 +252,22 @@
       if (this.options.format === '12') return `${hh}:${mm} ${v.ampm}`;
       return `${hh}:${mm}`;
     }
+
+    setActive(isActive) {
+      if (isActive === false) {
+        console.log('Disabling TimePicker inputs');
+        console.log('hourInput:', this.hourInput);
+        this.hourInput.setAttribute('disabled', '');
+        this.minuteInput.setAttribute('disabled', '');
+        if (this.amBtn) this.amBtn.setAttribute('disabled', '');
+        if (this.pmBtn) this.pmBtn.setAttribute('disabled', '');
+      } else {
+        this.hourInput.removeAttribute('disabled');
+        this.minuteInput.removeAttribute('disabled');
+        if (this.amBtn) this.amBtn.removeAttribute('disabled');
+        if (this.pmBtn) this.pmBtn.removeAttribute('disabled');
+      }
+    }
   }
 
   // expose globally
