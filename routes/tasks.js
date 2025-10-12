@@ -61,6 +61,23 @@ router.post("/api/update-task-done", (req, res) => {
   });
 });
 
+router.post("/api/update-task-starred", (req, res) => {
+  if (!req.session.isLoggedIn) {
+    res.json({status: "NOK", error: "Invalid Authorization."});
+    return;
+  }
+  var task_id = req.body.task_id;
+  var is_starred = req.body.is_starred;
+  var sql = "UPDATE tasks SET starred = ? WHERE id = ?";
+  con.query(sql, [is_starred, task_id], function (err, result) {
+    if (err) {
+      console.log(err);
+      res.json({status: "NOK", error: err.message});
+    }
+    res.json({status: "OK", data: "Task has been updated successfully."});
+  });
+});
+
 router.post("/api/update-all-tasks-done", (req, res) => {
   if (!req.session.isLoggedIn) {
     res.json({status: "NOK", error: "Invalid Authorization."});
@@ -70,7 +87,7 @@ router.post("/api/update-all-tasks-done", (req, res) => {
   var folder_id = req.body.folder_id;
   var is_done = req.body.is_done;
 
-  var sql = "UPDATE tasks SET is_done = ? WHERE folder_id = ?";
+  var sql = "UPDATE tasks SET is_done = ? WHERE folder_id = ? AND starred = 0";
   con.query(sql, [is_done, folder_id], function (err, result) {
     if (err) {
       console.log(err);
