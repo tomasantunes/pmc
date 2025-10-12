@@ -16,6 +16,11 @@ function TRow(props) {
       <td className={props.is_done ? "strikethrough" : ""}>{props.description}</td>
       <td>{props.time}</td>
       <td>
+        <button className="btn btn-secondary" onClick={() => { props.updateTaskStarred(props.task_id); }} key={Math.random()}>
+          {props.starred ? <i className="fa-solid fa-star"></i> : <i className="fa-regular fa-star"></i>}
+        </button>
+      </td>
+      <td>
       <div class="dropdown">
         <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
           Actions
@@ -35,7 +40,7 @@ function TBodyPlain(props) {
     <tbody {...props} className="table-group-divider">
       {props.data.map((task, i) => {
         return (
-          <TRow key={task.id} index={i} task_id={task.id} description={task.description} time={task.time} is_done={task.is_done} updateTaskDone={props.updateTaskDone} openEditTask={props.openEditTask} deleteTask={props.deleteTask} />
+          <TRow key={task.id} index={i} task_id={task.id} description={task.description} time={task.time} is_done={task.is_done} starred={task.starred} updateTaskDone={props.updateTaskDone} openEditTask={props.openEditTask} deleteTask={props.deleteTask} updateTaskStarred={props.updateTaskStarred} />
         )
       })}
     </tbody>
@@ -124,6 +129,23 @@ export default function Tasks({folder_id, folder}) {
 
   function updateTaskDone(e, task_id) {
     axios.post(config.BASE_URL + "/api/update-task-done", {task_id: task_id, is_done: e.target.checked, date_done: toLocaleISOString(new Date()).slice(0, 19).replace('T', ' ')})
+    .then(function(response) {
+      if (response.data.status == "OK") {
+        loadTasks();
+      }
+      else {
+        alert(response.data.error);
+      }
+    })
+    .catch(function(err) {
+      console.log(err);
+    });
+  }
+
+  function updateTaskStarred(task_id) {
+    let task = tasks.find(t => t.id === task_id);
+    let is_starred = !task.starred;
+    axios.post(config.BASE_URL + "/api/update-task-starred", {task_id: task_id, is_starred: is_starred})
     .then(function(response) {
       if (response.data.status == "OK") {
         loadTasks();
@@ -353,39 +375,70 @@ export default function Tasks({folder_id, folder}) {
   return (
     <>
       <div className="row">
-        <div className="col-md-6">
-          <p><b>Total Tasks:</b> {totalTasks}</p>
-          <p><b>Tasks Done:</b> {nrTasksDone}</p>
-          <p><b>Tasks Not Done:</b> {nrTasksNotDone}</p>
-        </div>
-        <div className="col-md-6">
-          <div className="buttons-menu my-3">
-            <button className="btn btn-success" onClick={openAddTask}>Add Task</button>
-            <div class="dropdown">
-              <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
-                Options
-              </button>
-              <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-                <li><a class="dropdown-item" href="#" onClick={deleteFolder}>Delete folder</a></li>
-                <li><a class="dropdown-item" href="#" onClick={toggleHideDone}>{hideDone ? "Show Done" : "Hide Done"}</a></li>
-              </ul>
+        <div className="col-md-8"></div>
+        <div className="col-md-4">
+          <div className="simple-tasks-header">
+            <div className="text-end">
+                <p><b>Total Tasks:</b> {totalTasks}</p>
+                <p><b>Tasks Done:</b> {nrTasksDone}</p>
+                <p><b>Tasks Not Done:</b> {nrTasksNotDone}</p>
+            </div>
+          </div>
+          <div>
+            <div className="buttons-menu my-3">
+              <button className="btn btn-success" onClick={openAddTask}>Add Task</button>
+              <div class="dropdown">
+                <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                  Options
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                  <li><a class="dropdown-item" href="#" onClick={deleteFolder}>Delete folder</a></li>
+                  <li><a class="dropdown-item" href="#" onClick={toggleHideDone}>{hideDone ? "Show Done" : "Hide Done"}</a></li>
+                </ul>
+              </div>
             </div>
           </div>
         </div>
       </div>
-      <table className="table table-striped table-bordered align-middle tasks">
-          <thead class="table-dark">
-              <tr>
-                  <th style={{width: "10%"}}>
-                    <input type="checkbox" checked={tasks.filter(task => task.is_done == true).length > 0 && tasks.length > 0} onChange={(e) => { e.target.checked ? setAllTasksDone() : setAllTasksNotDone() }} />
-                  </th>
-                  <th style={{width: "50%"}}>Task</th>
-                  <th style={{width: "20%"}}>Time</th>
-                  <th style={{width: "20%"}}>Actions</th>
-              </tr>
-          </thead>
-          <TBodyPlain data={tasks} updateTaskDone={updateTaskDone} openEditTask={openEditTask} deleteTask={deleteTask} />
-      </table>
+      {tasks.filter(task => task.starred == true).length > 0 && 
+        <div className="mb-4">
+          <div className="text-center">
+            <h3>Starred Tasks</h3>
+          </div>
+          <table className="table table-striped table-bordered align-middle tasks">
+              <thead class="table-dark">
+                  <tr>
+                      <th style={{width: "10%"}}>
+                      </th>
+                      <th style={{width: "50%"}}>Task</th>
+                      <th style={{width: "15%"}}>Time</th>
+                      <th style={{width: "10%"}}>Starred</th>
+                      <th style={{width: "15%"}}>Actions</th>
+                  </tr>
+              </thead>
+              <TBodyPlain data={tasks.filter(task => task.starred == true)} updateTaskDone={updateTaskDone} updateTaskStarred={updateTaskStarred} openEditTask={openEditTask} deleteTask={deleteTask} />
+          </table>
+        </div>
+      }
+      <div>
+        <div className="text-center">
+          <h3>Tasks</h3>
+        </div>
+        <table className="table table-striped table-bordered align-middle tasks">
+            <thead class="table-dark">
+                <tr>
+                    <th style={{width: "10%"}}>
+                      <input type="checkbox" checked={tasks.filter(task => task.is_done == true && task.starred == false).length > 0 && tasks.length > 0} onChange={(e) => { e.target.checked ? setAllTasksDone() : setAllTasksNotDone() }} />
+                    </th>
+                    <th style={{width: "50%"}}>Task</th>
+                    <th style={{width: "15%"}}>Time</th>
+                    <th style={{width: "10%"}}>Starred</th>
+                    <th style={{width: "15%"}}>Actions</th>
+                </tr>
+            </thead>
+            <TBodyPlain data={tasks.filter(task => task.starred == false)} updateTaskDone={updateTaskDone} updateTaskStarred={updateTaskStarred} openEditTask={openEditTask} deleteTask={deleteTask} />
+        </table>
+      </div>
       <div class="modal addTaskModal" tabindex="-1">
         <div class="modal-dialog">
           <div class="modal-content">

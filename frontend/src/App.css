@@ -223,3 +223,10 @@ tbody {
     width: 100%;
   }
 }
+
+.simple-tasks-header {
+    padding: 25px;
+    background-color: #ccc;
+    border-radius: 10px;
+    border: 2px solid #555;
+}
