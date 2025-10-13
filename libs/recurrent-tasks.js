@@ -25,11 +25,9 @@ async function checkIfTaskIsCancelled(task_id, dt) {
   }
 }
 
-async function checkIfTaskIsToday(task) {
+async function checkIfTaskIsOnThisWeekDay(task) {
   var today = new Date();
-  var dd = today.getDate();
   var wd = today.getDay() - 1;
-  var mm = today.getMonth() + 1;
 
   var is_cancelled = await checkIfTaskIsCancelled(task.id, utils.toLocaleISOString(today).slice(0, 10));
 
@@ -43,11 +41,11 @@ async function checkIfTaskIsToday(task) {
 
 module.exports = {
     checkIfTaskIsCancelled,
-    checkIfTaskIsToday,
+    checkIfTaskIsOnThisWeekDay,
     getTaskChecks,
     default: {
         checkIfTaskIsCancelled,
-        checkIfTaskIsToday,
+        checkIfTaskIsOnThisWeekDay,
         getTaskChecks
     }
 };

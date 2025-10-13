@@ -199,7 +199,7 @@ export default function Tasks({folder_id, folder}) {
       st = "";
       et = "";
     }
-    axios.post(config.BASE_URL + "/api/add-task", {folder_id: folder_id, description: newTaskDescription, start_time: st, end_time: et, sort_index: totalTasks})
+    axios.post(config.BASE_URL + "/api/add-task", {folder_id: folder_id, description: newTaskDescription, start_time: st, end_time: et, sort_index: totalTasks, type: "single"})
     .then(function(response) {
       if (response.data.status == "OK") {
         loadTasks();

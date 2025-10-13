@@ -1,4 +1,5 @@
 var database = require('./database');
+var {checkIfTaskIsOnThisWeekDay} = require('./recurrent-tasks');
 
 var { con, con2 } = database.getMySQLConnections();
 
@@ -10,10 +11,10 @@ async function getTaskList() {
   return arr;
 }
 
-async function getTodayTasks(tasks, cb) {
+async function getTasksOnThisWeekDay(tasks, cb) {
   var today_tasks = [];
   for (var i in tasks) {
-    if (await checkIfTaskIsToday(tasks[i])) {
+    if (await checkIfTaskIsOnThisWeekDay(tasks[i])) {
       today_tasks.push(tasks[i].id);
     }
   }
@@ -22,9 +23,9 @@ async function getTodayTasks(tasks, cb) {
 
 module.exports = {
     getTaskList,
-    getTodayTasks,
+    getTasksOnThisWeekDay,
     default: {
         getTaskList,
-        getTodayTasks
+        getTasksOnThisWeekDay
     }
 };
