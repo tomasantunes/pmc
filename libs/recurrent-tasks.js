@@ -1,4 +1,5 @@
 var database = require('./database');
+var utils = require('./utils');
 
 var { con, con2 } = database.getMySQLConnections();
 
@@ -30,7 +31,7 @@ async function checkIfTaskIsToday(task) {
   var wd = today.getDay() - 1;
   var mm = today.getMonth() + 1;
 
-  var is_cancelled = await checkIfTaskIsCancelled(task.id, today.toISOString().slice(0, 10));
+  var is_cancelled = await checkIfTaskIsCancelled(task.id, utils.toLocaleISOString(today).slice(0, 10));
 
   var days = task.days.split(",");
   days = days.map(Number);
