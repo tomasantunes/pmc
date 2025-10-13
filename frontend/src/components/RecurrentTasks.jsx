@@ -155,42 +155,6 @@ export default function Tasks({folder_id, folder}) {
   const [showEdit, setShowEdit] = useState(false);
   var navigate = useNavigate();
 
-  /*
-  const handleSort = ({ oldIndex, newIndex }) => {
-    setTasks(prevState => {
-      var new_arr = arrayMove(prevState, oldIndex, newIndex);
-      updateSortIndex(new_arr);
-      return new_arr;
-    });
-  };
-
-  function updateSortIndex(new_arr) {
-    for (var i in new_arr) {
-      var task = new_arr[i];
-      axios.post(config.BASE_URL + "/api/handle-sort", {task_id: task.id, sort_index: i})
-      .then(function(response) {
-        if (response.data.status == "OK") {
-          console.log("Sort index has been updated.");
-        }
-        else {
-          alert(response.data.error);
-        }
-      })
-      .catch(function(err) {
-        console.log(err);
-      });
-    }
-  }
-  
-
-  function cancelSort(e) {
-    if (e.target.className == "dropdown-item" || e.target.className == "dropdown-menu" || e.target.tagName == "INPUT" || e.target.tagName == "A" || e.target.tagName == "BUTTON") {
-      return true;
-    }
-    return false;
-  }
-  */
-
   function changeEnableNewStartTime(e) {
     setEnableNewStartTime(e.target.checked);
   }
@@ -847,7 +811,6 @@ export default function Tasks({folder_id, folder}) {
     if (task.days != "") {
       var checks_visible = task.days.split(",");
       checks_visible = checks_visible.map(Number);
-      console.log(checks_visible);
       var idx_arr = [1, 2, 3, 4, 5, 6, 0];
       for (var i in dates) {
         if (dateIsLessThan(dates[i], new Date(task.created_at.split("T")[0]))) {
@@ -856,6 +819,7 @@ export default function Tasks({folder_id, folder}) {
           });
         }
       }
+      console.log(checks_visible);
       return checks_visible;
     }
     else {
@@ -1061,7 +1025,7 @@ export default function Tasks({folder_id, folder}) {
                   <th style={{width: "10%"}}>Actions</th>
               </tr>
           </thead>
-          <TBodyPlain data={tasks} updateTaskDone={updateTaskDone} openEditTask={openEditTask} deleteTask={deleteTask} cancelTask={cancelTask} uncancelTask={uncancelTask} restartTask={restartTask} />
+          <TBodyPlain key={Math.random()} data={tasks} updateTaskDone={updateTaskDone} openEditTask={openEditTask} deleteTask={deleteTask} cancelTask={cancelTask} uncancelTask={uncancelTask} restartTask={restartTask} />
       </table>
       <div class="modal addTaskModal" tabindex="-1">
         <div class="modal-dialog">

@@ -32,7 +32,7 @@ router.get("/api/get-recurrent-tasks", (req, res) => {
       for (var j in dt_range) {
         var dt = dt_range[j];
         var wd = dt.getDay();
-        var is_cancelled = await recurrentTasks.checkIfTaskIsCancelled(task_id, dt.toISOString().slice(0, 10));
+        var is_cancelled = await recurrentTasks.checkIfTaskIsCancelled(task_id, utils.toLocaleISOString(dt).slice(0, 10));
         if (is_cancelled) {
           var days = result[i].days.split(",");
           var idx_to_remove = days.indexOf(wd.toString());
@@ -45,6 +45,8 @@ router.get("/api/get-recurrent-tasks", (req, res) => {
         result[i].time = "";
       }
     }
+    console.log("Result:");
+    console.log(result);
     res.json({status: "OK", data: result});
   });
 });
