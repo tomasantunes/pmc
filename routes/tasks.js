@@ -108,14 +108,15 @@ router.post("/api/add-task", (req, res) => {
   var start_time = req.body.start_time;
   var end_time = req.body.end_time;
   var sort_index = req.body.sort_index;
+  var type = req.body.type;
 
   if (typeof start_time == "undefined" || start_time == "" || start_time == null || typeof end_time == "undefined" || end_time == "" || end_time == null) {
     start_time = utils.toLocaleISOString(new Date('1970-01-01Z00:00:00:000')).slice(0, 19).replace('T', ' ');
     end_time = utils.toLocaleISOString(new Date('1970-01-01Z00:00:00:000')).slice(0, 19).replace('T', ' ');
   }
 
-  var sql = "INSERT INTO tasks (folder_id, description, start_time, end_time, is_done, sort_index) VALUES (?, ?, ?, ?, ?, ?)";
-  con.query(sql, [folder_id, description, start_time, end_time, 0, sort_index], async function (err, result) {
+  var sql = "INSERT INTO tasks (folder_id, description, start_time, end_time, is_done, sort_index, type) VALUES (?, ?, ?, ?, ?, ?, ?)";
+  con.query(sql, [folder_id, description, start_time, end_time, 0, sort_index, type], async function (err, result) {
     if (err) {
       console.log(err);
       res.json({status: "NOK", error: err.message});
