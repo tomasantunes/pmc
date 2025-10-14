@@ -1,4 +1,5 @@
 import React, {useEffect, useState} from 'react';
+import Chart from "react-apexcharts";
 import axios from 'axios';
 import config from '../config';
 
@@ -11,6 +12,40 @@ export default function Stats() {
   const [totalAllTasksDone, setTotalAllTasksDone] = useState(0);
   const [totalAllRecurrentTasks, setTotalAllRecurrentTasks] = useState(0);
   const [totalAllRecurrentTasksDone, setTotalAllRecurrentTasksDone] = useState(0);
+
+  const [tasksLast15Days, setTasksLast15Days] = useState({
+    series: [{ name: "Tasks Done", data: [] }],
+    options: {
+      chart: {
+        type: "bar",
+        height: 350,
+        toolbar: { show: false },
+      },
+      xaxis: {
+        categories: [],
+        title: { text: "Date" },
+      },
+      yaxis: {
+        title: { text: "Tasks Done" },
+        min: 0,
+        forceNiceScale: true,
+      },
+      plotOptions: {
+        bar: {
+          borderRadius: 4,
+          horizontal: false,
+          columnWidth: "50%",
+        },
+      },
+      dataLabels: {
+        enabled: true,
+      },
+      title: {
+        text: "Tasks Done in the Last 15 Days",
+        align: "center",
+      },
+    },
+  });
 
   function loadStats() {
     axios.get(config.BASE_URL + "/api/get-stats")
@@ -49,8 +84,32 @@ export default function Stats() {
     */
   }
 
+  function loadTasksLast15Days() {
+    axios.get(config.BASE_URL + "/api/get-count-tasks-last-15-days")
+    .then(function(response) {
+      if (response.data.status == "OK") {
+        const sorted = response.data.data.sort((a, b) => new Date(a.date) - new Date(b.date));
+        setTasksLast15Days((prev) => ({
+          ...prev,
+          series: [{ name: "Tasks Done", data: sorted.map((d) => d.done_count) }],
+          options: {
+            ...prev.options,
+            xaxis: { ...prev.options.xaxis, categories: sorted.map((d) => d.date) },
+          },
+        }));
+      }
+      else {
+        alert(response.data.error);
+      }
+    })
+    .catch(function(err) {
+      console.log(err);
+    });
+  }
+
   useEffect(() => {
     loadStats();
+    loadTasksLast15Days();
   }, []);
   return (
     <>
@@ -92,6 +151,12 @@ export default function Stats() {
           </tr>*/}
         </tbody>
       </table>
+      <Chart
+        options={tasksLast15Days.options}
+        series={tasksLast15Days.series}
+        type="bar"
+        height={500}
+      />
     </>
   )
 }

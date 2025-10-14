@@ -2,6 +2,7 @@ var express = require('express');
 var database = require('../libs/database');
 var tasks = require('../libs/tasks');
 var router = express.Router();
+var {fillMissingDays} = require('../libs/stats');
 
 var {con, con2 } = database.getMySQLConnections();
 
@@ -56,6 +57,45 @@ router.get("/api/get-stats", (req, res) => {
       });
     });
   });
+});
+
+router.get("/api/get-count-tasks-last-15-days", async (req, res) => {
+  if (!req.session.isLoggedIn) {
+    res.json({status: "NOK", error: "Invalid Authorization."});
+    return;
+  }
+
+  const [rows] = await con2.execute(`
+    SELECT 
+        done_date AS date,
+        COUNT(*) AS done_count
+    FROM (
+        SELECT 
+            DATE(t.date_done) AS done_date
+        FROM tasks t
+        WHERE 
+            t.type = 'single'
+            AND t.is_done = 1
+            AND t.date_done >= CURDATE() - INTERVAL 15 DAY
+
+        UNION ALL
+
+        SELECT 
+            rc.date AS done_date
+        FROM recurrent_checks rc
+        INNER JOIN tasks t ON rc.task_id = t.id
+        WHERE 
+            t.type = 'recurrent'
+            AND rc.is_done = 1
+            AND rc.date >= CURDATE() - INTERVAL 15 DAY
+    ) AS all_done
+    GROUP BY done_date
+    ORDER BY done_date;
+  `);
+
+  const filledData = fillMissingDays(rows);
+
+  res.json({status: "OK", data: filledData});
 });
 
 module.exports = router;
