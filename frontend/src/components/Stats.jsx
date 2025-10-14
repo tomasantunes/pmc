@@ -13,6 +13,7 @@ export default function Stats() {
   const [totalAllRecurrentTasks, setTotalAllRecurrentTasks] = useState(0);
   const [totalAllRecurrentTasksDone, setTotalAllRecurrentTasksDone] = useState(0);
   const [progressPercentage, setProgressPercentage] = useState(0);
+  const [recurrentTasksTodayProgressPercentage, setRecurrentTasksTodayProgressPercentage] = useState(0);
 
   const [tasksLast15Days, setTasksLast15Days] = useState({
     series: [{ name: "Tasks Done", data: [] }],
@@ -45,6 +46,10 @@ export default function Stats() {
         text: "Tasks Done in the Last 15 Days",
         align: "center",
       },
+      subtitle: {
+        text: "Includes both simple and recurrent tasks",
+        align: "center",
+      }
     },
   });
 
@@ -57,13 +62,19 @@ export default function Stats() {
         setRecurrentTasksDone(response.data.data.recurrent_tasks_done);
         setRecurrentTasksTotal(response.data.data.recurrent_tasks);
 
-        var total_tasks = response.data.data.total_tasks + response.data.data.recurrent_tasks;
-        var total_tasks_done = response.data.data.total_tasks_done + response.data.data.recurrent_tasks_done;
+        var total_tasks = response.data.data.total_tasks;
+        var total_tasks_done = response.data.data.total_tasks_done;
         var perc = Math.round((total_tasks_done / total_tasks) * 100);
         if (isNaN(perc)) {
           perc = 0;
         }
         setProgressPercentage(perc);
+
+        var perc2 = Math.round((response.data.data.recurrent_tasks_done / response.data.data.recurrent_tasks) * 100);
+        if (isNaN(perc2)) {
+          perc2 = 0;
+        }
+        setRecurrentTasksTodayProgressPercentage(perc2);
       }
       else {
         alert(response.data.error);
@@ -126,11 +137,11 @@ export default function Stats() {
       <table className="table table-sm table-bordered small-table">
         <tbody>
           <tr>
-            <th className="table-dark bg-blue">Tasks Today</th>
+            <th className="table-dark bg-blue">Total Simple Tasks</th>
             <td className="text-center">{tasksTotal}</td>
           </tr>
           <tr>
-            <th className="table-dark bg-blue">Tasks Done Today</th>
+            <th className="table-dark bg-blue">Total Simple Tasks Done</th>
             <td className="text-center">{tasksDone}</td>
           </tr>
           <tr>
@@ -142,8 +153,12 @@ export default function Stats() {
             <td className="text-center">{recurrentTasksDone}</td>
           </tr>
           <tr>
-            <th className="table-dark bg-blue">Progress</th>
+            <th className="table-dark bg-blue">Total Tasks Progress</th>
             <td className="text-center">{progressPercentage}%</td>
+          </tr>
+          <tr>
+            <th className="table-dark bg-blue">Recurrent Tasks Today Progress</th>
+            <td className="text-center">{recurrentTasksTodayProgressPercentage}%</td>
           </tr>
           {/*}
           <tr>
