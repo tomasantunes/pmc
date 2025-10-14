@@ -12,6 +12,7 @@ export default function Stats() {
   const [totalAllTasksDone, setTotalAllTasksDone] = useState(0);
   const [totalAllRecurrentTasks, setTotalAllRecurrentTasks] = useState(0);
   const [totalAllRecurrentTasksDone, setTotalAllRecurrentTasksDone] = useState(0);
+  const [progressPercentage, setProgressPercentage] = useState(0);
 
   const [tasksLast15Days, setTasksLast15Days] = useState({
     series: [{ name: "Tasks Done", data: [] }],
@@ -55,6 +56,14 @@ export default function Stats() {
         setTasksTotal(response.data.data.total_tasks);
         setRecurrentTasksDone(response.data.data.recurrent_tasks_done);
         setRecurrentTasksTotal(response.data.data.recurrent_tasks);
+
+        var total_tasks = response.data.data.total_tasks + response.data.data.recurrent_tasks;
+        var total_tasks_done = response.data.data.total_tasks_done + response.data.data.recurrent_tasks_done;
+        var perc = Math.round((total_tasks_done / total_tasks) * 100);
+        if (isNaN(perc)) {
+          perc = 0;
+        }
+        setProgressPercentage(perc);
       }
       else {
         alert(response.data.error);
@@ -131,6 +140,10 @@ export default function Stats() {
           <tr>
             <th className="table-dark bg-blue">Recurrent Tasks Done Today</th>
             <td className="text-center">{recurrentTasksDone}</td>
+          </tr>
+          <tr>
+            <th className="table-dark bg-blue">Progress</th>
+            <td className="text-center">{progressPercentage}%</td>
           </tr>
           {/*}
           <tr>
