@@ -535,7 +535,7 @@ export default function Tasks({folder_id, folder}) {
         setNewTaskFolderId(folder_id);
         setNewTaskSortIndex(0);
         setNewTaskType("daily");
-        setNewTaskDays("");
+        setNewTaskDays([]);
         setNewTaskDescription("");
         setSelectedNewStartTime("");
         setSelectedNewEndTime("");
