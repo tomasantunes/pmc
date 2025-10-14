@@ -5,6 +5,9 @@ import RecurrentTasks from './RecurrentTasks';
 import TasksList from './TasksList';
 import axios from 'axios';
 import config from '../config';
+import Swal from 'sweetalert2';
+import withReactContent from 'sweetalert2-react-content';
+const MySwal = withReactContent(Swal);
 
 export default function TasksPage({folder_id}) {
   const [folder, setFolder] = useState({});
@@ -44,7 +47,7 @@ export default function TasksPage({folder_id}) {
   }
 
   function openEditFolderName() {
-    Swal.fire({
+    MySwal.fire({
       title: 'Edit Folder Name',
       input: 'text',
       inputLabel: 'Folder Name',
