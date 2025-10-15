@@ -1,4 +1,3 @@
-// TimePicker.jsx
 import React, { useEffect, useRef, forwardRef, useImperativeHandle } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './bs5-timepicker.css';
@@ -18,19 +17,22 @@ const TimePicker = forwardRef(function TimePicker(
   const mountRef = useRef(null);
   const instanceRef = useRef(null);
 
-  // Initialize vanilla TimePicker
+  // 🔸 Initialize once
   useEffect(() => {
-    let isMounted = true;
     let unsubscribe = null;
+    let isMounted = true;
 
-    async function loadAndInit() {
-      if (!mountRef.current) return;
+    async function init() {
+      if (typeof window === 'undefined' || !mountRef.current) return;
 
       if (!window.TimePicker) {
         await import('./bs5-timepicker.js');
       }
 
-      if (!isMounted || !window.TimePicker) return;
+      if (!window.TimePicker) {
+        console.error('TimePicker: library not loaded');
+        return;
+      }
 
       instanceRef.current = new window.TimePicker(mountRef.current, {
         format,
@@ -38,21 +40,25 @@ const TimePicker = forwardRef(function TimePicker(
         inputClass,
       });
 
-      // set default value
-      instanceRef.current.setValue(defaultValue);
+      // Set initial value
+      if (defaultValue) {
+        instanceRef.current.setValue(defaultValue);
+      }
 
-      // notify parent when instance is ready
-      if (typeof onReady === 'function') onReady(instanceRef.current);
+      // Notify parent that picker is ready
+      if (typeof onReady === 'function') {
+        onReady(instanceRef.current);
+      }
 
+      // Subscribe to value changes
       unsubscribe = instanceRef.current.onChange((val) => {
-        if (!isMounted) return;
         if (typeof onChange === 'function') {
-          onChange(instanceRef.current.toString(), instanceRef.current.getValue(true));
+          onChange(instanceRef.current.toString(), val);
         }
       });
     }
 
-    loadAndInit();
+    init();
 
     return () => {
       isMounted = false;
@@ -60,32 +66,29 @@ const TimePicker = forwardRef(function TimePicker(
       if (mountRef.current) mountRef.current.innerHTML = '';
       instanceRef.current = null;
     };
-  }, [format, minuteStep, defaultValue, inputClass, onChange, onReady]);
+  }, []); // <-- run only once
 
+  // 🔸 Update value if prop changes later (optional)
+  useEffect(() => {
+    if (instanceRef.current) {
+      instanceRef.current.setValue(defaultValue, 0, { silent: true });
+    }
+  }, [defaultValue]);
 
-  // Forward methods to parent via ref
-  useImperativeHandle(
-    ref,
-    () => ({
-      getValue(asObject) {
-        return instanceRef.current ? instanceRef.current.getValue(asObject) : null;
-      },
-      setValue(h, m) {
-        if (instanceRef.current) instanceRef.current.setValue(h, m);
-      },
-      toString() {
-        return instanceRef.current ? instanceRef.current.toString() : '';
-      },
-      setActive(isActive) {
-        if (instanceRef.current) instanceRef.current.setActive(isActive);
-      },
-      // getter always returns latest instance
-      get instance() {
-        return instanceRef.current;
-      },
-    }),
-    []
-  );
+  useImperativeHandle(ref, () => ({
+    getValue(asObject) {
+      return instanceRef.current ? instanceRef.current.getValue(asObject) : null;
+    },
+    setValue(h, m) {
+      if (instanceRef.current) instanceRef.current.setValue(h, m);
+    },
+    toString() {
+      return instanceRef.current ? instanceRef.current.toString() : '';
+    },
+    setActive(isActive) {
+      if (instanceRef.current) instanceRef.current.setActive(isActive);
+    },
+  }));
 
   return (
     <div className={`react-timepicker-wrapper ${className}`} style={{ display: 'inline-block', verticalAlign: 'middle' }}>
