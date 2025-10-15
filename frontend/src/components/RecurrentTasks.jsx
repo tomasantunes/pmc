@@ -537,8 +537,8 @@ export default function Tasks({folder_id, folder}) {
         setNewTaskType("daily");
         setNewTaskDays([]);
         setNewTaskDescription("");
-        setSelectedNewStartTime("");
-        setSelectedNewEndTime("");
+        setSelectedNewStartTime("00:00");
+        setSelectedNewEndTime("00:00");
         clearWeekDayChecks();
       }
       else {
