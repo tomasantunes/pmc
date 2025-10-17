@@ -3,6 +3,7 @@ import {useNavigate} from 'react-router-dom';
 import Tasks from './Tasks';
 import RecurrentTasks from './RecurrentTasks';
 import TasksList from './TasksList';
+import DailyToDos from './DailyToDos';
 import axios from 'axios';
 import config from '../config';
 import Swal from 'sweetalert2';
@@ -61,14 +62,21 @@ export default function TasksPage({folder_id}) {
   }
 
   function renderTasksElement() {
-    if (folder.type == "simple") {
-      return (<Tasks folder_id={folder_id} folder={folder} />);
-    }
-    else if (folder.type == "list") {
-      return (<TasksList folder_id={folder_id} folder={folder} />);
-    }
-    else {
-      return (<RecurrentTasks folder_id={folder_id} folder={folder} />);
+    switch(folder.type) {
+      case "simple":
+        return (<Tasks folder_id={folder_id} folder={folder} />);
+        break;
+      case "list":
+        return (<TasksList folder_id={folder_id} folder={folder} />);
+        break;
+      case "recurrent":
+        return (<RecurrentTasks folder_id={folder_id} folder={folder} />);
+        break;
+      case "daily-todos":
+        return (<DailyToDos folder_id={folder_id} folder={folder} />);
+        break;
+      default:
+        // do nothing
     }
   }
 
