@@ -18,7 +18,7 @@ Copy and edit secret-config-base.json and rename it to secret-config.json
 Copy and edit frontend/src/config-base.json and rename it to config.json
 npm install
 cd frontend
-npm install --legacy-peer-deps
+npm install
 npm run build
 cd ..
 npm start
