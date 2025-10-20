@@ -45,6 +45,8 @@ Recurrent folders will have a weekly grid of checkboxes that you can check every
 
 There is an option to cancel today's task and to restart the counter for a task.
 
+You can setup the tasks and when the time comes you check if it's necessary to do the task and if it isn't you place the checkmark anyway.
+
 List folders will just display a list of items.
 
 ### Github tasks
@@ -67,5 +69,8 @@ CURRENTLY NOT WORKING CORRECTLY
 
 On this page you can see events weekly in a timetable or a list and you can create new events. If you set a start datetime and end datetime on a simple task it will automatically generate an event.
 
+## Note
+
+The app is responsive, it's a PWA, it works on mobile and you can install it on your home screen. And you can set your browser to remember the password.
 
 
