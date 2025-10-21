@@ -7,12 +7,13 @@
 var app = require('../app');
 var debug = require('debug')('pmc:server');
 var http = require('http');
+var secretConfig = require('../secret-config.json');
 
 /**
  * Get port from environment and store in Express.
  */
 
-var port = normalizePort(process.env.PORT || '4002');
+var port = normalizePort(process.env.PORT || secretConfig.PORT);
 app.set('port', port);
 
 /**
