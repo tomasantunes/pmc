@@ -28,6 +28,7 @@ export default function TasksPage({folder_id}) {
     })
     .catch(function(err) {
       console.log(err);
+      MySwal.fire("Error: " + err.message);
     });
 
   }
@@ -44,6 +45,7 @@ export default function TasksPage({folder_id}) {
     })
     .catch(function(err) {
       console.log(err);
+      MySwal.fire("Error: " + err.message);
     });
   }
 

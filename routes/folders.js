@@ -47,6 +47,7 @@ router.post("/api/edit-folder-name", (req, res) => {
     if (err) {
       console.log(err);
       res.json({status: "NOK", error: err.message});
+      return;
     }
     res.json({status: "OK", data: "Folder name has been updated successfully."});
   });

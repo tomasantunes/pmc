@@ -18,6 +18,7 @@ export default function Sidebar() {
     { value: 'simple', label: 'Simple' },
     { value: 'recurrent', label: 'Recurrent' },
     { value: 'list', label: 'List' },
+    { value: 'daily-todos', label: 'Daily To-Dos' },
   ]
 
   function loadFolders() {

@@ -6,19 +6,27 @@ import withReactContent from 'sweetalert2-react-content';
 const MySwal = withReactContent(Swal);
 import SimpleToDoTable from './SimpleToDoTable';
 import {toLocaleISOString} from '../libs/utils';
+import DateTimePicker from '../libs/bs5-datetime/DateTimePicker';
 
-export default function DailyToDos() {
+export default function DailyToDos({folder_id, folder}) {
   const [tasks, setTasks] = useState([]);
   const [defaultDate, setDefaultDate] = useState(toLocaleISOString(new Date()).slice(0, 10));
   const [selectedDate, setSelectedDate] = useState(toLocaleISOString(new Date()).slice(0, 10));
+  const [datePickerOptions, setDatePickerOptions] = useState({
+    format: 'YYYY-MM-DD',
+    showTime: false,
+  });
 
   function handleDateChange() {
     loadTasks(selectedDate);
   }
 
   function loadTasks(dt) {
-    axios.get(config.BASE_URL + "/get-daily-todo", {dt})
+    axios.get(config.BASE_URL + "/api/get-daily-todo", {
+      params: { dt, folder_id }
+    })
     .then(function(response) {
+      console.log(response);
       if (response.data.status == "OK") {
         setTasks(response.data.data);
       }
@@ -37,11 +45,14 @@ export default function DailyToDos() {
   return (
     <>
       <div className="container">
-        <h1>Daily To-Dos</h1>
-        <DateTimePicker value={selectedDate} defaultValue={defaultDate} onChange={handleDateChange} />
-        <SimpleToDoTable title={selectedDate} tasks={tasks} setTasks={setTasks} />
+        <div className="row">
+          <div className="col-md-4"></div>
+          <div className="col-md-4">
+            <DateTimePicker value={selectedDate} defaultValue={defaultDate} onChange={handleDateChange} options={datePickerOptions} />
+            <SimpleToDoTable title={selectedDate} tasks={tasks} setTasks={setTasks} folder_id={folder_id} selectedDate={selectedDate} />
+          </div>
+        </div>
       </div>
-      
     </>
   )
 }
