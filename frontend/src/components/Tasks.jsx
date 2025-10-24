@@ -481,7 +481,7 @@ export default function Tasks({folder_id, folder}) {
                     <th style={{width: "15%"}}>Actions</th>
                 </tr>
             </thead>
-            <TBodyPlain data={tasks.filter(task => task.starred == false)} updateTaskDone={updateTaskDone} updateTaskStarred={updateTaskStarred} openEditTask={openEditTask} deleteTask={deleteTask} />
+            <TBodyPlain data={tasks.filter(task => task.starred == false)} updateTaskDone={updateTaskDone} updateTaskStarred={updateTaskStarred} openEditTask={openEditTask} openMoveModal={openMoveModal} deleteTask={deleteTask} />
         </table>
       </div>
       <div class="modal addTaskModal" tabindex="-1">
