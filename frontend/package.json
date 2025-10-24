@@ -16,6 +16,7 @@
     "@fullcalendar/list": "^6.1.19",
     "@fullcalendar/react": "^6.1.19",
     "@fullcalendar/timegrid": "^6.1.19",
+    "@hello-pangea/dnd": "^18.0.1",
     "@popperjs/core": "^2.11.8",
     "apexcharts": "^5.3.5",
     "axios": "^1.12.2",

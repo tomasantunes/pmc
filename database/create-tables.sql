@@ -55,7 +55,7 @@ CREATE TABLE daily_todos_tasks (
     is_done BOOLEAN NOT NULL,
     sort_index INT(11) NOT NULL DEFAULT 0,
     tdate DATE NOT NULL,
-    eisenhower_category VARCHAR(50) DEFAULT NULL,
+    eisenhower_category VARCHAR(50) DEFAULT 'Not Urgent and Not Important',
     starred BOOLEAN NOT NULL DEFAULT 0,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
