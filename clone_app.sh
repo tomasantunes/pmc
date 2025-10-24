@@ -17,9 +17,10 @@ read -p "New Github Token: " NEW_GITHUB_TOKEN
 read -p "New OpenAI API Key: " NEW_OPENAI_API_KEY
 read -p "Old domain (e.g. app.example.com): " OLD_DOMAIN
 read -p "New domain (e.g. new.example.com): " NEW_DOMAIN
+read -p "Old MySQL DB name: " OLD_DB_NAME
 read -p "New MySQL DB name: " DB_NAME
-read -p "New MySQL DB user: " DB_USER
-read -s -p "New MySQL DB password: " DB_PASS
+read -p "MySQL DB user: " DB_USER
+read -s -p "MySQL DB password: " DB_PASS
 echo
 
 APP_DIR="/home/user1/$NEW_APP"
@@ -28,16 +29,16 @@ OLD_DIR="/home/user1/$OLD_APP"
 # === 2. COPY APP ===
 echo "📦 Cloning app folder..."
 sudo cp -r "$OLD_DIR" "$APP_DIR"
-sudo chown -R www-data:www-data "$APP_DIR"
+sudo chown -R user1:user1 "$APP_DIR"
 
 # === 3. CREATE DATABASE ===
 echo "🧱 Creating new MySQL database and user..."
 sudo mysql -u root -p <<MYSQL_SCRIPT
 CREATE DATABASE IF NOT EXISTS $DB_NAME;
-CREATE USER IF NOT EXISTS '$DB_USER'@'localhost' IDENTIFIED BY '$DB_PASS';
-GRANT ALL PRIVILEGES ON $DB_NAME.* TO '$DB_USER'@'localhost';
-FLUSH PRIVILEGES;
 MYSQL_SCRIPT
+
+mysqldump -u root -p --no-data $OLD_DB_NAME > schema.sql
+mysql -u root -p $DB_NAME < schema.sql
 
 # === 4. UPDATE BACKEND CONFIG.JSON ===
 BACKEND_CONFIG="$APP_DIR/secret-config.json"
@@ -53,7 +54,7 @@ if [ -f "$BACKEND_CONFIG" ]; then
     --arg db_user "$DB_USER" \
     --arg db_pass "$DB_PASS" \
     --arg domain "$NEW_DOMAIN" \
-    --argjson port "$NEW_PORT" \
+    --arg port "$NEW_PORT" \
     '
     .DB_NAME = $db_name |
     .DB_USER = $db_user |
@@ -120,5 +121,5 @@ echo "Backend: port $NEW_PORT"
 echo "Frontend: rebuilt successfully"
 echo "New domain: https://$NEW_DOMAIN"
 echo "PM2 process: $NEW_APP"
-echo "MySQL DB: $DB_NAME ($DB_USER)"
+echo "MySQL DB: $DB_NAME"
 echo "--------------------------------------"
