@@ -5,7 +5,7 @@ import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
 const MySwal = withReactContent(Swal);
 
-export default function SimpleToDoTable({title, tasks, setTasks, folder_id, selectedDate}) {
+export default function SimpleToDoTable({title, tasks, setTasks, folder_id, selectedDate, loadTasks}) {
   const [newTaskDescription, setNewTaskDescription] = useState("");
 
   function changeNewTaskDescription(e) {
@@ -41,6 +41,28 @@ export default function SimpleToDoTable({title, tasks, setTasks, folder_id, sele
     });
   }
 
+  function updateTaskDone(e, task_id) {
+    console.log(e.target.checked);
+    let data = {
+      task_id,
+      is_done: e.target.checked
+    }
+    axios.post("/api/update-daily-todo-task-done", data)
+    .then(function(response) {
+      if (response.data.status == "OK") {
+        console.log("Task has been updated.");
+        loadTasks(selectedDate);
+      }
+      else {
+        MySwal.fire("Error updating task.");
+      }
+    })
+    .catch(function(err) {
+      console.log(err);
+      MySwal.fire("Error updating task.");
+    })
+  }
+
   return (
     <>
       <h2>{title}</h2>
@@ -55,7 +77,7 @@ export default function SimpleToDoTable({title, tasks, setTasks, folder_id, sele
         <tbody>
           {tasks.map((t) => (
             <tr key={t.id}>
-              <td><input type="checkbox" /></td>
+              <td><input type="checkbox" checked={t.is_done} onChange={(e) => { updateTaskDone(e, t.id) }} /></td>
               <td>{t.description}</td>
               <td></td>
             </tr>
