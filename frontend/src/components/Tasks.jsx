@@ -258,6 +258,9 @@ export default function Tasks({folder_id, folder}) {
     var modal = bootstrap.Modal.getOrCreateInstance(document.querySelector('.addTaskModal'))
     modal.hide();
     setShowNew(false);
+    setNewTaskDescription("");
+    setSelectedNewStartTime(null);
+    setSelectedNewEndTime(null);
   }
 
   function openEditTask(task_id) {
@@ -328,6 +331,10 @@ export default function Tasks({folder_id, folder}) {
     var modal = bootstrap.Modal.getOrCreateInstance(document.querySelector('.editTaskModal'))
     modal.hide();
     setShowEdit(false);
+    setEditTaskId(null);
+    setEditTaskDescription("");
+    setSelectedEditStartTime(null);
+    setSelectedEditEndTime(null);
   }
 
   function deleteTask(task_id) {
