@@ -17,8 +17,9 @@ export default function DailyToDos({folder_id, folder}) {
     showTime: false,
   });
 
-  function handleDateChange() {
-    loadTasks(selectedDate);
+  function handleDateChange(newDate) {
+    setSelectedDate(newDate);
+    loadTasks(newDate);
   }
 
   function loadTasks(dt) {
