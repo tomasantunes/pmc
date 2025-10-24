@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useRef} from 'react';
 import axios from 'axios';
 import config from '../config';
 import Select from 'react-select';
@@ -12,6 +12,9 @@ export default function Sidebar() {
   });
   const [selectedFolderType, setSelectedFolderType] = useState();
   const [collapseSidebarMobile, setCollapseSidebarMobile] = useState(true);
+  const [documentHeight, setDocumentHeight] = useState(
+    document.documentElement.scrollHeight
+  );
   var navigate = useNavigate();
 
   const folderTypes = [
@@ -94,6 +97,17 @@ export default function Sidebar() {
 
   useEffect(() => {
     loadFolders();
+
+    const updateHeight = () => {
+      setDocumentHeight(document.documentElement.scrollHeight);
+    };
+
+    const observer = new ResizeObserver(updateHeight);
+    observer.observe(document.body);
+
+    updateHeight();
+
+    return () => observer.disconnect();
   }, []);
   return (
     <>
@@ -103,7 +117,7 @@ export default function Sidebar() {
           <i className="fa-solid fa-bars fa-lg"></i> 
         </button>
       </nav>
-      <div className={collapseSidebarMobile ? "sidebar": "sidebar open"}>
+      <div className={collapseSidebarMobile ? "sidebar": "sidebar open"} style={{height: documentHeight}}>
           <h1><b>PMC</b></h1>
           <ul className="menu">
               <li><Link to="/home">Home</Link></li>
