@@ -50,7 +50,7 @@ export default function DailyToDos({folder_id, folder}) {
           <div className="col-md-4"></div>
           <div className="col-md-4">
             <DateTimePicker value={selectedDate} defaultValue={defaultDate} onChange={handleDateChange} options={datePickerOptions} />
-            <SimpleToDoTable title={selectedDate} tasks={tasks} setTasks={setTasks} folder_id={folder_id} selectedDate={selectedDate} />
+            <SimpleToDoTable title={selectedDate} tasks={tasks} setTasks={setTasks} folder_id={folder_id} selectedDate={selectedDate} loadTasks={loadTasks} />
           </div>
         </div>
       </div>

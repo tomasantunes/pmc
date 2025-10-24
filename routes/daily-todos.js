@@ -51,4 +51,31 @@ router.post("/api/add-daily-todo-task", (req, res) => {
   });
 });
 
+router.post("/api/update-daily-todo-task-done", (req, res) => {
+  if (!req.session.isLoggedIn) {
+    res.json({status: "NOK", error: "Invalid Authorization."});
+    return;
+  }
+
+  var task_id = req.body.task_id;
+  var is_done = req.body.is_done;
+
+  console.log("Task ID:");
+  console.log(task_id);
+  console.log("Is Done:");
+  console.log(is_done);
+
+  var sql = "UPDATE daily_todos_tasks SET is_done = ? WHERE id = ?";
+
+  con.query(sql, [is_done, task_id], function(err, result) {
+    if (err) {
+      console.log(err);
+      res.json({status: "NOK", error: err.message});
+      return;
+    }
+
+    res.json({status: "OK", data: "Task has been updated."})
+  });
+});
+
 module.exports = router;
