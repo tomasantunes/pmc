@@ -118,4 +118,22 @@ router.post("/api/add-folder", (req, res) => {
   });
 });
 
+router.get("/api/list-simple-folders", (req, res) => {
+  if (!req.session.isLoggedIn) {
+    res.json({status: "NOK", error: "Invalid Authorization."});
+    return;
+  }
+
+  var sql = "SELECT id, name FROM folders WHERE type = 'simple'";
+  con.query(sql, function (err, result) {
+    if (err) {
+      console.log(err);
+      res.json({status: "NOK", error: err.message});
+      return;
+    }
+
+    res.json({status: "OK", data: result});
+  });
+});
+
 module.exports = router;
