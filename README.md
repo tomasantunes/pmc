@@ -39,7 +39,7 @@ You can generate a Github token on your Github account's settings and an OpenAI 
 
 On the sidebar press "Add Folder", type the name of the folder and select between "Simple", "Recurrent" or "List".
 
-Simple folders will have a To-Do List where you can create tasks and check them as you do them. You can also star tasks so they go to the top. For each task you can define a description, a start date and time and an end date and time.
+Simple folders will have a To-Do List where you can create tasks and check them as you do them. You can also star tasks so they go to the top. For each task you can define a description, a start date and time and an end date and time. You can also move a simple task to another simple folder.
 
 Recurrent folders will have a weekly grid of checkboxes that you can check every day. You can set a start time and an end time for each task. You can also define the specific days of the week when you will do those tasks.
 
@@ -48,6 +48,8 @@ There is an option to cancel today's task and to restart the counter for a task.
 You can setup the tasks and when the time comes you check if it's necessary to do the task and if it isn't you place the checkmark anyway.
 
 List folders will just display a list of items.
+
+Daily To-Dos are another type of folder where you can define tasks for a specific date, mark them as done and if you switch to Eisenhower mode you can organize your daily tasks according to the eisenhower categories by dragging and dropping them.
 
 ### Github tasks
 
