@@ -5,6 +5,7 @@ import {useNavigate} from 'react-router-dom';
 import moment from 'moment';
 import {toLocaleISOString} from '../libs/utils';
 import DateTimePicker from '../libs/bs5-datetime/DateTimePicker';
+import Select from "react-select";
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
 const MySwal = withReactContent(Swal);
@@ -27,6 +28,7 @@ function TRow(props) {
         </button>
         <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
           <li><a class="dropdown-item" href="javascript:void(0)" onClick={() => { props.openEditTask(props.task_id) }}>Edit</a></li>
+          <li><a class="dropdown-item" href="javascript:void(0)" onClick={() => { props.openMoveModal(props.task_id) }}>Move to...</a></li>
           <li><a class="dropdown-item" href="javascript:void(0)" onClick={() => { props.deleteTask(props.task_id) }}>Delete</a></li>
         </ul>
       </div>
@@ -40,7 +42,7 @@ function TBodyPlain(props) {
     <tbody {...props} className="table-group-divider">
       {props.data.map((task, i) => {
         return (
-          <TRow key={task.id} index={i} task_id={task.id} description={task.description} time={task.time} is_done={task.is_done} starred={task.starred} updateTaskDone={props.updateTaskDone} openEditTask={props.openEditTask} deleteTask={props.deleteTask} updateTaskStarred={props.updateTaskStarred} />
+          <TRow key={task.id} index={i} task_id={task.id} description={task.description} time={task.time} is_done={task.is_done} starred={task.starred} updateTaskDone={props.updateTaskDone} openEditTask={props.openEditTask} openMoveModal={props.openMoveModal} deleteTask={props.deleteTask} updateTaskStarred={props.updateTaskStarred} />
         )
       })}
     </tbody>
@@ -64,8 +66,9 @@ export default function Tasks({folder_id, folder}) {
   const [totalTasks, setTotalTasks] = useState(0);
   const [nrTasksNotDone, setNrTasksNotDone] = useState(0);
   const [nrTasksDone, setNrTasksDone] = useState(0);
-  
-
+  const [simpleFolders, setSimpleFolders] = useState([]);
+  const [selectedSimpleFolder, setSelectedSimpleFolder] = useState(null);
+  const [taskToMoveId, setTaskToMoveId] = useState(null);
   var navigate = useNavigate();
 
   /*
@@ -279,6 +282,48 @@ export default function Tasks({folder_id, folder}) {
     });
   }
 
+  function openMoveModal(task_id) {
+    axios.get(config.BASE_URL + "/api/list-simple-folders")
+    .then(function(response) {
+      setSimpleFolders(response.data.data);
+      setTaskToMoveId(task_id);
+      var modal = bootstrap.Modal.getOrCreateInstance(document.querySelector('.moveModal'))
+      modal.show();
+    })
+    .catch(function(err) {
+      console.log(err);
+      MySwal.fire(err.message);
+    });
+  }
+
+  function closeMoveModal() {
+    var modal = bootstrap.Modal.getOrCreateInstance(document.querySelector('.moveModal'))
+    modal.hide();
+    setSelectedSimpleFolder(null);
+    setTaskToMoveId(null);
+  }
+
+  function handleSimpleFolderChange(selectedOption) {
+    setSelectedSimpleFolder(selectedOption);
+  }
+
+  function submitMoveTask(e) {
+    e.preventDefault();
+    axios.post(config.BASE_URL + "/api/move-simple-task", {task_id: taskToMoveId, target_folder_id: selectedSimpleFolder.value})
+    .then(function(response) {
+      if (response.data.status == "OK") {
+        loadTasks();
+        closeMoveModal();
+      }
+      else {
+        alert(response.data.error);
+      }
+    })
+    .catch(function(err) {
+      console.log(err);
+    });
+  }
+
   function closeEditTask() {
     var modal = bootstrap.Modal.getOrCreateInstance(document.querySelector('.editTaskModal'))
     modal.hide();
@@ -416,7 +461,7 @@ export default function Tasks({folder_id, folder}) {
                       <th style={{width: "15%"}}>Actions</th>
                   </tr>
               </thead>
-              <TBodyPlain data={tasks.filter(task => task.starred == true)} updateTaskDone={updateTaskDone} updateTaskStarred={updateTaskStarred} openEditTask={openEditTask} deleteTask={deleteTask} />
+              <TBodyPlain data={tasks.filter(task => task.starred == true)} updateTaskDone={updateTaskDone} updateTaskStarred={updateTaskStarred} openEditTask={openEditTask} openMoveModal={openMoveModal} deleteTask={deleteTask} />
           </table>
         </div>
       }
@@ -506,6 +551,32 @@ export default function Tasks({folder_id, folder}) {
                 <div className="form-group">
                     <div style={{textAlign: "right"}}>
                         <button type="submit" className="btn btn-primary">Save</button>
+                    </div>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal moveModal" tabindex="-1">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Move Task</h5>
+              <button type="button" class="btn-close" onClick={closeMoveModal} aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <form onSubmit={submitMoveTask}>
+                <div className="form-group py-2">
+                  <label className="control-label">Select folder...</label>
+                  <div>
+                      <Select options={simpleFolders.map(folder => ({ value: folder.id, label: folder.name }))} onChange={handleSimpleFolderChange} value={selectedSimpleFolder} />
+                  </div>
+                </div>
+                <div className="form-group">
+                    <div style={{textAlign: "right"}}>
+                        <button type="submit" className="btn btn-primary">Move</button>
                     </div>
                 </div>
               </form>

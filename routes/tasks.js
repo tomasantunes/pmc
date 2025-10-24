@@ -233,4 +233,24 @@ router.get("/api/get-random-task", (req, res) => {
   });
 });
 
+router.post("/api/move-simple-task", (req, res) => {
+  if (!req.session.isLoggedIn) {
+    res.json({status: "NOK", error: "Invalid Authorization."});
+    return;
+  }
+
+  var task_id = req.body.task_id;
+  var target_folder_id = req.body.target_folder_id;
+
+  var sql = "UPDATE tasks SET folder_id = ? WHERE id = ?";
+  con.query(sql, [target_folder_id, task_id], function (err, result) {
+    if (err) {
+      console.log(err);
+      res.json({status: "NOK", error: err.message});
+      return;
+    }
+    res.json({status: "OK", data: "Task has been moved successfully."});
+  });
+});
+
 module.exports = router;
