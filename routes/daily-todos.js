@@ -74,7 +74,29 @@ router.post("/api/update-daily-todo-task-done", (req, res) => {
       return;
     }
 
-    res.json({status: "OK", data: "Task has been updated."})
+    res.json({status: "OK", data: "Task has been updated."});
+  });
+});
+
+router.post("/api/update-eisenhower-category", (req, res) => {
+  if (!req.session.isLoggedIn) {
+    res.json({status: "NOK", error: "Invalid Authorization."});
+    return;
+  }
+
+  var id = req.body.id;
+  var eisenhower_category = req.body.eisenhower_category;
+
+  var sql = "UPDATE daily_todos_tasks SET eisenhower_category = ? WHERE id = ?";
+
+  con.query(sql, [eisenhower_category, id], function(err, result) {
+    if (err) {
+      console.log(err);
+      res.json({status: "NOK", error: err.message});
+      return;
+    }
+
+    res.json({status: "OK", data: "Task has been updated."});
   });
 });
 
