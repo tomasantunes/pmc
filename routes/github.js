@@ -75,4 +75,15 @@ router.get("/api/get-github-tasks", async (req, res) => {
   }
 });
 
+router.get("/api/check-github-status", (req, res) => {
+  if (!req.session.isLoggedIn) {
+    return res.json({ status: "NOK", error: "Invalid Authorization." });
+  }
+
+  if (github.hasGithubToken()) {
+    return res.json({ status: "OK", data: { hasToken: true } });
+  }
+  return res.json({ status: "OK", data: { hasToken: false } });
+})
+
 module.exports = router;
