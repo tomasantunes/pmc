@@ -12,6 +12,7 @@ export default function Sidebar() {
   });
   const [selectedFolderType, setSelectedFolderType] = useState();
   const [collapseSidebarMobile, setCollapseSidebarMobile] = useState(true);
+  const [showGithubPage, setShowGithubPage] = useState(false);
   const [documentHeight, setDocumentHeight] = useState(
     document.documentElement.scrollHeight
   );
@@ -95,6 +96,21 @@ export default function Sidebar() {
     window.location.reload();
   }
 
+  function checkGithubStatus() {
+    axios.get(config.BASE_URL + "/api/check-github-status")
+    .then(function(response) {
+      if (response.data.status == "OK") {
+        setShowGithubPage(response.data.data.hasToken);
+      }
+      else {
+        alert(response.data.error);
+      }
+    })
+    .catch(function(err) {
+      console.log(err);
+    });
+  }
+
   useEffect(() => {
     loadFolders();
 
@@ -106,6 +122,7 @@ export default function Sidebar() {
     observer.observe(document.body);
 
     updateHeight();
+    checkGithubStatus();
 
     return () => observer.disconnect();
   }, []);
@@ -124,8 +141,8 @@ export default function Sidebar() {
               <li><Link to="/calendar">Calendar</Link></li>
               <li><Link to="/schedule">Schedule</Link></li>
               <li><Link to="/random-task">Random Task</Link></li>
-              <li><Link to="/github-tasks">Github Tasks</Link></li>
-              <li><Link to="/motivation">Motivation</Link></li>
+              {showGithubPage && <li><Link to="/github-tasks">Github Tasks</Link></li>}
+              {/*<li><Link to="/motivation">Motivation</Link></li>*/}
               <li><a href="#" onClick={openAddFolder}>Add Folder</a></li>
               {folders.map((folder) => {
                 return (

@@ -23,9 +23,15 @@ function getOctokit() {
     return octokit;
 }
 
+function hasGithubToken() {
+    return secretConfig.GITHUB_TOKEN && secretConfig.GITHUB_TOKEN.length > 0;
+}
+
 module.exports = {
     getOctokit,
+    hasGithubToken,
     default: {
-        getOctokit
+        getOctokit,
+        hasGithubToken
     }
 };
