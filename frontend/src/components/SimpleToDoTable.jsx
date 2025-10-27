@@ -20,7 +20,8 @@ export default function SimpleToDoTable({title, tasks, setTasks, folder_id, sele
       description: newTaskDescription,
       is_done: false,
       sort_index: tasks.length,
-      tdate: selectedDate
+      tdate: selectedDate,
+      eisenhower_category: 'Not Urgent and Not Important'
     };
 
     axios.post(config.BASE_URL + "/api/add-daily-todo-task", newTask)
