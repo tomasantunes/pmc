@@ -47,10 +47,6 @@ export default function DailyToDos({ folder_id, folder }) {
     loadTasks(selectedDate);
   }, []);
 
-  useEffect(() => {
-    console.log(tasks[0]);
-  }, [tasks])
-
   const categories = [
     { key: "Urgent and Important", label: "Urgent & Important" },
     { key: "Not Urgent and Important", label: "Not Urgent & Important" },
