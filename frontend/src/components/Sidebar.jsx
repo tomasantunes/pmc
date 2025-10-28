@@ -5,6 +5,7 @@ import Select from 'react-select';
 import {Link, useNavigate} from 'react-router-dom';
 
 export default function Sidebar() {
+  const sidebarRef = useRef(null);
   const [folders, setFolders] = useState([]);
   const [newFolder, setNewFolder] = useState({
     name: "",
@@ -111,15 +112,22 @@ export default function Sidebar() {
     });
   }
 
+  const updateHeight = () => {
+      const docHeight = document.documentElement.scrollHeight;
+      const sidebarHeight = sidebarRef.current?.scrollHeight || 0;
+      setDocumentHeight(Math.max(docHeight, sidebarHeight));
+    };
+
+  useEffect(() => {
+    updateHeight();
+  }, [folders]);
+
   useEffect(() => {
     loadFolders();
 
-    const updateHeight = () => {
-      setDocumentHeight(document.documentElement.scrollHeight);
-    };
-
     const observer = new ResizeObserver(updateHeight);
     observer.observe(document.body);
+    if (sidebarRef.current) observer.observe(sidebarRef.current);
 
     updateHeight();
     checkGithubStatus();
