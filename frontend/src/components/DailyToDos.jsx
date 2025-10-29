@@ -157,7 +157,7 @@ export default function DailyToDos({ folder_id, folder }) {
                                     background: "white",
                                   }}
                                 >
-                                  {task.description}
+                                  <span>{task.is_done ? "✔" : ""}{task.description}</span>
                                 </div>
                               )}
                             </Draggable>
