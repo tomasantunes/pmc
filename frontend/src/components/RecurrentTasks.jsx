@@ -4,6 +4,7 @@ import axios from 'axios';
 import config from '../config';
 import moment from 'moment';
 import TimePicker from '../libs/bs5-timepicker/TimePicker';
+import { toLocaleISOString } from '../libs/utils';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
 const MySwal = withReactContent(Swal)
@@ -764,23 +765,6 @@ export default function Tasks({folder_id, folder}) {
         });
       }
     });
-  }
-
-  function toLocaleISOString(date) {
-    function pad(number) {
-        if (number < 10) {
-            return '0' + number;
-        }
-        return number;
-    }
-
-    return date.getFullYear() +
-        '-' + pad(date.getMonth() + 1) +
-        '-' + pad(date.getDate()) +
-        'T' + pad(date.getHours()) +
-        ':' + pad(date.getMinutes()) +
-        ':' + pad(date.getSeconds()) ;
-
   }
 
   function updateTaskDone(e, task_id, index) {

@@ -19,6 +19,7 @@ CREATE TABLE tasks (
     type VARCHAR(256) NOT NULL DEFAULT 'single',
     date_done DATETIME DEFAULT NULL,
     days VARCHAR(512) DEFAULT '',
+    months VARCHAR(512) DEFAULT '',
     start_time DATETIME DEFAULT NULL,
     end_time DATETIME DEFAULT NULL,
     starred BOOLEAN NOT NULL DEFAULT 0,
