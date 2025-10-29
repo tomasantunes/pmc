@@ -2,6 +2,7 @@ import React, {useEffect, useState} from 'react';
 import {useNavigate} from 'react-router-dom';
 import Tasks from './Tasks';
 import RecurrentTasks from './RecurrentTasks';
+import MonthlyTasks from './MonthlyTasks';
 import TasksList from './TasksList';
 import DailyToDos from './DailyToDos';
 import axios from 'axios';
@@ -73,6 +74,9 @@ export default function TasksPage({folder_id}) {
         break;
       case "recurrent":
         return (<RecurrentTasks folder_id={folder_id} folder={folder} />);
+        break;
+      case "monthly":
+        return (<MonthlyTasks folder_id={folder_id} folder={folder} />);
         break;
       case "daily-todos":
         return (<DailyToDos folder_id={folder_id} folder={folder} />);

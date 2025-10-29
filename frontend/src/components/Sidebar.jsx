@@ -22,6 +22,7 @@ export default function Sidebar() {
   const folderTypes = [
     { value: 'simple', label: 'Simple' },
     { value: 'recurrent', label: 'Recurrent' },
+    { value: 'monthly', label: 'Monthly' },
     { value: 'list', label: 'List' },
     { value: 'daily-todos', label: 'Daily To-Dos' },
   ]

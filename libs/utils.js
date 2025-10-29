@@ -35,6 +35,33 @@ function getDatesUntilNextYear(days) {
   return dates_to_push;
 }
 
+// months: string like "0,2,5,11"
+function getMonthlyDates(months) {
+  const now = new Date();
+  const currentYear = now.getFullYear();
+  const nextYear = currentYear + 1;
+
+  const selectedMonths = months
+    .split(",")
+    .map((m) => parseInt(m.trim()))
+    .filter((m) => !isNaN(m) && m >= 0 && m <= 11);
+
+  const dates = [];
+
+  // Create one date per selected month from now until the end of next year
+  for (let y of [currentYear, nextYear]) {
+    for (let m of selectedMonths) {
+      const date = new Date(y, m, 1); // pick day 1 of that month
+      if (date >= now) {
+        dates.push(date);
+      }
+    }
+  }
+
+  return dates;
+};
+
+
 function nextDate(dayIndex) {
   var today = new Date();
   today.setDate(today.getDate() + (dayIndex - 1 - today.getDay() + 7) % 7 + 1);
@@ -65,19 +92,37 @@ function toLocaleISOString(date) {
         ':' + pad(date.getSeconds()) ;
 }
 
+function getRangeOfMonths(startDate, endDate) {
+  const months = [];
+  const current = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
+  const end = new Date(endDate.getFullYear(), endDate.getMonth(), 1);
+
+  while (current <= end) {
+    months.push(new Date(current));
+    current.setMonth(current.getMonth() + 1);
+  }
+
+  return months;
+}
+
+
 module.exports = {
     addDays,
     getRangeOfDates,
     getDatesUntilNextYear,
+    getMonthlyDates,
     nextDate,
     previousMonday,
     toLocaleISOString,
+    getRangeOfMonths,
     default: {
         addDays,
         getRangeOfDates,
         getDatesUntilNextYear,
+        getMonthlyDates,
         nextDate,
         previousMonday,
-        toLocaleISOString
+        toLocaleISOString,
+        getRangeOfMonths
     }
 };
