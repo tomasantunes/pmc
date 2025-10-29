@@ -100,4 +100,55 @@ router.post("/api/update-eisenhower-category", (req, res) => {
   });
 });
 
+router.post("/api/update-daily-todo-task-description", (req, res) => {
+  if (!req.session.isLoggedIn) {
+    res.json({status: "NOK", error: "Invalid Authorization."});
+    return;
+  }
+
+  var task_id = req.body.task_id;
+  var description = req.body.description;
+
+  console.log("Task ID:");
+  console.log(task_id);
+  console.log("New Description:");
+  console.log(description);
+
+  var sql = "UPDATE daily_todos_tasks SET description = ? WHERE id = ?";
+
+  con.query(sql, [description, task_id], function(err, result) {
+    if (err) {
+      console.log(err);
+      res.json({status: "NOK", error: err.message});
+      return;
+    }
+
+    res.json({status: "OK", data: "Task description has been updated."});
+  });
+});
+
+router.delete("/api/delete-daily-todo-task", (req, res) => {
+  if (!req.session.isLoggedIn) {
+    res.json({status: "NOK", error: "Invalid Authorization."});
+    return;
+  }
+
+  var task_id = req.body.task_id;
+
+  console.log("Deleting Task ID:");
+  console.log(task_id);
+
+  var sql = "DELETE FROM daily_todos_tasks WHERE id = ?";
+
+  con.query(sql, [task_id], function(err, result) {
+    if (err) {
+      console.log(err);
+      res.json({status: "NOK", error: err.message});
+      return;
+    }
+
+    res.json({status: "OK", data: "Task has been deleted."});
+  });
+});
+
 module.exports = router;
