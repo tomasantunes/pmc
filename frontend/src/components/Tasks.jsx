@@ -457,7 +457,7 @@ export default function Tasks({folder_id, folder}) {
           <div className="text-center">
             <h3>Starred Tasks</h3>
           </div>
-          <table className="table table-striped table-bordered align-middle tasks">
+      <table className="table table-striped table-bordered align-middle tasks">
               <thead class="table-dark">
                   <tr>
                       <th style={{width: "10%"}}>
@@ -468,7 +468,7 @@ export default function Tasks({folder_id, folder}) {
                       <th style={{width: "15%"}}>Actions</th>
                   </tr>
               </thead>
-              <TBodyPlain data={tasks.filter(task => task.starred == true)} updateTaskDone={updateTaskDone} updateTaskStarred={updateTaskStarred} openEditTask={openEditTask} openMoveModal={openMoveModal} deleteTask={deleteTask} />
+              <TBodyPlain data={tasks.filter(task => task.starred == true).sort((a, b) => (a.id || 0) - (b.id || 0))} updateTaskDone={updateTaskDone} updateTaskStarred={updateTaskStarred} openEditTask={openEditTask} openMoveModal={openMoveModal} deleteTask={deleteTask} />
           </table>
         </div>
       }
@@ -488,7 +488,7 @@ export default function Tasks({folder_id, folder}) {
                     <th style={{width: "15%"}}>Actions</th>
                 </tr>
             </thead>
-            <TBodyPlain data={tasks.filter(task => task.starred == false)} updateTaskDone={updateTaskDone} updateTaskStarred={updateTaskStarred} openEditTask={openEditTask} openMoveModal={openMoveModal} deleteTask={deleteTask} />
+            <TBodyPlain data={tasks.filter(task => task.starred == false).sort((a, b) => (a.id || 0) - (b.id || 0))} updateTaskDone={updateTaskDone} updateTaskStarred={updateTaskStarred} openEditTask={openEditTask} openMoveModal={openMoveModal} deleteTask={deleteTask} />
         </table>
       </div>
       <div class="modal addTaskModal" tabindex="-1">
