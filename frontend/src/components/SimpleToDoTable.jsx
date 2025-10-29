@@ -7,6 +7,8 @@ const MySwal = withReactContent(Swal);
 
 export default function SimpleToDoTable({title, tasks, setTasks, folder_id, selectedDate, loadTasks}) {
   const [newTaskDescription, setNewTaskDescription] = useState("");
+  const [editingTaskId, setEditingTaskId] = useState(null);
+  const [editingDescription, setEditingDescription] = useState("");
 
   function changeNewTaskDescription(e) {
     setNewTaskDescription(e.target.value);
@@ -64,6 +66,85 @@ export default function SimpleToDoTable({title, tasks, setTasks, folder_id, sele
     })
   }
 
+  function startEditingTask(task) {
+    setEditingTaskId(task.id);
+    setEditingDescription(task.description);
+  }
+
+  function cancelEditing() {
+    setEditingTaskId(null);
+    setEditingDescription("");
+  }
+
+  function saveTaskDescription(task_id) {
+    if (!editingDescription.trim()) {
+      MySwal.fire("Task description cannot be empty");
+      return;
+    }
+
+    const data = {
+      task_id: task_id,
+      description: editingDescription
+    };
+
+    axios.post(config.BASE_URL + "/api/update-daily-todo-task-description", data)
+    .then(function(response) {
+      if (response.data.status == "OK") {
+        // Update the task in the local state
+        setTasks(tasks.map(task => 
+          task.id === task_id 
+            ? { ...task, description: editingDescription }
+            : task
+        ));
+        setEditingTaskId(null);
+        setEditingDescription("");
+      }
+      else {
+        MySwal.fire("Error: " + response.data.error);
+      }
+    })
+    .catch(function(err) {
+      MySwal.fire("Connection Error");
+    });
+  }
+
+  function deleteTask(task_id) {
+    MySwal.fire({
+      title: 'Are you sure?',
+      text: "You won't be able to revert this!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, delete it!'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        const data = {
+          task_id: task_id
+        };
+
+        axios.delete(config.BASE_URL + "/api/delete-daily-todo-task", { data })
+        .then(function(response) {
+          if (response.data.status == "OK") {
+            // Remove the task from the local state
+            setTasks(tasks.filter(task => task.id !== task_id));
+            MySwal.fire(
+              'Deleted!',
+              'Your task has been deleted.',
+              'success'
+            );
+          }
+          else {
+            MySwal.fire("Error: " + response.data.error);
+          }
+        })
+        .catch(function(err) {
+          MySwal.fire("Connection Error");
+        });
+      }
+    });
+  }
+
   return (
     <>
       <h2>{title}</h2>
@@ -72,15 +153,67 @@ export default function SimpleToDoTable({title, tasks, setTasks, folder_id, sele
           <tr>
             <th></th>
             <th>Task</th>
-            <th></th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
           {tasks.map((t) => (
             <tr key={t.id}>
               <td><input type="checkbox" checked={t.is_done} onChange={(e) => { updateTaskDone(e, t.id) }} /></td>
-              <td>{t.description}</td>
-              <td></td>
+              <td>
+                {editingTaskId === t.id ? (
+                  <input 
+                    type="text" 
+                    className="form-control" 
+                    value={editingDescription} 
+                    onChange={(e) => setEditingDescription(e.target.value)}
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter') {
+                        saveTaskDescription(t.id);
+                      }
+                      if (e.key === 'Escape') {
+                        cancelEditing();
+                      }
+                    }}
+                    autoFocus
+                  />
+                ) : (
+                  <span onDoubleClick={() => startEditingTask(t)}>{t.description}</span>
+                )}
+              </td>
+              <td>
+                {editingTaskId === t.id ? (
+                  <div>
+                    <button 
+                      className="btn btn-success btn-sm me-2" 
+                      onClick={() => saveTaskDescription(t.id)}
+                    >
+                      <i className="fas fa-check" />
+                    </button>
+                    <button 
+                      className="btn btn-secondary btn-sm" 
+                      onClick={cancelEditing}
+                    >
+                      <i className="fas fa-times" />
+                    </button>
+                  </div>
+                ) : (
+                  <div>
+                    <button 
+                      className="btn btn-primary btn-sm me-2" 
+                      onClick={() => startEditingTask(t)}
+                    >
+                      <i className="fas fa-edit" />
+                    </button>
+                    <button 
+                      className="btn btn-danger btn-sm" 
+                      onClick={() => deleteTask(t.id)}
+                    >
+                      <i className="fas fa-trash" />
+                    </button>
+                  </div>
+                )}
+              </td>
             </tr>
           ))}
         </tbody>
