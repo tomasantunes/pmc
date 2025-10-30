@@ -169,31 +169,16 @@ router.post("/api/edit-monthly-task", async (req, res) => {
 
   const task_id = req.body.task_id;
   const description = req.body.description;
-  const start_time = req.body.start_time;
-  const end_time = req.body.end_time;
   const months = req.body.months;
 
-  let start_time2, end_time2, has_time = false;
-
-  if (
-    typeof start_time === "undefined" ||
-    start_time === "" ||
-    typeof end_time === "undefined" ||
-    end_time === ""
-  ) {
-    start_time2 = utils
+  let start_time2 = utils
       .toLocaleISOString(new Date("1970-01-01Z00:00:00:000"))
       .slice(0, 19)
       .replace("T", " ");
-    end_time2 = utils
+  let end_time2 = utils
       .toLocaleISOString(new Date("1970-01-01Z00:00:00:000"))
       .slice(0, 19)
       .replace("T", " ");
-  } else {
-    start_time2 = start_time;
-    end_time2 = end_time;
-    has_time = true;
-  }
 
   const sql =
     "UPDATE tasks SET description = ?, start_time = ?, end_time = ?, months = ? WHERE id = ?";
@@ -219,25 +204,6 @@ router.post("/api/edit-monthly-task", async (req, res) => {
       for (let date of dates) {
         const sql4 = "INSERT INTO recurrent_checks (task_id, date, is_done) VALUES (?, ?, 0)";
         await con2.query(sql4, [task_id, date.toISOString().slice(0, 10)]);
-
-        if (has_time) {
-          const start_date = new Date(date);
-          const [stHour, stMin] = start_time.split(" ")[1].split(":");
-          start_date.setHours(stHour, stMin, 0);
-
-          const end_date = new Date(date);
-          const [etHour, etMin] = end_time.split(" ")[1].split(":");
-          end_date.setHours(etHour, etMin, 0);
-
-          const sql5 =
-            "INSERT INTO events (task_id, start_date, end_date, description) VALUES (?, ?, ?, ?)";
-          await con2.query(sql5, [
-            task_id,
-            start_date.toISOString().slice(0, 19).replace("T", " "),
-            end_date.toISOString().slice(0, 19).replace("T", " "),
-            description,
-          ]);
-        }
       }
 
       res.json({ status: "OK", data: "Monthly task has been updated successfully." });
