@@ -100,6 +100,7 @@ function TRow({
                 Delete
               </a>
             </li>
+            {/*
             <li>
               <a
                 className="dropdown-item"
@@ -117,6 +118,7 @@ function TRow({
                 Restart Task
               </a>
             </li>
+            */}
           </ul>
         </div>
       </td>
@@ -246,6 +248,28 @@ export default function MonthlyTasks({ folder_id, folder }) {
       .catch((err) => alert(err.message));
   }
 
+  function submitEditTask(e) {
+    e.preventDefault();
+    axios.post(config.BASE_URL + "/api/edit-monthly-task", {
+      task_id: editTaskId,
+      description: editTaskDescription,
+      months: editTaskMonths.map((m) => m.value).join(","),
+    })
+    .then(function(response) {
+      if (response.data.status == "OK") {
+        MySwal.fire("Task has been edited successfully.");
+        loadTasks();
+        closeEditTask();
+        setEditTaskDescription("");
+        setEditTaskMonths([]);
+      }
+    })
+    .catch(function(err) {
+      console.log(err);
+      MySwal.fire(err.message);
+    })
+  }
+
   function submitAddTask(e) {
     e.preventDefault();
     axios
@@ -293,10 +317,35 @@ export default function MonthlyTasks({ folder_id, folder }) {
     modal.show();
   }
 
+  function openEditTask(task_id) {
+    setShowEdit(true);
+    setEditTaskId(task_id);
+    const task = tasks.find((t) => t.id === task_id);
+    console.log(task);
+    setEditTaskDescription(task.description);
+    var months = [];
+    for (var i in task.months.split(",")) {
+      months.push(monthsOfYear[Number(task.months.split(",")[i])]);
+    }
+    setEditTaskMonths(months);
+    const modal = bootstrap.Modal.getOrCreateInstance(
+      document.querySelector(".editMonthlyTaskModal")
+    );
+    modal.show();
+  }
+
   function closeAddTask() {
     setShowNew(false);
     const modal = bootstrap.Modal.getOrCreateInstance(
       document.querySelector(".addMonthlyTaskModal")
+    );
+    modal.hide();
+  }
+
+  function closeEditTask() {
+    setShowEdit(false);
+    const modal = bootstrap.Modal.getOrCreateInstance(
+      document.querySelector(".editMonthlyTaskModal")
     );
     modal.hide();
   }
@@ -326,7 +375,7 @@ export default function MonthlyTasks({ folder_id, folder }) {
               key={task.id}
               task={task}
               updateTaskDone={updateTaskDone}
-              openEditTask={() => {}}
+              openEditTask={openEditTask}
               deleteTask={deleteTask}
               restartTask={() => {}}
               cancelTask={() => {}}
@@ -396,6 +445,73 @@ export default function MonthlyTasks({ folder_id, folder }) {
                 </button>
                 <button className="btn btn-primary" type="submit">
                   Add Task
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      {/* Edit Task Modal */}
+      <div
+        className="modal fade editMonthlyTaskModal"
+        tabIndex="-1"
+        aria-hidden="true"
+      >
+        <div className="modal-dialog modal-lg modal-dialog-centered">
+          <div className="modal-content">
+            <form onSubmit={submitEditTask}>
+              <div className="modal-header">
+                <h5 className="modal-title">Edit Monthly Task</h5>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={closeEditTask}
+                ></button>
+              </div>
+              <div className="modal-body">
+                <div className="mb-3">
+                  <label>Description</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    value={editTaskDescription}
+                    onChange={(e) => setEditTaskDescription(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="mb-3">
+                  <label>Select Months</label>
+                  <div className="d-flex flex-wrap gap-2 mt-2">
+                    {monthsOfYear.map((m) => (
+                      <label key={m.value} className="me-3">
+                        <input
+                          type="checkbox"
+                          className="form-check-input me-1"
+                          checked={editTaskMonths.some(
+                            (x) => x.value === m.value
+                          )}
+                          onChange={(e) => {
+                            if (e.target.checked)
+                              setEditTaskMonths((prev) => [...prev, m]);
+                            else
+                              setEditTaskMonths((prev) =>
+                                prev.filter((x) => x.value !== m.value)
+                              );
+                          }}
+                        />
+                        {m.label}
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <div className="modal-footer">
+                <button className="btn btn-secondary" onClick={closeEditTask}>
+                  Cancel
+                </button>
+                <button className="btn btn-primary" type="submit">
+                  Edit Task
                 </button>
               </div>
             </form>
