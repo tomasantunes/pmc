@@ -10,7 +10,10 @@ Productivity Management Center - Made with Express and React
 | ![PMC Screenshot 3](https://i.imgur.com/Ss9h6EB.png) |
 |-|
 
-| ![PMC Screenshot 3](https://i.imgur.com/vVRnVIM.png) |
+| ![PMC Screenshot 4](https://i.imgur.com/vVRnVIM.png) |
+|-|
+
+| ![PMC Screenshot 4](https://i.imgur.com/JysU01G.png) |
 |-|
 
 ## How to run

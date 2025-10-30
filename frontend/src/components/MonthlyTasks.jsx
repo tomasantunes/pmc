@@ -8,7 +8,7 @@ import moment from "moment";
 
 const MySwal = withReactContent(Swal);
 
-const monthsOfYear = [
+const initialMonthsOfYear = [
   { value: 0, label: "January" },
   { value: 1, label: "February" },
   { value: 2, label: "March" },
@@ -25,13 +25,10 @@ const monthsOfYear = [
 
 const now = new Date();
 const currentMonthIndex = now.getMonth();
-const currentYear = new Date().getFullYear();
-const firstDay = new Date(currentYear, 0, 1);
-const lastDay = new Date(currentYear, 11, 31);
-const dates = Array.from({ length: 12 }, (_, i) => new Date(currentYear, i, 1));
 
 function TRow({
   task,
+  monthsOfYear,
   updateTaskDone,
   openEditTask,
   deleteTask,
@@ -138,10 +135,36 @@ export default function MonthlyTasks({ folder_id, folder }) {
   const [totalTasks, setTotalTasks] = useState(0);
   const [nrTasksDone, setNrTasksDone] = useState(0);
   const [nrTasksPending, setNrTasksPending] = useState(0);
+  
+  // State variables for year navigation
+  const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
+  const [monthsOfYear, setMonthsOfYear] = useState(initialMonthsOfYear);
+  const [dates, setDates] = useState(Array.from({ length: 12 }, (_, i) => new Date(new Date().getFullYear(), i, 1)));
+  const [firstDay, setFirstDay] = useState(new Date(new Date().getFullYear(), 0, 1));
+  const [lastDay, setLastDay] = useState(new Date(new Date().getFullYear(), 11, 31));
 
   useEffect(() => {
     loadTasks();
-  }, []);
+  }, [firstDay, lastDay]);
+
+  // Update dates when year changes
+  useEffect(() => {
+    const newFirstDay = new Date(currentYear, 0, 1);
+    const newLastDay = new Date(currentYear, 11, 31);
+    const newDates = Array.from({ length: 12 }, (_, i) => new Date(currentYear, i, 1));
+    
+    setFirstDay(newFirstDay);
+    setLastDay(newLastDay);
+    setDates(newDates);
+  }, [currentYear]);
+
+  function previousYear() {
+    setCurrentYear(prevYear => prevYear - 1);
+  }
+
+  function nextYear() {
+    setCurrentYear(prevYear => prevYear + 1);
+  }
 
   function loadTasks() {
     axios
@@ -359,6 +382,24 @@ export default function MonthlyTasks({ folder_id, folder }) {
         Add Monthly Task
       </button>
 
+      <div className="d-flex justify-content-center align-items-center mb-3">
+        <button 
+          className="btn btn-outline-primary me-3" 
+          onClick={previousYear}
+          title="Previous Year"
+        >
+          ← Previous Year
+        </button>
+        <h4 className="mb-0 mx-3">{currentYear}</h4>
+        <button 
+          className="btn btn-outline-primary ms-3" 
+          onClick={nextYear}
+          title="Next Year"
+        >
+          Next Year →
+        </button>
+      </div>
+
       <table className="table table-bordered table-striped align-middle">
         <thead>
           <tr>
@@ -374,6 +415,7 @@ export default function MonthlyTasks({ folder_id, folder }) {
             <TRow
               key={task.id}
               task={task}
+              monthsOfYear={monthsOfYear}
               updateTaskDone={updateTaskDone}
               openEditTask={openEditTask}
               deleteTask={deleteTask}
