@@ -110,8 +110,8 @@ router.post("/api/add-monthly-task", async (req, res) => {
         const dates = utils.getMonthlyDates(months);
 
         for (let date of dates) {
-          const sql2 = "INSERT INTO recurrent_checks (task_id, date, is_done) VALUES (?, ?, 0)";
-          await con2.query(sql2, [result.insertId, date.toISOString().slice(0, 10)]);
+          const sql2 = "INSERT INTO recurrent_checks (task_id, date, is_done) VALUES (?, ?, ?)";
+          await con2.query(sql2, [result.insertId, date.toISOString().slice(0, 10), 0]);
         }
 
         res.json({ status: "OK", data: "Monthly task has been added successfully." });

@@ -39,7 +39,6 @@ function getDatesUntilNextYear(days) {
 function getMonthlyDates(months) {
   const now = new Date();
   const currentYear = now.getFullYear();
-  const nextYear = currentYear + 1;
 
   const selectedMonths = months
     .split(",")
@@ -48,8 +47,8 @@ function getMonthlyDates(months) {
 
   const dates = [];
 
-  // Create one date per selected month from now until the end of next year
-  for (let y of [currentYear, nextYear]) {
+  // Create one date per selected month from now until the end of this year
+  for (let y of [currentYear]) {
     for (let m of selectedMonths) {
       const date = new Date(y, m, 1); // pick day 1 of that month
       if (date >= now) {
