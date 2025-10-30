@@ -88,8 +88,8 @@ router.post("/api/add-recurrent-task", (req, res) => {
     var dates = utils.getDatesUntilNextYear(days);
 
     for (var i in dates) {
-      var sql2 = "INSERT INTO recurrent_checks (task_id, date, is_done) VALUES (?, ?, 0)";
-      await con2.query(sql2, [result.insertId, dates[i].toISOString().slice(0, 10)]);
+      var sql2 = "INSERT INTO recurrent_checks (task_id, date, is_done) VALUES (?, ?, ?)";
+      await con2.query(sql2, [result.insertId, dates[i].toISOString().slice(0, 10), 0]);
 
       if (has_time) {
         var start_date = dates[i];
