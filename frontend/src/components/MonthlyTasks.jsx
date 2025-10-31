@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import {useNavigate} from "react-router-dom";
 import axios from "axios";
 import config from "../config";
 import { toLocaleISOString } from '../libs/utils';
@@ -124,6 +125,7 @@ function TRow({
 }
 
 export default function MonthlyTasks({ folder_id, folder }) {
+  const navigate = useNavigate();
   const [tasks, setTasks] = useState([]);
   const [newTaskDescription, setNewTaskDescription] = useState("");
   const [selectedMonths, setSelectedMonths] = useState([]);
@@ -332,6 +334,33 @@ export default function MonthlyTasks({ folder_id, folder }) {
     });
   }
 
+  function deleteFolder() {
+    MySwal.fire({
+      title: "Are you sure?",
+      text: "Are you sure you want to delete this folder?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes"
+    }).then((result) => {
+      if (result.isConfirmed) {
+        axios.post(config.BASE_URL + "/api/delete-folder", {folder_id: folder_id})
+        .then(function(response) {
+          if (response.data.status == "OK") {
+            navigate("/home");
+          }
+          else {
+            alert(response.data.error);
+          }
+        })
+        .catch(function(err) {
+          console.log(err);
+        });
+      }
+    });
+  }
+
   function openAddTask() {
     setShowNew(true);
     const modal = bootstrap.Modal.getOrCreateInstance(
@@ -375,12 +404,27 @@ export default function MonthlyTasks({ folder_id, folder }) {
 
   return (
     <div className="container mt-4">
-      <h3 className="mb-3">
-        Monthly Tasks {folder ? `— ${folder.name}` : ""}
-      </h3>
-      <button className="btn btn-primary mb-3" onClick={openAddTask}>
-        Add Monthly Task
-      </button>
+      <div className="row">
+        <div className="col-md-6">
+          <h3 className="mb-3">
+            Monthly Tasks {folder ? `— ${folder.name}` : ""}
+          </h3>
+          <button className="btn btn-primary mb-3" onClick={openAddTask}>
+            Add Monthly Task
+          </button>
+        </div>
+        <div className="col-md-6 text-end">
+          <div class="dropdown">
+            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+              Options
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+              <li><a class="dropdown-item" href="#" onClick={deleteFolder}>Delete folder</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      
 
       <div className="d-flex justify-content-center align-items-center mb-3">
         <button 

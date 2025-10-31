@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import {useNavigate} from "react-router-dom";
 import axios from "axios";
 import config from "../config";
 import Swal from "sweetalert2";
@@ -10,6 +11,7 @@ import DateTimePicker from "../libs/bs5-datetime/DateTimePicker";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 
 export default function DailyToDos({ folder_id, folder }) {
+  const navigate = useNavigate();
   const [tasks, setTasks] = useState([]);
   const [defaultDate] = useState(toLocaleISOString(new Date()).slice(0, 10));
   const [selectedDate, setSelectedDate] = useState(
@@ -41,6 +43,33 @@ export default function DailyToDos({ folder_id, folder }) {
       .catch(function () {
         MySwal.fire("Connection Error");
       });
+  }
+
+  function deleteFolder() {
+    MySwal.fire({
+      title: "Are you sure?",
+      text: "Are you sure you want to delete this folder?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes"
+    }).then((result) => {
+      if (result.isConfirmed) {
+        axios.post(config.BASE_URL + "/api/delete-folder", {folder_id: folder_id})
+        .then(function(response) {
+          if (response.data.status == "OK") {
+            navigate("/home");
+          }
+          else {
+            alert(response.data.error);
+          }
+        })
+        .catch(function(err) {
+          console.log(err);
+        });
+      }
+    });
   }
 
   useEffect(() => {
@@ -92,13 +121,21 @@ export default function DailyToDos({ folder_id, folder }) {
             options={datePickerOptions}
           />
         </div>
-        <div className="text-end">
+        <div className="text-end d-block">
           <button
-            className="btn btn-outline-primary ms-2"
+            className="btn btn-outline-primary me-2 d-inline-block"
             onClick={() => setEisenhowerMode((p) => !p)}
           >
             {eisenhowerMode ? "Normal View" : "Eisenhower View"}
           </button>
+          <div class="dropdown d-inline-block">
+            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+              Options
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+              <li><a class="dropdown-item" href="#" onClick={deleteFolder}>Delete folder</a></li>
+            </ul>
+          </div>
         </div>
       </div>
 

@@ -13,7 +13,11 @@ router.get("/api/get-monthly-tasks", async (req, res) => {
       return res.json({ status: "NOK", error: "Invalid Authorization." });
     }
 
+  
     const { folder_id, dti, dtf } = req.query;
+
+    console.log("dti: " + dti);
+    console.log("dtf: " + dtf);
 
     if (!folder_id || !dti || !dtf) {
       return res.json({ status: "NOK", error: "Missing parameters." });
@@ -45,7 +49,7 @@ router.get("/api/get-monthly-tasks", async (req, res) => {
 
       for (const m of monthRange) {
         const monthIndex = m.getMonth(); // 0-11
-        const isoMonth = utils.toLocaleISOString(m).slice(0, 7); // YYYY-MM
+        const isoMonth = utils.toLocaleISOString(m).slice(0, 10);
 
         // Check if this month is cancelled
         const isCancelled = await recurrentTasks.checkIfTaskIsCancelled(task_id, isoMonth);
