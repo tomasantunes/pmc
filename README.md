@@ -57,6 +57,8 @@ List folders will just display a list of items.
 
 Daily To-Dos are another type of folder where you can define tasks for a specific date, mark them as done and if you switch to Eisenhower mode you can organize your daily tasks according to the eisenhower categories by dragging and dropping them.
 
+On Monthly folders you can set tasks to be done on a monthly basis. To create a new monthly task write the description and choose on which months it needs to be done.
+
 ### Github tasks
 
 On this page will be displayed the tasks from any TODO.md files that you have on the root of your repos and any open issues on your repos.
@@ -80,5 +82,3 @@ On this page you can see events weekly in a timetable or a list and you can crea
 ## Note
 
 The app is responsive, it's a PWA, it works on mobile and you can install it on your home screen. And you can set your browser to remember the password.
-
-
