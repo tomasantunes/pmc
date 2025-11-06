@@ -7,6 +7,7 @@ import config from "../config";
 export default function TimeTracker() {
   const [description, setDescription] = useState("");
   const [sessions, setSessions] = useState([]);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const navigate = useNavigate();
 
   // ================================
@@ -106,8 +107,8 @@ export default function TimeTracker() {
   // ================================
   // RENDER
   // ================================
-
-  return (
+  if (isLoggedIn) {
+    return (
     <>
       <Sidebar />
       <div className="page">
@@ -191,4 +192,8 @@ export default function TimeTracker() {
       </div>
     </>
   );
+  }
+  else {
+    return (<></>);
+  }
 }
