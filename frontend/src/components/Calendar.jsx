@@ -90,6 +90,17 @@ export default function Home() {
     });
   }
 
+  function handleChangeNewStartTime(value) {
+    setSelectedNewStartTime(value);
+    // set time to an hour later and set it as end time
+    var new_end_time = moment(value).add(60, 'minutes').format('YYYY-MM-DD HH:mm');
+    setSelectedNewEndTime(new_end_time);
+  }
+
+  function handleChangeNewEndTime(value) {
+    setSelectedNewEndTime(value);
+  }
+
   function loadEvents() {
     axios.get(config.BASE_URL + "/api/get-events")
     .then((response) => {
@@ -170,13 +181,13 @@ export default function Home() {
                   <div className="form-group py-2">
                     <label className="control-label">Start</label>
                     <div>
-                      <DateTimePicker value={selectedNewStartTime} defaultValue={selectedNewStartTime} onChange={setSelectedNewStartTime} />
+                      <DateTimePicker value={selectedNewStartTime} defaultValue={selectedNewStartTime} onChange={handleChangeNewStartTime} />
                     </div>
                   </div>
                   <div className="form-group py-2">
                     <label className="control-label">End</label>
                     <div>
-                      <DateTimePicker value={selectedNewEndTime} defaultValue={selectedNewEndTime} onChange={setSelectedNewEndTime} />
+                      <DateTimePicker value={selectedNewEndTime} defaultValue={selectedNewEndTime} onChange={handleChangeNewEndTime} />
                     </div>
                   </div>
                   <div className="form-group">

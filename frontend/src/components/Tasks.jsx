@@ -399,6 +399,17 @@ export default function Tasks({folder_id, folder}) {
     setEditTaskDescription(e.target.value);
   }
 
+  function handleChangeNewStartTime(value) {
+    setSelectedNewStartTime(value);
+    // set time to half an hour later and set it as end time
+    var new_end_time = moment(value).add(30, 'minutes').format('YYYY-MM-DD HH:mm');
+    setSelectedNewEndTime(new_end_time);
+  }
+
+  function handleChangeNewEndTime(value) {
+    setSelectedNewEndTime(value);
+  }
+
   function toggleHideDone() {
     axios.post("/api/set-hide-done", {folder_id: folder_id, hide_done: !hideDone})
     .then(function(response) {
@@ -509,13 +520,13 @@ export default function Tasks({folder_id, folder}) {
                 <div className="form-group py-2">
                   <label className="control-label">Start</label>
                     <div>
-                      <DateTimePicker defaultValue={selectedNewStartTime} onChange={setSelectedNewStartTime} />
+                      <DateTimePicker defaultValue={selectedNewStartTime} onChange={handleChangeNewStartTime} />
                     </div>
                 </div>
                 <div className="form-group py-2">
                   <label className="control-label">End</label>
                   <div>
-                    <DateTimePicker defaultValue={selectedNewEndTime} onChange={setSelectedNewEndTime} />
+                    <DateTimePicker defaultValue={selectedNewEndTime} onChange={handleChangeNewEndTime} />
                   </div>
                 </div>
                 <div className="form-group">
