@@ -9,6 +9,7 @@ import Motivation from './components/Motivation';
 import Calendar from './components/Calendar';
 import RandomTask from './components/RandomTask';
 import Schedule from './components/Schedule';
+import TimeTracker from './components/TimeTracker';
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
         <Route path="/calendar" element={<Calendar />} />
         <Route path="/random-task" element={<RandomTask />} />
         <Route path="/schedule" element={<Schedule />} />
+        <Route path="/time-tracker" element={<TimeTracker />} />
       </Routes>
     </Router>
   );

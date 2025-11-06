@@ -17,6 +17,7 @@ var calendarRouter = require('./routes/calendar');
 var scheduleRouter = require('./routes/schedule');
 var dailyTodosRouter = require('./routes/daily-todos');
 var monthlyTasksRouter = require('./routes/monthly-tasks');
+var timetrackerRouter = require('./routes/timetracker');
 
 var app = express();
 
@@ -49,6 +50,7 @@ app.use('/', calendarRouter);
 app.use('/', scheduleRouter);
 app.use('/', dailyTodosRouter);
 app.use('/', monthlyTasksRouter);
+app.use('/', timetrackerRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
