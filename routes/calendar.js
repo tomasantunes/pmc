@@ -5,6 +5,11 @@ var router = express.Router();
 var {con, con2 } = database.getMySQLConnections();
 
 router.post("/api/add-event", (req, res) => {
+  if (!req.session.isLoggedIn) {
+    res.json({status: "NOK", error: "Invalid Authorization."});
+    return;
+  }
+
   var start_date = req.body.start;
   var end_date = req.body.end;
   var description = req.body.value;
@@ -20,6 +25,11 @@ router.post("/api/add-event", (req, res) => {
 });
 
 router.get("/api/get-events", (req, res) => {
+  if (!req.session.isLoggedIn) {
+    res.json({status: "NOK", error: "Invalid Authorization."});
+    return;
+  }
+  
   var sql = "SELECT description AS value, start_date AS start, end_date AS end FROM events";
   con.query(sql, function (err, result) {
     if (err) {
