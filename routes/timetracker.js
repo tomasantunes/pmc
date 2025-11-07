@@ -34,14 +34,20 @@ router.post('/api/time-tracker/:id/pause', async (req, res) => {
   try {
     const { id } = req.params;
 
-    // Close latest sub-session if running
-    const sql = `
+    // Close latest open sub-session if exists
+    const updateSql = `
       UPDATE time_tracking_sub_sessions
       SET end_time = NOW()
       WHERE session_id = ? AND end_time IS NULL
-      ORDER BY id DESC LIMIT 1
+      ORDER BY id DESC
+      LIMIT 1
     `;
-    await con2.query(sql, [id]);
+    const result = await con2.query(updateSql, [id]);
+
+    // result.affectedRows may be 0 -> nothing to pause
+    if (result[0].affectedRows === 0) {
+      return res.json({ status: 'OK', message: 'No running sub-session to pause' });
+    }
 
     res.json({ status: 'OK', message: 'Session paused' });
   } catch (err) {
@@ -57,6 +63,15 @@ router.post('/api/time-tracker/:id/resume', async (req, res) => {
   }
   try {
     const { id } = req.params;
+
+    // Check if an open sub-session already exists
+    const checkSql = `SELECT 1 FROM time_tracking_sub_sessions WHERE session_id = ? AND end_time IS NULL LIMIT 1`;
+    const exists = await con2.query(checkSql, [id]);
+
+    if (exists[0].length > 0) {
+      return res.json({ status: 'OK', message: 'Session already running' });
+    }
+
     await con2.query(`INSERT INTO time_tracking_sub_sessions (session_id, start_time) VALUES (?, NOW())`, [id]);
     res.json({ status: 'OK', message: 'Session resumed' });
   } catch (err) {
@@ -73,11 +88,11 @@ router.post('/api/time-tracker/:id/stop', async (req, res) => {
   try {
     const { id } = req.params;
 
-    // Close current running sub-session (if any)
+    // Close any open sub-sessions for this session
     await con2.query(
-      `UPDATE time_tracking_sub_sessions SET end_time = NOW()
-       WHERE session_id = ? AND end_time IS NULL
-       ORDER BY id DESC LIMIT 1`,
+      `UPDATE time_tracking_sub_sessions 
+       SET end_time = NOW()
+       WHERE session_id = ? AND end_time IS NULL`,
       [id]
     );
 
@@ -103,26 +118,26 @@ router.get('/api/time-tracker/list', async (req, res) => {
         s.description, 
         s.start_time, 
         s.end_time,
-        IFNULL(SUM(TIMESTAMPDIFF(SECOND, sub.start_time, IFNULL(sub.end_time, NOW()))), 0) AS total_seconds
+        IFNULL(SUM(TIMESTAMPDIFF(SECOND, sub.start_time, IFNULL(sub.end_time, NOW()))), 0) AS total_seconds,
+        MAX(sub.end_time IS NULL) AS has_open_sub -- 1 if there's at least one open sub-session
       FROM time_tracking_sessions s
       LEFT JOIN time_tracking_sub_sessions sub ON s.id = sub.session_id
       WHERE s.id IS NOT NULL
       GROUP BY s.id
       ORDER BY s.id DESC
     `;
-
     const [rows, fields] = await con2.query(sql);
 
     const sessions = rows
-    .filter(r => r.id) // only valid sessions
-    .map((r) => ({
-      id: r.id,
-      description: r.description,
-      start_time: r.start_time,
-      end_time: r.end_time,
-      total_seconds: Number(r.total_seconds) || 0,
-      is_running: r.end_time == null,
-    }));
+      .filter(r => r.id) // defensive
+      .map((r) => ({
+        id: r.id,
+        description: r.description,
+        start_time: r.start_time,
+        end_time: r.end_time,
+        total_seconds: Number(r.total_seconds) || 0,
+        is_running: Boolean(Number(r.has_open_sub)), // convert 0/1 -> true/false
+      }));
 
     res.json({ status: 'OK', sessions });
   } catch (err) {

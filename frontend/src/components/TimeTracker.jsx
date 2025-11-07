@@ -144,12 +144,13 @@ export default function TimeTracker() {
                 </div>
                 <div>
                   {s.end_time ? (
-                    <button className="btn btn-sm btn-secondary me-2" disabled>
+                    <button key={Math.random()} className="btn btn-sm btn-secondary me-2" disabled>
                       <i className="fas fa-check"></i>
                     </button>
                   ) : s.is_running ? (
                     <>
                       <button
+                        key={Math.random()}
                         className="btn btn-sm btn-warning me-2"
                         onClick={() => pauseSession(s.id)}
                       >
@@ -165,6 +166,7 @@ export default function TimeTracker() {
                   ) : (
                     <>
                       <button
+                        key={Math.random()}
                         className="btn btn-sm btn-success me-2"
                         onClick={() => resumeSession(s.id)}
                       >
