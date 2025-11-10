@@ -1,22 +1,22 @@
-import React, {useState, useEffect, useRef} from 'react';
-import {useNavigate} from 'react-router-dom';
-import axios from 'axios';
-import config from '../config';
-import moment from 'moment';
-import TimePicker from '../libs/bs5-timepicker/TimePicker';
-import { toLocaleISOString } from '../libs/utils';
-import Swal from 'sweetalert2';
-import withReactContent from 'sweetalert2-react-content';
-const MySwal = withReactContent(Swal)
+import React, { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import config from "../config";
+import moment from "moment";
+import TimePicker from "../libs/bs5-timepicker/TimePicker";
+import { toLocaleISOString } from "../libs/utils";
+import Swal from "sweetalert2";
+import withReactContent from "sweetalert2-react-content";
+const MySwal = withReactContent(Swal);
 
 const weekDays = [
-  {value: 1, label: "Monday"},
-  {value: 2, label: "Tuesday"},
-  {value: 3, label: "Wednesday"},
-  {value: 4, label: "Thursday"},
-  {value: 5, label: "Friday"},
-  {value: 6, label: "Saturday"},
-  {value: 0, label: "Sunday"},
+  { value: 1, label: "Monday" },
+  { value: 2, label: "Tuesday" },
+  { value: 3, label: "Wednesday" },
+  { value: 4, label: "Thursday" },
+  { value: 5, label: "Friday" },
+  { value: 6, label: "Saturday" },
+  { value: 0, label: "Sunday" },
 ];
 
 function TRow(props) {
@@ -45,22 +45,19 @@ function TRow(props) {
     for (var i = 0; i < 7; i++) {
       if (props.checks.includes(i)) {
         checks_arr.push(true);
-      }
-      else {
+      } else {
         checks_arr.push(false);
       }
 
       if (props.checks_visible.includes(i)) {
         checks_visible_arr.push(true);
-      }
-      else {
+      } else {
         checks_visible_arr.push(false);
       }
 
       if (props.checks_cancelled.includes(i)) {
         checks_cancelled_arr.push(true);
-      }
-      else {
+      } else {
         checks_cancelled_arr.push(false);
       }
     }
@@ -75,32 +72,158 @@ function TRow(props) {
     <tr {...props}>
       <td>{props.description}</td>
       <td>{props.time}</td>
-      <td>{checksVisible[0] && <input type="checkbox" checked={checks[0]} onChange={(e) => {toggleCheck(e, props.task_id, 0)}} />}</td>
-      <td>{checksVisible[1] && <input type="checkbox" checked={checks[1]} onChange={(e) => {toggleCheck(e, props.task_id, 1)}} />}</td>
-      <td>{checksVisible[2] && <input type="checkbox" checked={checks[2]} onChange={(e) => {toggleCheck(e, props.task_id, 2)}} />}</td>
-      <td>{checksVisible[3] && <input type="checkbox" checked={checks[3]} onChange={(e) => {toggleCheck(e, props.task_id, 3)}} />}</td>
-      <td>{checksVisible[4] && <input type="checkbox" checked={checks[4]} onChange={(e) => {toggleCheck(e, props.task_id, 4)}} />}</td>
-      <td>{checksVisible[5] && <input type="checkbox" checked={checks[5]} onChange={(e) => {toggleCheck(e, props.task_id, 5)}} />}</td>
-      <td>{checksVisible[6] && <input type="checkbox" checked={checks[6]} onChange={(e) => {toggleCheck(e, props.task_id, 6)}} />}</td>
+      <td>
+        {checksVisible[0] && (
+          <input
+            type="checkbox"
+            checked={checks[0]}
+            onChange={(e) => {
+              toggleCheck(e, props.task_id, 0);
+            }}
+          />
+        )}
+      </td>
+      <td>
+        {checksVisible[1] && (
+          <input
+            type="checkbox"
+            checked={checks[1]}
+            onChange={(e) => {
+              toggleCheck(e, props.task_id, 1);
+            }}
+          />
+        )}
+      </td>
+      <td>
+        {checksVisible[2] && (
+          <input
+            type="checkbox"
+            checked={checks[2]}
+            onChange={(e) => {
+              toggleCheck(e, props.task_id, 2);
+            }}
+          />
+        )}
+      </td>
+      <td>
+        {checksVisible[3] && (
+          <input
+            type="checkbox"
+            checked={checks[3]}
+            onChange={(e) => {
+              toggleCheck(e, props.task_id, 3);
+            }}
+          />
+        )}
+      </td>
+      <td>
+        {checksVisible[4] && (
+          <input
+            type="checkbox"
+            checked={checks[4]}
+            onChange={(e) => {
+              toggleCheck(e, props.task_id, 4);
+            }}
+          />
+        )}
+      </td>
+      <td>
+        {checksVisible[5] && (
+          <input
+            type="checkbox"
+            checked={checks[5]}
+            onChange={(e) => {
+              toggleCheck(e, props.task_id, 5);
+            }}
+          />
+        )}
+      </td>
+      <td>
+        {checksVisible[6] && (
+          <input
+            type="checkbox"
+            checked={checks[6]}
+            onChange={(e) => {
+              toggleCheck(e, props.task_id, 6);
+            }}
+          />
+        )}
+      </td>
       <td>
         <div class="dropdown">
-            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+          <button
+            class="btn btn-secondary dropdown-toggle"
+            type="button"
+            id="dropdownMenuButton1"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+          >
             Actions
-            </button>
-            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-            <li><a class="dropdown-item" href="#" onClick={() => { props.openEditTask(props.task_id) }}>Edit</a></li>
-            <li><a class="dropdown-item" href="#" onClick={() => { props.deleteTask(props.task_id) }}>Delete</a></li>
-            {!checksCancelled[currentIdx] ?
-            <li><a class="dropdown-item" href="#" onClick={() => { props.cancelTask(props.task_id) }}>Cancel Today's Task</a></li>
-            :
-            <li><a class="dropdown-item" href="#" onClick={() => { props.uncancelTask(props.task_id) }}>Uncancel Today's Task</a></li>
-            }
-            <li><a class="dropdown-item" href="#" onClick={() => { props.restartTask(props.task_id) }}>Restart Task</a></li>
-            </ul>
+          </button>
+          <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+            <li>
+              <a
+                class="dropdown-item"
+                href="#"
+                onClick={() => {
+                  props.openEditTask(props.task_id);
+                }}
+              >
+                Edit
+              </a>
+            </li>
+            <li>
+              <a
+                class="dropdown-item"
+                href="#"
+                onClick={() => {
+                  props.deleteTask(props.task_id);
+                }}
+              >
+                Delete
+              </a>
+            </li>
+            {!checksCancelled[currentIdx] ? (
+              <li>
+                <a
+                  class="dropdown-item"
+                  href="#"
+                  onClick={() => {
+                    props.cancelTask(props.task_id);
+                  }}
+                >
+                  Cancel Today's Task
+                </a>
+              </li>
+            ) : (
+              <li>
+                <a
+                  class="dropdown-item"
+                  href="#"
+                  onClick={() => {
+                    props.uncancelTask(props.task_id);
+                  }}
+                >
+                  Uncancel Today's Task
+                </a>
+              </li>
+            )}
+            <li>
+              <a
+                class="dropdown-item"
+                href="#"
+                onClick={() => {
+                  props.restartTask(props.task_id);
+                }}
+              >
+                Restart Task
+              </a>
+            </li>
+          </ul>
         </div>
       </td>
     </tr>
-  )
+  );
 }
 
 function TBodyPlain(props) {
@@ -108,14 +231,30 @@ function TBodyPlain(props) {
     <tbody {...props} className="table-group-divider">
       {props.data.map((task, i) => {
         return (
-          <TRow key={task.id} index={i} task_id={task.id} description={task.description} time={task.time} checks={task.checks} type={task.type} checks_visible={task.checks_visible} checks_cancelled={task.checks_cancelled} updateTaskDone={props.updateTaskDone} openEditTask={props.openEditTask} deleteTask={props.deleteTask} cancelTask={props.cancelTask} uncancelTask={props.uncancelTask} restartTask={props.restartTask} />
-        )
+          <TRow
+            key={task.id}
+            index={i}
+            task_id={task.id}
+            description={task.description}
+            time={task.time}
+            checks={task.checks}
+            type={task.type}
+            checks_visible={task.checks_visible}
+            checks_cancelled={task.checks_cancelled}
+            updateTaskDone={props.updateTaskDone}
+            openEditTask={props.openEditTask}
+            deleteTask={props.deleteTask}
+            cancelTask={props.cancelTask}
+            uncancelTask={props.uncancelTask}
+            restartTask={props.restartTask}
+          />
+        );
       })}
     </tbody>
-  )
+  );
 }
 
-export default function Tasks({folder_id, folder}) {
+export default function Tasks({ folder_id, folder }) {
   const [tasks, setTasks] = useState([]);
   const [days, setDays] = useState([]);
   const [dates, setDates] = useState([]);
@@ -154,6 +293,10 @@ export default function Tasks({folder_id, folder}) {
   const [nrTasksPending, setNrTasksPending] = useState(0);
   const [showNew, setShowNew] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
+  const [newAlertActive, setNewAlertActive] = useState(false);
+  const [newAlertText, setNewAlertText] = useState("");
+  const [editAlertActive, setEditAlertActive] = useState(false);
+  const [editAlertText, setEditAlertText] = useState("");
   var navigate = useNavigate();
 
   function changeEnableNewStartTime(e) {
@@ -182,16 +325,14 @@ export default function Tasks({folder_id, folder}) {
           new_arr.push(weekDays[0]);
           return new_arr;
         });
-      }
-      else if (showEdit) {
+      } else if (showEdit) {
         setEditTaskDays((prev) => {
           var new_arr = prev;
           new_arr.push(weekDays[0]);
           return new_arr;
         });
       }
-    }
-    else {
+    } else {
       if (showNew) {
         setNewTaskDays((prev) => {
           var new_arr = prev;
@@ -200,8 +341,7 @@ export default function Tasks({folder_id, folder}) {
           });
           return new_arr;
         });
-      }
-      else if (showEdit) {
+      } else if (showEdit) {
         setEditTaskDays((prev) => {
           var new_arr = prev;
           new_arr = new_arr.filter((item) => {
@@ -222,16 +362,14 @@ export default function Tasks({folder_id, folder}) {
           new_arr.push(weekDays[1]);
           return new_arr;
         });
-      }
-      else if (showEdit) {
+      } else if (showEdit) {
         setEditTaskDays((prev) => {
           var new_arr = prev;
           new_arr.push(weekDays[1]);
           return new_arr;
         });
       }
-    }
-    else {
+    } else {
       if (showNew) {
         setNewTaskDays((prev) => {
           var new_arr = prev;
@@ -239,9 +377,8 @@ export default function Tasks({folder_id, folder}) {
             return item.value != 2;
           });
           return new_arr;
-      });
-      }
-      else if (showEdit) {
+        });
+      } else if (showEdit) {
         setEditTaskDays((prev) => {
           var new_arr = prev;
           new_arr = new_arr.filter((item) => {
@@ -262,16 +399,14 @@ export default function Tasks({folder_id, folder}) {
           new_arr.push(weekDays[2]);
           return new_arr;
         });
-      }
-      else if (showEdit) {
+      } else if (showEdit) {
         setEditTaskDays((prev) => {
           var new_arr = prev;
           new_arr.push(weekDays[2]);
           return new_arr;
         });
       }
-    }
-    else {
+    } else {
       if (showNew) {
         setNewTaskDays((prev) => {
           var new_arr = prev;
@@ -280,8 +415,7 @@ export default function Tasks({folder_id, folder}) {
           });
           return new_arr;
         });
-      }
-      else if (showEdit) {
+      } else if (showEdit) {
         setEditTaskDays((prev) => {
           var new_arr = prev;
           new_arr = new_arr.filter((item) => {
@@ -302,16 +436,14 @@ export default function Tasks({folder_id, folder}) {
           new_arr.push(weekDays[3]);
           return new_arr;
         });
-      }
-      else if (showEdit) {
+      } else if (showEdit) {
         setEditTaskDays((prev) => {
           var new_arr = prev;
           new_arr.push(weekDays[3]);
           return new_arr;
         });
       }
-    }
-    else {
+    } else {
       if (showNew) {
         setNewTaskDays((prev) => {
           var new_arr = prev;
@@ -320,8 +452,7 @@ export default function Tasks({folder_id, folder}) {
           });
           return new_arr;
         });
-      }
-      else if (showEdit) {
+      } else if (showEdit) {
         setEditTaskDays((prev) => {
           var new_arr = prev;
           new_arr = new_arr.filter((item) => {
@@ -342,16 +473,14 @@ export default function Tasks({folder_id, folder}) {
           new_arr.push(weekDays[4]);
           return new_arr;
         });
-      }
-      else if (showEdit) {
+      } else if (showEdit) {
         setEditTaskDays((prev) => {
           var new_arr = prev;
           new_arr.push(weekDays[4]);
           return new_arr;
         });
       }
-    }
-    else {
+    } else {
       if (showNew) {
         setNewTaskDays((prev) => {
           var new_arr = prev;
@@ -360,8 +489,7 @@ export default function Tasks({folder_id, folder}) {
           });
           return new_arr;
         });
-      }
-      else if (showEdit) {
+      } else if (showEdit) {
         setEditTaskDays((prev) => {
           var new_arr = prev;
           new_arr = new_arr.filter((item) => {
@@ -382,16 +510,14 @@ export default function Tasks({folder_id, folder}) {
           new_arr.push(weekDays[5]);
           return new_arr;
         });
-      }
-      else if (showEdit) {
+      } else if (showEdit) {
         setEditTaskDays((prev) => {
           var new_arr = prev;
           new_arr.push(weekDays[5]);
           return new_arr;
         });
       }
-    }
-    else {
+    } else {
       if (showNew) {
         setNewTaskDays((prev) => {
           var new_arr = prev;
@@ -400,8 +526,7 @@ export default function Tasks({folder_id, folder}) {
           });
           return new_arr;
         });
-      }
-      else if (showEdit) {
+      } else if (showEdit) {
         setEditTaskDays((prev) => {
           var new_arr = prev;
           new_arr = new_arr.filter((item) => {
@@ -422,16 +547,14 @@ export default function Tasks({folder_id, folder}) {
           new_arr.push(weekDays[6]);
           return new_arr;
         });
-      }
-      else if (showEdit) {
+      } else if (showEdit) {
         setEditTaskDays((prev) => {
           var new_arr = prev;
           new_arr.push(weekDays[6]);
           return new_arr;
         });
       }
-    }
-    else {
+    } else {
       if (showNew) {
         setNewTaskDays((prev) => {
           var new_arr = prev;
@@ -440,8 +563,7 @@ export default function Tasks({folder_id, folder}) {
           });
           return new_arr;
         });
-      }
-      else if (showEdit) {
+      } else if (showEdit) {
         setEditTaskDays((prev) => {
           var new_arr = prev;
           new_arr = new_arr.filter((item) => {
@@ -453,60 +575,77 @@ export default function Tasks({folder_id, folder}) {
     }
   }
 
+  function toggleNewAlertActive() {
+    setNewAlertActive(e.target.checked);
+  }
+
+  function toggleEditAlertActive() {
+    setEditAlertActive(e.target.checked);
+  }
 
   function cancelTask(task_id) {
-    axios.post(config.BASE_URL + "/api/cancel-task", {task_id: task_id, date: toLocaleISOString(new Date()).split('T')[0]})
-    .then(function(response) {
-      if (response.data.status == "OK") {
-        window.location.reload();
-      }
-      else {
-        alert(response.data.error);
-      }
-    })
-    .catch(function(err) {
-      console.log(err);
-      alert(err.message);
-    });
+    axios
+      .post(config.BASE_URL + "/api/cancel-task", {
+        task_id: task_id,
+        date: toLocaleISOString(new Date()).split("T")[0],
+      })
+      .then(function (response) {
+        if (response.data.status == "OK") {
+          window.location.reload();
+        } else {
+          alert(response.data.error);
+        }
+      })
+      .catch(function (err) {
+        console.log(err);
+        alert(err.message);
+      });
   }
 
   function uncancelTask(task_id) {
-    axios.post(config.BASE_URL + "/api/uncancel-task", {task_id: task_id, date: toLocaleISOString(new Date()).split('T')[0]})
-    .then(function(response) {
-      if (response.data.status == "OK") {
-        window.location.reload();
-      }
-      else {
-        alert(response.data.error);
-      }
-    })
-    .catch(function(err) {
-      console.log(err);
-      alert(err.message);
-    });
+    axios
+      .post(config.BASE_URL + "/api/uncancel-task", {
+        task_id: task_id,
+        date: toLocaleISOString(new Date()).split("T")[0],
+      })
+      .then(function (response) {
+        if (response.data.status == "OK") {
+          window.location.reload();
+        } else {
+          alert(response.data.error);
+        }
+      })
+      .catch(function (err) {
+        console.log(err);
+        alert(err.message);
+      });
   }
 
   function restartTask(task_id) {
-    axios.post(config.BASE_URL + "/api/restart-recurrent-task", {task_id: task_id})
-    .then(function(response) {
-      if (response.data.status == "OK") {
-        loadTasks();
-      }
-      else {
-        alert(response.data.error);
-      }
-    })
-    .catch(function(err) {
-      console.log(err);
-      alert(err.message);
-    });
+    axios
+      .post(config.BASE_URL + "/api/restart-recurrent-task", {
+        task_id: task_id,
+      })
+      .then(function (response) {
+        if (response.data.status == "OK") {
+          loadTasks();
+        } else {
+          alert(response.data.error);
+        }
+      })
+      .catch(function (err) {
+        console.log(err);
+        alert(err.message);
+      });
   }
 
   function submitAddTask(e) {
     e.preventDefault();
-    var days = newTaskDays.map((item) => {
-      return item.value;
-    }).join(",");
+    var days = newTaskDays
+      .map((item) => {
+        return item.value;
+      })
+      .join(",");
 
     var start_time = "";
     var end_time = "";
@@ -519,120 +658,133 @@ export default function Tasks({folder_id, folder}) {
       end_time = selectedNewEndTime;
     }
 
-    axios.post(config.BASE_URL + "/api/add-recurrent-task", {
-      task_type: newTaskType, 
-      sort_index: newTaskSortIndex, 
-      days: days, 
-      start_time: moment(start_time, "HH:mm").set({year: 1970, month: 0, date: 1}).format("YYYY-MM-DD HH:mm"), 
-      end_time: moment(end_time, "HH:mm").set({year: 1970, month: 0, date: 1}).format("YYYY-MM-DD HH:mm"),
-      description: newTaskDescription,
-      folder_id: newTaskFolderId
-    })
-    .then(function(response) {
-      if (response.data.status == "OK") {
-        loadTasks();
-        var modal = bootstrap.Modal.getOrCreateInstance(document.querySelector('.addTaskModal'))
-        modal.hide();
-        setNewTaskFolderId(folder_id);
-        setNewTaskSortIndex(0);
-        setNewTaskType("daily");
-        setNewTaskDays([]);
-        setNewTaskDescription("");
-        setSelectedNewStartTime("00:00");
-        setSelectedNewEndTime("00:00");
-        clearWeekDayChecks();
-      }
-      else {
-        alert(response.data.error);
-      }
-    })
-    .catch(function(err) {
-      console.log(err);
-    });
+    axios
+      .post(config.BASE_URL + "/api/add-recurrent-task", {
+        task_type: newTaskType,
+        sort_index: newTaskSortIndex,
+        days: days,
+        start_time: moment(start_time, "HH:mm")
+          .set({ year: 1970, month: 0, date: 1 })
+          .format("YYYY-MM-DD HH:mm"),
+        end_time: moment(end_time, "HH:mm")
+          .set({ year: 1970, month: 0, date: 1 })
+          .format("YYYY-MM-DD HH:mm"),
+        description: newTaskDescription,
+        folder_id: newTaskFolderId,
+        alert_active: newAlertActive,
+        alert_text: newAlertText,
+      })
+      .then(function (response) {
+        if (response.data.status == "OK") {
+          loadTasks();
+          var modal = bootstrap.Modal.getOrCreateInstance(
+            document.querySelector(".addTaskModal"),
+          );
+          modal.hide();
+          setNewTaskFolderId(folder_id);
+          setNewTaskSortIndex(0);
+          setNewTaskType("daily");
+          setNewTaskDays([]);
+          setNewTaskDescription("");
+          setSelectedNewStartTime("00:00");
+          setSelectedNewEndTime("00:00");
+          clearWeekDayChecks();
+        } else {
+          alert(response.data.error);
+        }
+      })
+      .catch(function (err) {
+        console.log(err);
+      });
   }
 
   function openAddTask() {
-    var modal = bootstrap.Modal.getOrCreateInstance(document.querySelector('.addTaskModal'))
+    var modal = bootstrap.Modal.getOrCreateInstance(
+      document.querySelector(".addTaskModal"),
+    );
     modal.show();
     setShowNew(true);
   }
 
   function closeAddTask() {
-    var modal = bootstrap.Modal.getOrCreateInstance(document.querySelector('.addTaskModal'))
+    var modal = bootstrap.Modal.getOrCreateInstance(
+      document.querySelector(".addTaskModal"),
+    );
     modal.hide();
     setShowNew(false);
   }
 
   function closeEditTask() {
-    var modal = bootstrap.Modal.getOrCreateInstance(document.querySelector('.editTaskModal'))
+    var modal = bootstrap.Modal.getOrCreateInstance(
+      document.querySelector(".editTaskModal"),
+    );
     modal.hide();
     setShowEdit(false);
   }
 
   function openEditTask(task_id) {
     clearWeekDayChecks();
-    axios.get(config.BASE_URL + "/api/get-task", {params: {task_id: task_id}})
-    .then(function(response) {
-      if (response.data.status == "OK") {
-        var task = response.data.data;
-        console.log(task);
-        setSelectedEditStartTime(moment(task.start_time, 'YYYY-MM-DD HH:mm:ss').format('HH:mm'));
-        setSelectedEditEndTime(moment(task.end_time, 'YYYY-MM-DD HH:mm:ss').format('HH:mm'));
-        setEditTaskId(task.id);
-        setEditTaskDescription(task.description);
-        setEditTaskFolderId(task.folder_id);
-        setEditTaskSortIndex(task.sort_index);
-        setEditTaskType(task.type);
-        
-        if (task.days != "") {
-          var days = task.days.split(",");
-          days = days.map(Number);
-          var selected_days = [];
-          for (var i in days) {
-            var week_day = weekDays.find((d) => {
-              return d.value == days[i];
-            });
-            setWeekDayCheck(days[i]);
-            selected_days.push(week_day);
+    axios
+      .get(config.BASE_URL + "/api/get-task", { params: { task_id: task_id } })
+      .then(function (response) {
+        if (response.data.status == "OK") {
+          var task = response.data.data;
+          console.log(task);
+          setSelectedEditStartTime(
+            moment(task.start_time, "YYYY-MM-DD HH:mm:ss").format("HH:mm"),
+          );
+          setSelectedEditEndTime(
+            moment(task.end_time, "YYYY-MM-DD HH:mm:ss").format("HH:mm"),
+          );
+          setEditTaskId(task.id);
+          setEditTaskDescription(task.description);
+          setEditTaskFolderId(task.folder_id);
+          setEditTaskSortIndex(task.sort_index);
+          setEditTaskType(task.type);
+
+          if (task.days != "") {
+            var days = task.days.split(",");
+            days = days.map(Number);
+            var selected_days = [];
+            for (var i in days) {
+              var week_day = weekDays.find((d) => {
+                return d.value == days[i];
+              });
+              setWeekDayCheck(days[i]);
+              selected_days.push(week_day);
+            }
+            setEditTaskDays(selected_days);
+          } else {
+            setEditTaskDays([]);
           }
-          setEditTaskDays(selected_days);
+          var modal = bootstrap.Modal.getOrCreateInstance(
+            document.querySelector(".editTaskModal"),
+          );
+          modal.show();
+          setShowEdit(true);
+        } else {
+          alert(response.data.error);
         }
-        else {
-          setEditTaskDays([]);
-        }
-        var modal = bootstrap.Modal.getOrCreateInstance(document.querySelector('.editTaskModal'))
-        modal.show();
-        setShowEdit(true);
-      }
-      else {
-        alert(response.data.error);
-      }
-    })
-    .catch(function(err) {
-      console.log(err);
-    });
+      })
+      .catch(function (err) {
+        console.log(err);
+      });
   }
 
   function setWeekDayCheck(value) {
     if (value == 0) {
       setSundayChecked(true);
-    }
-    else if (value == 1) {
+    } else if (value == 1) {
       setMondayChecked(true);
-    }
-    else if (value == 2) {
+    } else if (value == 2) {
       setTuesdayChecked(true);
-    }
-    else if (value == 3) {
+    } else if (value == 3) {
       setWednesdayChecked(true);
-    }
-    else if (value == 4) {
+    } else if (value == 4) {
       setThursdayChecked(true);
-    }
-    else if (value == 5) {
+    } else if (value == 5) {
       setFridayChecked(true);
-    }
-    else if (value == 6) {
+    } else if (value == 6) {
       setSaturdayChecked(true);
     }
   }
@@ -665,9 +817,11 @@ export default function Tasks({folder_id, folder}) {
 
   function submitEditTask(e) {
     e.preventDefault();
-    var days = editTaskDays.map((item) => {
-      return item.value;
-    }).join(",");
+    var days = editTaskDays
+      .map((item) => {
+        return item.value;
+      })
+      .join(",");
 
     var start_time = "";
     var end_time = "";
@@ -680,37 +834,45 @@ export default function Tasks({folder_id, folder}) {
       end_time = selectedEditEndTime;
     }
 
-    axios.post(config.BASE_URL + "/api/edit-recurrent-task", {
-      task_id: editTaskId, 
-      days: days,
-      start_time: moment(start_time, "HH:mm").set({year: 1970, month: 0, date: 1}).format("YYYY-MM-DD HH:mm"), 
-      end_time: moment(end_time, "HH:mm").set({year: 1970, month: 0, date: 1}).format("YYYY-MM-DD HH:mm"), 
-      description: editTaskDescription, 
-      folder_id: editTaskFolderId, 
-      sort_index: editTaskSortIndex, 
-      task_type: editTaskType
-    })
-    .then(function(response) {
-      if (response.data.status == "OK") {
-        loadTasks();
-        var modal = bootstrap.Modal.getOrCreateInstance(document.querySelector('.editTaskModal'))
-        modal.hide();
-        setEditTask({
-          task_id: 0,
-          description: "",
-          time: "",
-          days: ""
-        });
-        setSelectedWeekDays([]);
-        clearWeekDayChecks();
-      }
-      else {
-        alert(response.data.error);
-      }
-    })
-    .catch(function(err) {
-      console.log(err);
-    });
+    axios
+      .post(config.BASE_URL + "/api/edit-recurrent-task", {
+        task_id: editTaskId,
+        days: days,
+        start_time: moment(start_time, "HH:mm")
+          .set({ year: 1970, month: 0, date: 1 })
+          .format("YYYY-MM-DD HH:mm"),
+        end_time: moment(end_time, "HH:mm")
+          .set({ year: 1970, month: 0, date: 1 })
+          .format("YYYY-MM-DD HH:mm"),
+        description: editTaskDescription,
+        folder_id: editTaskFolderId,
+        sort_index: editTaskSortIndex,
+        task_type: editTaskType,
+        alert_active: editAlertActive,
+        alert_text: editAlertText,
+      })
+      .then(function (response) {
+        if (response.data.status == "OK") {
+          loadTasks();
+          var modal = bootstrap.Modal.getOrCreateInstance(
+            document.querySelector(".editTaskModal"),
+          );
+          modal.hide();
+          setEditTask({
+            task_id: 0,
+            description: "",
+            time: "",
+            days: "",
+          });
+          setSelectedWeekDays([]);
+          clearWeekDayChecks();
+        } else {
+          alert(response.data.error);
+        }
+      })
+      .catch(function (err) {
+        console.log(err);
+      });
   }
 
   function deleteTask(task_id) {
@@ -721,21 +883,21 @@ export default function Tasks({folder_id, folder}) {
       showCancelButton: true,
       confirmButtonColor: "#3085d6",
       cancelButtonColor: "#d33",
-      confirmButtonText: "Yes"
+      confirmButtonText: "Yes",
     }).then((result) => {
       if (result.isConfirmed) {
-        axios.post(config.BASE_URL + "/api/delete-task", {task_id: task_id})
-        .then(function(response) {
-          if (response.data.status == "OK") {
-            loadTasks();
-          }
-          else {
-            alert(response.data.error);
-          }
-        })
-        .catch(function(err) {
-          console.log(err);
-        });
+        axios
+          .post(config.BASE_URL + "/api/delete-task", { task_id: task_id })
+          .then(function (response) {
+            if (response.data.status == "OK") {
+              loadTasks();
+            } else {
+              alert(response.data.error);
+            }
+          })
+          .catch(function (err) {
+            console.log(err);
+          });
       }
     });
   }
@@ -748,47 +910,63 @@ export default function Tasks({folder_id, folder}) {
       showCancelButton: true,
       confirmButtonColor: "#3085d6",
       cancelButtonColor: "#d33",
-      confirmButtonText: "Yes"
+      confirmButtonText: "Yes",
     }).then((result) => {
       if (result.isConfirmed) {
-        axios.post(config.BASE_URL + "/api/delete-folder", {folder_id: folder_id})
-        .then(function(response) {
-          if (response.data.status == "OK") {
-            navigate("/home");
-          }
-          else {
-            alert(response.data.error);
-          }
-        })
-        .catch(function(err) {
-          console.log(err);
-        });
+        axios
+          .post(config.BASE_URL + "/api/delete-folder", {
+            folder_id: folder_id,
+          })
+          .then(function (response) {
+            if (response.data.status == "OK") {
+              navigate("/home");
+            } else {
+              alert(response.data.error);
+            }
+          })
+          .catch(function (err) {
+            console.log(err);
+          });
       }
     });
   }
 
   function updateTaskDone(e, task_id, index) {
-    var dt = toLocaleISOString(dates[index]).split('T')[0];
-    axios.post(config.BASE_URL + "/api/update-recurrent-task-done", {task_id: task_id, is_done: e.target.checked, date: dt})
-    .then(function(response) {
-      if (response.data.status == "OK") {
-        loadTasks();
-      }
-      else {
-        alert(response.data.error);
-      }
-    })
-    .catch(function(err) {
-      console.log(err);
-    });
+    var dt = toLocaleISOString(dates[index]).split("T")[0];
+    axios
+      .post(config.BASE_URL + "/api/update-recurrent-task-done", {
+        task_id: task_id,
+        is_done: e.target.checked,
+        date: dt,
+      })
+      .then(function (response) {
+        if (response.data.status == "OK") {
+          loadTasks();
+        } else {
+          alert(response.data.error);
+        }
+      })
+      .catch(function (err) {
+        console.log(err);
+      });
   }
 
   function compareDates(a, b) {
-    return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+    return (
+      a.getFullYear() === b.getFullYear() &&
+      a.getMonth() === b.getMonth() &&
+      a.getDate() === b.getDate()
+    );
   }
 
   function dateIsLessThan(a, b) {
-    return a.getFullYear() < b.getFullYear() || (a.getFullYear() == b.getFullYear() && a.getMonth() < b.getMonth()) || (a.getFullYear() == b.getFullYear() && a.getMonth() == b.getMonth() && a.getDate() < b.getDate());
+    return (
+      a.getFullYear() < b.getFullYear() ||
+      (a.getFullYear() == b.getFullYear() && a.getMonth() < b.getMonth()) ||
+      (a.getFullYear() == b.getFullYear() &&
+        a.getMonth() == b.getMonth() &&
+        a.getDate() < b.getDate())
+    );
   }
 
   async function getChecksVisible(task) {
@@ -805,67 +983,71 @@ export default function Tasks({folder_id, folder}) {
       }
       console.log(checks_visible);
       return checks_visible;
-    }
-    else {
+    } else {
       return [];
     }
-    
   }
 
   function loadTasks() {
-    axios.get(config.BASE_URL + "/api/get-recurrent-tasks", {params: {folder_id: folder_id, dti: toLocaleISOString(dates[0]).split('T')[0], dtf: toLocaleISOString(dates[6]).split('T')[0]}})
-    .then(async function(response) {
-      if (response.data.status == "OK") {
-        var new_data = response.data.data.map(task => ({
-          ...task,
-          checks: [...task.checks],
-        }));
+    axios
+      .get(config.BASE_URL + "/api/get-recurrent-tasks", {
+        params: {
+          folder_id: folder_id,
+          dti: toLocaleISOString(dates[0]).split("T")[0],
+          dtf: toLocaleISOString(dates[6]).split("T")[0],
+        },
+      })
+      .then(async function (response) {
+        if (response.data.status == "OK") {
+          var new_data = response.data.data.map((task) => ({
+            ...task,
+            checks: [...task.checks],
+          }));
 
-        var count_tasks = 0;
-        var count_tasks_done = 0;
-        var count_tasks_pending = 0;
-        var today = new Date();
+          var count_tasks = 0;
+          var count_tasks_done = 0;
+          var count_tasks_pending = 0;
+          var today = new Date();
 
-        for (var i in new_data) {
-          var checks = [];
-          var checks_cancelled = [];
-          var checks_visible = await getChecksVisible(new_data[i]);
-          for (var j in new_data[i].checks) {
-            const check = new_data[i].checks[j];
-            const checkDate = new Date(check.date.split("T")[0]);
-            if (compareDates(checkDate, today)) {
-              count_tasks++;
-              if (check.is_done) count_tasks_done++;
-              else count_tasks_pending++;
-            }
-
-            for (var k in dates) {
-              if (compareDates(checkDate, dates[k]) && check.is_done) {
-                checks.push(Number(k));
+          for (var i in new_data) {
+            var checks = [];
+            var checks_cancelled = [];
+            var checks_visible = await getChecksVisible(new_data[i]);
+            for (var j in new_data[i].checks) {
+              const check = new_data[i].checks[j];
+              const checkDate = new Date(check.date.split("T")[0]);
+              if (compareDates(checkDate, today)) {
+                count_tasks++;
+                if (check.is_done) count_tasks_done++;
+                else count_tasks_pending++;
               }
-              if (compareDates(checkDate, dates[k]) && check.is_cancelled) {
-                checks_cancelled.push(Number(k));
+
+              for (var k in dates) {
+                if (compareDates(checkDate, dates[k]) && check.is_done) {
+                  checks.push(Number(k));
+                }
+                if (compareDates(checkDate, dates[k]) && check.is_cancelled) {
+                  checks_cancelled.push(Number(k));
+                }
               }
             }
+            new_data[i].checks = checks;
+            new_data[i].checks_cancelled = checks_cancelled;
+            new_data[i].checks_visible = checks_visible;
           }
-          new_data[i].checks = checks;
-          new_data[i].checks_cancelled = checks_cancelled;
-          new_data[i].checks_visible = checks_visible;
-        }
 
-        setTotalTasks(count_tasks);
-        setNrTasksDone(count_tasks_done);
-        setNrTasksPending(count_tasks_pending);
-        setTasks(new_data);
-      }
-      else {
-        alert(response.data.error);
-      }
-    })
-    .catch(function(err) {
-      console.log(err);
-      alert(err.message);
-    });
+          setTotalTasks(count_tasks);
+          setNrTasksDone(count_tasks_done);
+          setNrTasksPending(count_tasks_pending);
+          setTasks(new_data);
+        } else {
+          alert(response.data.error);
+        }
+      })
+      .catch(function (err) {
+        console.log(err);
+        alert(err.message);
+      });
   }
 
   function addLeadingZeros(n) {
@@ -879,7 +1061,7 @@ export default function Tasks({folder_id, folder}) {
     var days = [];
     for (var i = 0; i < 7; i++) {
       var date = new Date();
-      date.setDate(date.getDate() - (date.getDay() + 6) % 7);
+      date.setDate(date.getDate() - ((date.getDay() + 6) % 7));
       date.setDate(date.getDate() + i);
       var mm = date.getMonth() + 1;
       var dd = date.getDate();
@@ -903,7 +1085,7 @@ export default function Tasks({folder_id, folder}) {
     var dates = [];
     for (var i = 0; i < 7; i++) {
       var date = new Date();
-      date.setDate(date.getDate() - (date.getDay() + 6) % 7);
+      date.setDate(date.getDate() - ((date.getDay() + 6) % 7));
       date.setDate(date.getDate() + i);
       dates.push(date);
     }
@@ -974,62 +1156,129 @@ export default function Tasks({folder_id, folder}) {
     <>
       <div className="row">
         <div className="col-md-6">
-          <p><b>Total tasks today:</b> {totalTasks}</p>
-          <p><b>Tasks done today:</b> {nrTasksDone}</p>
-          <p><b>Tasks pending today:</b> {nrTasksPending}</p>
+          <p>
+            <b>Total tasks today:</b> {totalTasks}
+          </p>
+          <p>
+            <b>Tasks done today:</b> {nrTasksDone}
+          </p>
+          <p>
+            <b>Tasks pending today:</b> {nrTasksPending}
+          </p>
         </div>
         <div className="col-md-6">
           <div className="buttons-menu-recurrent my-3">
-            <button className="btn btn-primary" onClick={previousWeek}><i class="fa-solid fa-arrow-left"></i></button>
-            <button className="btn btn-primary" onClick={nextWeek}><i class="fa-solid fa-arrow-right"></i></button>
-            <button className="btn btn-success" onClick={openAddTask}>Add Task</button>
+            <button className="btn btn-primary" onClick={previousWeek}>
+              <i class="fa-solid fa-arrow-left"></i>
+            </button>
+            <button className="btn btn-primary" onClick={nextWeek}>
+              <i class="fa-solid fa-arrow-right"></i>
+            </button>
+            <button className="btn btn-success" onClick={openAddTask}>
+              Add Task
+            </button>
             <div class="dropdown">
-              <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+              <button
+                class="btn btn-secondary dropdown-toggle"
+                type="button"
+                id="dropdownMenuButton1"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+              >
                 Options
               </button>
               <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-                <li><a class="dropdown-item" href="#" onClick={deleteFolder}>Delete folder</a></li>
+                <li>
+                  <a class="dropdown-item" href="#" onClick={deleteFolder}>
+                    Delete folder
+                  </a>
+                </li>
               </ul>
             </div>
           </div>
         </div>
       </div>
       <table className="table table-striped table-bordered align-middle recurrent-tasks">
-          <thead class="table-dark">
-              <tr>
-                  <th style={{width: "45%"}}>Task</th>
-                  <th style={{width: "10%"}}>Time</th>
-                  <th style={{width: "5%"}}>Mon <br/>{days[0]}</th>
-                  <th style={{width: "5%"}}>Tue <br/>{days[1]}</th>
-                  <th style={{width: "5%"}}>Wed <br/>{days[2]}</th>
-                  <th style={{width: "5%"}}>Thu <br/>{days[3]}</th>
-                  <th style={{width: "5%"}}>Fri <br/>{days[4]}</th>
-                  <th style={{width: "5%"}}>Sat <br/>{days[5]}</th>
-                  <th style={{width: "5%"}}>Sun <br/>{days[6]}</th>
-                  <th style={{width: "10%"}}>Actions</th>
-              </tr>
-          </thead>
-          <TBodyPlain key={Math.random()} data={tasks} updateTaskDone={updateTaskDone} openEditTask={openEditTask} deleteTask={deleteTask} cancelTask={cancelTask} uncancelTask={uncancelTask} restartTask={restartTask} />
+        <thead class="table-dark">
+          <tr>
+            <th style={{ width: "45%" }}>Task</th>
+            <th style={{ width: "10%" }}>Time</th>
+            <th style={{ width: "5%" }}>
+              Mon <br />
+              {days[0]}
+            </th>
+            <th style={{ width: "5%" }}>
+              Tue <br />
+              {days[1]}
+            </th>
+            <th style={{ width: "5%" }}>
+              Wed <br />
+              {days[2]}
+            </th>
+            <th style={{ width: "5%" }}>
+              Thu <br />
+              {days[3]}
+            </th>
+            <th style={{ width: "5%" }}>
+              Fri <br />
+              {days[4]}
+            </th>
+            <th style={{ width: "5%" }}>
+              Sat <br />
+              {days[5]}
+            </th>
+            <th style={{ width: "5%" }}>
+              Sun <br />
+              {days[6]}
+            </th>
+            <th style={{ width: "10%" }}>Actions</th>
+          </tr>
+        </thead>
+        <TBodyPlain
+          key={Math.random()}
+          data={tasks}
+          updateTaskDone={updateTaskDone}
+          openEditTask={openEditTask}
+          deleteTask={deleteTask}
+          cancelTask={cancelTask}
+          uncancelTask={uncancelTask}
+          restartTask={restartTask}
+        />
       </table>
       <div class="modal addTaskModal" tabindex="-1">
         <div class="modal-dialog">
           <div class="modal-content">
             <div class="modal-header">
               <h5 class="modal-title">Add Task</h5>
-              <button type="button" class="btn-close" onClick={closeAddTask} aria-label="Close"></button>
+              <button
+                type="button"
+                class="btn-close"
+                onClick={closeAddTask}
+                aria-label="Close"
+              ></button>
             </div>
             <div class="modal-body">
               <form onSubmit={submitAddTask}>
                 <div className="form-group py-2">
                   <label className="control-label">Description</label>
                   <div>
-                      <input type="text" className="form-control input-lg" name="description" value={newTaskDescription} onChange={changeNewTaskDescription}/>
+                    <input
+                      type="text"
+                      className="form-control input-lg"
+                      name="description"
+                      value={newTaskDescription}
+                      onChange={changeNewTaskDescription}
+                    />
                   </div>
                 </div>
                 <div className="form-group py-2">
                   <label className="control-label">Start Time</label>
                   <div>
-                    <input type="checkbox" checked={enableNewStartTime} onChange={changeEnableNewStartTime} />
+                    <input
+                      type="checkbox"
+                      checked={enableNewStartTime}
+                      onChange={changeEnableNewStartTime}
+                    />
                     <TimePicker
                       ref={newStartTimeRef}
                       format="24"
@@ -1046,7 +1295,11 @@ export default function Tasks({folder_id, folder}) {
                 <div className="form-group py-2">
                   <label className="control-label">End Time</label>
                   <div>
-                    <input type="checkbox" checked={enableNewEndTime} onChange={changeEnableNewEndTime} />
+                    <input
+                      type="checkbox"
+                      checked={enableNewEndTime}
+                      onChange={changeEnableNewEndTime}
+                    />
                     <TimePicker
                       ref={newEndTimeRef}
                       format="24"
@@ -1063,31 +1316,84 @@ export default function Tasks({folder_id, folder}) {
                 <div className="form-group py-2">
                   <label className="control-label">Week Days</label>
                   <div className="my-2">
-                    <input type="checkbox" checked={mondayChecked} onChange={toggleMonday} /> Monday
+                    <input
+                      type="checkbox"
+                      checked={mondayChecked}
+                      onChange={toggleMonday}
+                    />{" "}
+                    Monday
                   </div>
                   <div className="mb-2">
-                    <input type="checkbox" checked={tuesdayChecked} onChange={toggleTuesday} /> Tuesday
+                    <input
+                      type="checkbox"
+                      checked={tuesdayChecked}
+                      onChange={toggleTuesday}
+                    />{" "}
+                    Tuesday
                   </div>
                   <div className="mb-2">
-                    <input type="checkbox" checked={wednesdayChecked} onChange={toggleWednesday} /> Wesnesday
+                    <input
+                      type="checkbox"
+                      checked={wednesdayChecked}
+                      onChange={toggleWednesday}
+                    />{" "}
+                    Wesnesday
                   </div>
                   <div className="mb-2">
-                    <input type="checkbox" checked={thursdayChecked} onChange={toggleThursday} /> Thursday
+                    <input
+                      type="checkbox"
+                      checked={thursdayChecked}
+                      onChange={toggleThursday}
+                    />{" "}
+                    Thursday
                   </div>
                   <div className="mb-2">
-                    <input type="checkbox" checked={fridayChecked} onChange={toggleFriday} /> Friday
+                    <input
+                      type="checkbox"
+                      checked={fridayChecked}
+                      onChange={toggleFriday}
+                    />{" "}
+                    Friday
                   </div>
                   <div className="mb-2">
-                    <input type="checkbox" checked={saturdayChecked} onChange={toggleSaturday} /> Saturday<br/>
+                    <input
+                      type="checkbox"
+                      checked={saturdayChecked}
+                      onChange={toggleSaturday}
+                    />{" "}
+                    Saturday
+                    <br />
                   </div>
                   <div className="mb-2">
-                    <input type="checkbox" checked={sundayChecked} onChange={toggleSunday} /> Sunday
+                    <input
+                      type="checkbox"
+                      checked={sundayChecked}
+                      onChange={toggleSunday}
+                    />{" "}
+                    Sunday
                   </div>
                 </div>
+                <div className="form-group py-2">
+                  <input
+                    type="checkbox"
+                    checked={newAlertActive}
+                    onChange={toggleNewAlertActive}
+                  />
+                  <label>Alert</label>
+                </div>
                 <div className="form-group">
-                    <div style={{textAlign: "right"}}>
-                        <button type="submit" className="btn btn-primary">Add</button>
-                    </div>
+                  <label>Alert Text</label>
+                  <textarea
+                    value={newAlertText}
+                    onChange={setNewAlertText}
+                  ></textarea>
+                </div>
+                <div className="form-group">
+                  <div style={{ textAlign: "right" }}>
+                    <button type="submit" className="btn btn-primary">
+                      Add
+                    </button>
+                  </div>
                 </div>
               </form>
             </div>
@@ -1099,20 +1405,35 @@ export default function Tasks({folder_id, folder}) {
           <div class="modal-content">
             <div class="modal-header">
               <h5 class="modal-title">Edit Task</h5>
-              <button type="button" class="btn-close" onClick={closeEditTask} aria-label="Close"></button>
+              <button
+                type="button"
+                class="btn-close"
+                onClick={closeEditTask}
+                aria-label="Close"
+              ></button>
             </div>
             <div class="modal-body">
               <form onSubmit={submitEditTask}>
                 <div className="form-group py-2">
                   <label className="control-label">Description</label>
                   <div>
-                      <input type="text" className="form-control input-lg" name="description" value={editTaskDescription} onChange={changeEditTaskDescription}/>
+                    <input
+                      type="text"
+                      className="form-control input-lg"
+                      name="description"
+                      value={editTaskDescription}
+                      onChange={changeEditTaskDescription}
+                    />
                   </div>
                 </div>
                 <div className="form-group py-2">
                   <label className="control-label">Start Time</label>
                   <div>
-                    <input type="checkbox" checked={enableEditStartTime} onChange={changeEnableEditStartTime} />
+                    <input
+                      type="checkbox"
+                      checked={enableEditStartTime}
+                      onChange={changeEnableEditStartTime}
+                    />
                     <TimePicker
                       ref={editStartTimeRef}
                       format="24"
@@ -1129,7 +1450,11 @@ export default function Tasks({folder_id, folder}) {
                 <div className="form-group py-2">
                   <label className="control-label">End Time</label>
                   <div>
-                    <input type="checkbox" checked={enableEditEndTime} onChange={changeEnableEditEndTime} />
+                    <input
+                      type="checkbox"
+                      checked={enableEditEndTime}
+                      onChange={changeEnableEditEndTime}
+                    />
                     <TimePicker
                       ref={editEndTimeRef}
                       format="24"
@@ -1146,31 +1471,77 @@ export default function Tasks({folder_id, folder}) {
                 <div className="form-group py-2">
                   <label className="control-label">Week Days</label>
                   <div className="my-2">
-                    <input type="checkbox" checked={mondayChecked} onChange={toggleMonday} /> Monday
+                    <input
+                      type="checkbox"
+                      checked={mondayChecked}
+                      onChange={toggleMonday}
+                    />{" "}
+                    Monday
                   </div>
                   <div className="mb-2">
-                    <input type="checkbox" checked={tuesdayChecked} onChange={toggleTuesday} /> Tuesday
+                    <input
+                      type="checkbox"
+                      checked={tuesdayChecked}
+                      onChange={toggleTuesday}
+                    />{" "}
+                    Tuesday
                   </div>
                   <div className="mb-2">
-                    <input type="checkbox" checked={wednesdayChecked} onChange={toggleWednesday} /> Wesnesday
+                    <input
+                      type="checkbox"
+                      checked={wednesdayChecked}
+                      onChange={toggleWednesday}
+                    />{" "}
+                    Wesnesday
                   </div>
                   <div className="mb-2">
-                    <input type="checkbox" checked={thursdayChecked} onChange={toggleThursday} /> Thursday
+                    <input
+                      type="checkbox"
+                      checked={thursdayChecked}
+                      onChange={toggleThursday}
+                    />{" "}
+                    Thursday
                   </div>
                   <div className="mb-2">
-                    <input type="checkbox" checked={fridayChecked} onChange={toggleFriday} /> Friday
+                    <input
+                      type="checkbox"
+                      checked={fridayChecked}
+                      onChange={toggleFriday}
+                    />{" "}
+                    Friday
                   </div>
                   <div className="mb-2">
-                    <input type="checkbox" checked={saturdayChecked} onChange={toggleSaturday} /> Saturday<br/>
+                    <input
+                      type="checkbox"
+                      checked={saturdayChecked}
+                      onChange={toggleSaturday}
+                    />{" "}
+                    Saturday
+                    <br />
                   </div>
                   <div className="mb-2">
-                    <input type="checkbox" checked={sundayChecked} onChange={toggleSunday} /> Sunday
+                    <input
+                      type="checkbox"
+                      checked={sundayChecked}
+                      onChange={toggleSunday}
+                    />{" "}
+                    Sunday
                   </div>
                 </div>
+                <div class="form-group py-2">
+                  <input
+                    type="checkbox"
+                    value={editAlertActive}
+                    onChange={toggleEditAlertActive}
+                  />
+                  <label>Alert</label>
+                </div>
                 <div className="form-group">
-                    <div style={{textAlign: "right"}}>
-                        <button type="submit" className="btn btn-primary">Save</button>
-                    </div>
+                  <div style={{ textAlign: "right" }}>
+                    <button type="submit" className="btn btn-primary">
+                      Save
+                    </button>
+                  </div>
                 </div>
               </form>
             </div>
@@ -1178,5 +1549,5 @@ export default function Tasks({folder_id, folder}) {
         </div>
       </div>
     </>
-  )
+  );
 }

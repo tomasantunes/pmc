@@ -104,6 +104,19 @@ function getRangeOfMonths(startDate, endDate) {
   return months;
 }
 
+function toCron(days, time) {
+  // parse time string
+  const [hourStr, minuteStr] = time.split(":");
+  const hour = parseInt(hourStr, 10);
+  const minute = parseInt(minuteStr, 10);
+
+  // join days array into comma-separated string
+  const dayOfWeek = days.join(",");
+
+  // build cron string
+  return `${minute} ${hour} * * ${dayOfWeek}`;
+}
+
 
 module.exports = {
     addDays,
@@ -114,6 +127,7 @@ module.exports = {
     previousMonday,
     toLocaleISOString,
     getRangeOfMonths,
+    toCron,
     default: {
         addDays,
         getRangeOfDates,
@@ -122,6 +136,7 @@ module.exports = {
         nextDate,
         previousMonday,
         toLocaleISOString,
-        getRangeOfMonths
+        getRangeOfMonths,
+        toCron
     }
 };
