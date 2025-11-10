@@ -575,11 +575,11 @@ export default function Tasks({ folder_id, folder }) {
     }
   }
 
-  function toggleNewAlertActive() {
+  function toggleNewAlertActive(e) {
     setNewAlertActive(e.target.checked);
   }
 
-  function toggleEditAlertActive() {
+  function toggleEditAlertActive(e) {
     setEditAlertActive(e.target.checked);
   }
 
@@ -1381,13 +1381,16 @@ export default function Tasks({ folder_id, folder }) {
                   />
                   <label>Alert</label>
                 </div>
-                <div className="form-group">
-                  <label>Alert Text</label>
-                  <textarea
-                    value={newAlertText}
-                    onChange={setNewAlertText}
-                  ></textarea>
-                </div>
+                {newAlertActive && (
+                  <div className="form-group py-2">
+                    <label>Alert Text</label>
+                    <textarea
+                      className="form-control"
+                      value={newAlertText}
+                      onChange={(e) => setNewAlertText(e.target.value)}
+                    ></textarea>
+                  </div>
+                )}
                 <div className="form-group">
                   <div style={{ textAlign: "right" }}>
                     <button type="submit" className="btn btn-primary">
@@ -1536,6 +1539,16 @@ export default function Tasks({ folder_id, folder }) {
                   />
                   <label>Alert</label>
                 </div>
+                {editAlertActive && (
+                  <div className="form-group py-2">
+                    <label>Alert Text</label>
+                    <textarea
+                      className="form-control"
+                      value={editAlertText}
+                      onChange={(e) => setEditAlertText(e.target.value)}
+                    ></textarea>
+                  </div>
+                )}
                 <div className="form-group">
                   <div style={{ textAlign: "right" }}>
                     <button type="submit" className="btn btn-primary">
