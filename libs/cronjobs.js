@@ -6,7 +6,7 @@ const secretConfig = require("../secret-config");
 var { con, con2 } = database.getMySQLConnections();
 var cronjobs_arr = [];
 
-function loadCronJobs() {
+function loadCron() {
   for (var i in cronjobs_arr) {
     cronjobs_arr[i].stop();
   }

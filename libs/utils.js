@@ -1,14 +1,14 @@
 function addDays(date, days) {
-    date.setDate(date.getDate() + days);
-    return date;
+  date.setDate(date.getDate() + days);
+  return date;
 }
 
 function getRangeOfDates(startDate, stopDate) {
   var dateArray = new Array();
   var currentDate = startDate;
   while (currentDate <= stopDate) {
-      dateArray.push(new Date (currentDate));
-      currentDate = addDays(currentDate, 1);
+    dateArray.push(new Date(currentDate));
+    currentDate = addDays(currentDate, 1);
   }
   return dateArray;
 }
@@ -58,12 +58,13 @@ function getMonthlyDates(months) {
   }
 
   return dates;
-};
-
+}
 
 function nextDate(dayIndex) {
   var today = new Date();
-  today.setDate(today.getDate() + (dayIndex - 1 - today.getDay() + 7) % 7 + 1);
+  today.setDate(
+    today.getDate() + ((dayIndex - 1 - today.getDay() + 7) % 7) + 1,
+  );
   today.setHours(23, 59, 59);
   return today;
 }
@@ -76,19 +77,26 @@ function previousMonday() {
 }
 
 function toLocaleISOString(date) {
-    function pad(number) {
-        if (number < 10) {
-            return '0' + number;
-        }
-        return number;
+  function pad(number) {
+    if (number < 10) {
+      return "0" + number;
     }
+    return number;
+  }
 
-    return date.getFullYear() +
-        '-' + pad(date.getMonth() + 1) +
-        '-' + pad(date.getDate()) +
-        'T' + pad(date.getHours()) +
-        ':' + pad(date.getMinutes()) +
-        ':' + pad(date.getSeconds()) ;
+  return (
+    date.getFullYear() +
+    "-" +
+    pad(date.getMonth() + 1) +
+    "-" +
+    pad(date.getDate()) +
+    "T" +
+    pad(date.getHours()) +
+    ":" +
+    pad(date.getMinutes()) +
+    ":" +
+    pad(date.getSeconds())
+  );
 }
 
 function getRangeOfMonths(startDate, endDate) {
@@ -111,14 +119,23 @@ function toCron(days, time) {
   const minute = parseInt(minuteStr, 10);
 
   // join days array into comma-separated string
-  const dayOfWeek = days.join(",");
+  const dayOfWeek = days;
 
   // build cron string
   return `${minute} ${hour} * * ${dayOfWeek}`;
 }
 
-
 module.exports = {
+  addDays,
+  getRangeOfDates,
+  getDatesUntilNextYear,
+  getMonthlyDates,
+  nextDate,
+  previousMonday,
+  toLocaleISOString,
+  getRangeOfMonths,
+  toCron,
+  default: {
     addDays,
     getRangeOfDates,
     getDatesUntilNextYear,
@@ -128,15 +145,5 @@ module.exports = {
     toLocaleISOString,
     getRangeOfMonths,
     toCron,
-    default: {
-        addDays,
-        getRangeOfDates,
-        getDatesUntilNextYear,
-        getMonthlyDates,
-        nextDate,
-        previousMonday,
-        toLocaleISOString,
-        getRangeOfMonths,
-        toCron
-    }
+  },
 };
