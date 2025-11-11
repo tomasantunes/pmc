@@ -1,9 +1,9 @@
 var express = require("express");
 var database = require("../libs/database");
 var utils = require("../libs/utils");
-var tasks = require("../libs/tasks");
 var recurrentTasks = require("../libs/recurrent-tasks");
-var { loadCron } = require("../libs/cronjobs");
+var { upsertRecurrentAlert, insertRecurrentAlert } = require("../libs/alerts");
+
 var router = express.Router();
 
 var { con, con2 } = database.getMySQLConnections();
@@ -146,18 +146,7 @@ router.post("/api/add-recurrent-task", (req, res) => {
       }
 
       if (alert_active && has_time) {
-        var st = start_time.split(" ")[1];
-        var cron_string = utils.toCron(days, st);
-
-        var sql4 =
-          "INSERT INTO alerts (task_id, cron_string, text) VALUES (?, ?, ?)";
-        con.query(
-          sql4,
-          [result.insertId, cron_string, alert_text],
-          function (err, result) {
-            loadCron();
-          },
-        );
+        insertRecurrentAlert(start_time, days, result.insertId, alert_text);
       }
       res.json({ status: "OK", data: "Task has been added successfully." });
     },
@@ -281,18 +270,7 @@ router.post("/api/edit-recurrent-task", (req, res) => {
       }
 
       if (alert_active && has_time) {
-        var st = start_time.split(" ")[1];
-        var cron_string = utils.toCron(days, st);
-
-        var sql4 =
-          "UPDATE alerts SET cron_string = ?, text = ? WHERE task_id = ?";
-        con.query(
-          sql4,
-          [cron_string, alert_text, task_id],
-          function (err, result) {
-            loadCron();
-          },
-        );
+        upsertRecurrentAlert(start_time, days, task_id, alert_text);
       }
 
       res.json({ status: "OK", data: "Task has been updated successfully." });
