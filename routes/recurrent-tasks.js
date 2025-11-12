@@ -51,11 +51,49 @@ router.get("/api/get-recurrent-tasks", (req, res) => {
         result[i].end_time == "1970-01-01 00:00:00"
       ) {
         result[i].time = "";
+        result[i].start_time = "";
+        result[i].end_time = "";
       }
     }
     console.log("Result:");
     console.log(result);
     res.json({ status: "OK", data: result });
+  });
+});
+
+router.get("/api/get-recurrent-task", (req, res) => {
+  if (!req.session.isLoggedIn) {
+    res.json({ status: "NOK", error: "Invalid Authorization." });
+    return;
+  }
+  var task_id = req.query.task_id;
+  var sql = "SELECT * FROM tasks WHERE id = ? AND type = 'recurrent'";
+  con.query(sql, [task_id], function (err, result) {
+    if (err) {
+      console.log(err);
+      res.json({ status: "NOK", error: err.message });
+    }
+
+    if (result.length > 0) {
+      var sql2 = "SELECT * FROM alerts WHERE task_id = ?";
+      con.query(sql2, [task_id], function (err2, result2) {
+        if (err2) {
+          console.log(err2);
+          res.json({ status: "NOK", error: err2.message });
+        }
+
+        if (result2.length > 0) {
+          result[0].alert_active = true;
+          result[0].alert_text = result2[0].text;
+        } else {
+          result[0].alert_active = false;
+          result[0].alert_text = "";
+        }
+        return res.json({ status: "OK", data: result[0] });
+      });
+    } else {
+      return res.json({ status: "NOK", error: "Task not found." });
+    }
   });
 });
 

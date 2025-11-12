@@ -730,17 +730,23 @@ export default function Tasks({ folder_id, folder }) {
         if (response.data.status == "OK") {
           var task = response.data.data;
           console.log(task);
-          setSelectedEditStartTime(
-            moment(task.start_time, "YYYY-MM-DD HH:mm:ss").format("HH:mm"),
-          );
-          setSelectedEditEndTime(
-            moment(task.end_time, "YYYY-MM-DD HH:mm:ss").format("HH:mm"),
-          );
+          if (task.start_time != "" && task.end_time != "") {
+            setEnableEditStartTime(true);
+            setSelectedEditStartTime(
+              moment(task.start_time, "YYYY-MM-DD HH:mm:ss").format("HH:mm"),
+            );
+            setEnableEditEndTime(true);
+            setSelectedEditEndTime(
+              moment(task.end_time, "YYYY-MM-DD HH:mm:ss").format("HH:mm"),
+            );
+          }
           setEditTaskId(task.id);
           setEditTaskDescription(task.description);
           setEditTaskFolderId(task.folder_id);
           setEditTaskSortIndex(task.sort_index);
           setEditTaskType(task.type);
+          setEditAlertActive(task.alert_active);
+          setEditAlertText(task.alert_text);
 
           if (task.days != "") {
             var days = task.days.split(",");
