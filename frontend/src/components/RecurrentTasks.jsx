@@ -725,7 +725,9 @@ export default function Tasks({ folder_id, folder }) {
   function openEditTask(task_id) {
     clearWeekDayChecks();
     axios
-      .get(config.BASE_URL + "/api/get-task", { params: { task_id: task_id } })
+      .get(config.BASE_URL + "/api/get-recurrent-task", {
+        params: { task_id: task_id },
+      })
       .then(function (response) {
         if (response.data.status == "OK") {
           var task = response.data.data;
@@ -1540,7 +1542,7 @@ export default function Tasks({ folder_id, folder }) {
                 <div class="form-group py-2">
                   <input
                     type="checkbox"
-                    value={editAlertActive}
+                    checked={editAlertActive}
                     onChange={toggleEditAlertActive}
                   />
                   <label>Alert</label>
