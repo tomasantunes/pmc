@@ -699,6 +699,15 @@ export default function Tasks({ folder_id, folder }) {
   }
 
   function openAddTask() {
+    setEnableNewStartTime(false);
+    setEnableNewEndTime(false);
+    setSelectedNewStartTime("00:00");
+    setSelectedNewEndTime("00:00");
+    setNewTaskDescription("");
+    setNewTaskDays([]);
+    setNewAlertActive(false);
+    setNewAlertText("");
+    clearWeekDayChecks();
     var modal = bootstrap.Modal.getOrCreateInstance(
       document.querySelector(".addTaskModal"),
     );
