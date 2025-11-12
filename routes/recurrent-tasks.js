@@ -93,6 +93,15 @@ router.get("/api/get-recurrent-task", (req, res) => {
           result[0].alert_active = false;
           result[0].alert_text = "";
         }
+
+        if (result[0].start_time == "1970-01-01 00:00:00") {
+          result[0].start_time = "";
+        }
+
+        if (result[0].end_time == "1970-01-01 00:00:00") {
+          result[0].end_time = "";
+        }
+
         return res.json({ status: "OK", data: result[0] });
       });
     } else {
