@@ -56,6 +56,11 @@ function insertRecurrentAlert(dt, days, task_id, text) {
   });
 }
 
+function deleteRecurrentAlert(task_id) {
+  var sql = "DELETE FROM alerts WHERE task_id = ?";
+  con.query(sql, [task_id]);
+}
+
 module.exports = {
   upsertRecurrentAlert,
   insertRecurrentAlert,
