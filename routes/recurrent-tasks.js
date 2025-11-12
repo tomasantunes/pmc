@@ -2,7 +2,11 @@ var express = require("express");
 var database = require("../libs/database");
 var utils = require("../libs/utils");
 var recurrentTasks = require("../libs/recurrent-tasks");
-var { upsertRecurrentAlert, insertRecurrentAlert } = require("../libs/alerts");
+var {
+  upsertRecurrentAlert,
+  insertRecurrentAlert,
+  deleteRecurrentAlert,
+} = require("../libs/alerts");
 
 var router = express.Router();
 
@@ -309,6 +313,10 @@ router.post("/api/edit-recurrent-task", (req, res) => {
 
       if (alert_active && has_time) {
         upsertRecurrentAlert(start_time, days, task_id, alert_text);
+      }
+
+      if (!alert_active) {
+        deleteRecurrentAlert(task_id);
       }
 
       res.json({ status: "OK", data: "Task has been updated successfully." });
