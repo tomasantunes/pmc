@@ -10,6 +10,7 @@ import Calendar from './components/Calendar';
 import RandomTask from './components/RandomTask';
 import Schedule from './components/Schedule';
 import TimeTracker from './components/TimeTracker';
+import Alerts from './components/Alerts';
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
         <Route path="/random-task" element={<RandomTask />} />
         <Route path="/schedule" element={<Schedule />} />
         <Route path="/time-tracker" element={<TimeTracker />} />
+        <Route path="/alerts" element={<Alerts />} />
       </Routes>
     </Router>
   );

@@ -140,7 +140,7 @@ export default function Sidebar() {
       <nav className="mobile-nav d-md-none">
         <span className="brand">PMC</span>
         <button id="menu-toggle" className="btn text-white" onClick={() => setCollapseSidebarMobile(!collapseSidebarMobile)}>
-          <i className="fa-solid fa-bars fa-lg"></i> 
+          <i className="fa-solid fa-bars fa-lg"></i>
         </button>
       </nav>
       <div className={collapseSidebarMobile ? "sidebar": "sidebar open"} style={{height: documentHeight}}>
@@ -149,6 +149,7 @@ export default function Sidebar() {
               <li><Link to="/home">Home</Link></li>
               <li><Link to="/calendar">Calendar</Link></li>
               <li><Link to="/schedule">Schedule</Link></li>
+              <li><Link to="/alerts">Alerts</Link></li>
               <li><Link to="/time-tracker">Time Tracker</Link></li>
               <li><Link to="/random-task">Random Task</Link></li>
               {showGithubPage && <li><Link to="/github-tasks">Github Tasks</Link></li>}

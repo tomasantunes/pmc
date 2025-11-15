@@ -28,9 +28,15 @@ function loadCron() {
   });
 }
 
+function listCronJobs() {
+  return cronjobs_arr;
+}
+
 module.exports = {
   loadCron,
+  listCronJobs,
   default: {
     loadCron,
+    listCronJobs
   },
 };
