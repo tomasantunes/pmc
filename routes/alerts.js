@@ -1,5 +1,6 @@
 var express = require('express');
 var { listCronJobs } = require('../libs/cronjobs');
+var { listAlerts } = require('../libs/alerts');
 var router = express.Router();
 
 router.get("/list-cron-jobs", (req, res) => {
@@ -20,6 +21,15 @@ router.get("/list-cron-jobs", (req, res) => {
     console.log(e);
     res.json({status: "NOK", error: JSON.stringify(e)})
   }
+});
+
+router.get("/list-alerts", async (req, res) => {
+  if (!req.session.isLoggedIn) {
+    return res.json({ status: "NOK", error: "Invalid Authorization." });
+  }
+
+  var alerts = await listAlerts();
+  res.json({ status: "OK", data: alerts });
 });
 
 module.exports = router;

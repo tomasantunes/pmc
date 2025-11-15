@@ -61,11 +61,19 @@ function deleteRecurrentAlert(task_id) {
   con.query(sql, [task_id]);
 }
 
+async function listAlerts() {
+  var sql = "SELECT * FROM alerts";
+  var [rows, fields] = await con2.query(sql);
+  return rows;
+}
+
 module.exports = {
   upsertRecurrentAlert,
   insertRecurrentAlert,
+  listAlerts,
   default: {
     upsertRecurrentAlert,
     insertRecurrentAlert,
+    listAlerts
   },
 };
