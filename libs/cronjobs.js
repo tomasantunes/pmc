@@ -18,13 +18,14 @@ function loadCron() {
       return false;
     }
 
-    for (var i in result) {
-      var cronjob = cron.schedule(result[i].cron_string, () => {
+    result.forEach(item => {
+      const cronjob = cron.schedule(item.cron_string, () => {
         console.log("Triggered cron email alert.");
-        sendEmail(result[i].text);
+        sendEmail(item.text);
       });
+
       cronjobs_arr.push(cronjob);
-    }
+    });
   });
 }
 
