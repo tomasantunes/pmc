@@ -6,23 +6,21 @@ import Sidebar from './Sidebar';
 
 export default function Alerts() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [cronJobs, setCronJobs] = useState([]);
+  const [alerts, setAlerts] = useState([]);
   const navigate = useNavigate();
 
-  function loadAlerts() {
-    axios.get(config.BASE_URL + "/list-cron-jobs")
-      .then(function (response) {
-        console.log(response.data.data);
-        if (response.data.status == "OK") {
-          setCronJobs(response.data.data);
-        }
-        else {
-          console.log("Error: " + response.data.error);
-        }
-      })
-      .catch(function (err) {
-        console.log(err);
-      });
+  async function loadAlerts() {
+    try {
+      let res1 = await axios.get("/list-cron-jobs");
+      let res2 = await axios.get("/list-alerts");
+      for (let i in res1.data.data) {
+        res1.data.data[i].cron_string = res2.data.data[i].cron_string;
+        res1.data.data[i].text = res2.data.data[i].text;
+      }
+      setAlerts(res1.data.data);
+    } catch(e) {
+      console.log(e);
+    }
   }
 
   function checkLogin() {
@@ -57,14 +55,18 @@ export default function Alerts() {
                   <th>IDX</th>
                   <th>ID</th>
                   <th>Next Run</th>
+                  <th>Cron Expression</th>
+                  <th>Text</th>
                 </tr>
               </thead>
               <tbody>
-                {cronJobs.map((c) => (
-                  <tr key={c.idx}>
-                    <td>{c.idx}</td>
-                    <td>{c.id}</td>
-                    <td>{c.nextRun}</td>
+                {alerts.map((a) => (
+                  <tr key={a.idx}>
+                    <td>{a.idx}</td>
+                    <td>{a.id}</td>
+                    <td>{a.nextRun}</td>
+                    <td>{a.cron_string}</td>
+                    <td>{a.text}</td>
                   </tr>
                 ))}
               </tbody>
