@@ -61,12 +61,23 @@ function getMonthlyDates(months) {
 }
 
 function nextDate(dayIndex) {
-  var today = new Date();
-  today.setDate(
-    today.getDate() + ((dayIndex - 1 - today.getDay() + 7) % 7) + 1,
-  );
-  today.setHours(23, 59, 59);
-  return today;
+  const today = new Date();
+  const todayDay = today.getDay(); // 0 = Sunday, 1 = Monday, ...
+
+  const result = new Date(today);
+
+  if (todayDay === dayIndex) {
+    // If today is the target day (e.g., Sunday), return today
+    result.setHours(23, 59, 59);
+    return result;
+  }
+
+  // Otherwise, calculate next target day
+  const diff = (dayIndex - todayDay + 7) % 7;
+  result.setDate(result.getDate() + diff);
+  result.setHours(23, 59, 59);
+
+  return result;
 }
 
 function previousMonday() {
