@@ -6,8 +6,8 @@ var router = express.Router();
 var {con, con2 } = database.getMySQLConnections();
 
 router.get("/api/get-schedule", (req, res) => {
-  var last_monday = utils.previousMonday();
-  var next_sunday = utils.nextDate(7);
+  var last_monday = utils.toLocaleISOString(utils.previousMonday());
+  var next_sunday = utils.toLocaleISOString(utils.nextDate(7));
 
   var sql = "SELECT * FROM events WHERE start_date BETWEEN ? AND ? ORDER BY start_date ASC";
   con.query(sql, [last_monday, next_sunday], function (err, result) {
