@@ -119,6 +119,23 @@ router.post("/api/time-tracker/:id/stop", async (req, res) => {
   }
 });
 
+router.post("/api/time-tracker/:id/delete", async (req, res) => {
+  if (!req.session.isLoggedIn) {
+    res.json({ status: "NOK", error: "Invalid Authorization." });
+    return;
+  }
+
+  const { id } = req.params;
+
+  let sql1 = "DELETE FROM time_tracking_sessions WHERE id = ?";
+  await con2.query(sql1, [id]);
+
+  let sql2 = "DELETE FROM time_tracking_sub_sessions WHERE session_id = ?";
+  await con2.query(sql2, [id]);
+
+  res.json({ status: "OK", data: "Session has been deleted." });
+});
+
 router.get("/api/time-tracker/list", async (req, res) => {
   if (!req.session.isLoggedIn) {
     res.json({ status: "NOK", error: "Invalid Authorization." });
