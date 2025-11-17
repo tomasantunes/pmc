@@ -81,6 +81,16 @@ export default function TimeTracker() {
     }
   };
 
+  const deleteSession = async (id) => {
+    try {
+      await axios.post(`${config.BASE_URL}/api/time-tracker/${id}/delete`);
+      fetchSessions();
+      fetchClosedSessions();
+    } catch (err) {
+      console.error("Error stopping session:", err);
+    }
+  };
+
   const getSuggestionsList = async () => {
     try {
       const res = await axios.get(
@@ -242,8 +252,15 @@ export default function TimeTracker() {
                           >
                             <i className="fas fa-stop"></i>
                           </button>
+
                         </>
                       )}
+                      <button
+                        className="btn btn-sm btn-danger"
+                        onClick={() => deleteSession(s.id)}
+                      >
+                        <i className="fa-regular fa-trash-can"></i>
+                      </button>
                     </div>
                   </div>
                 ))}
@@ -309,8 +326,15 @@ export default function TimeTracker() {
                           >
                             <i className="fas fa-stop"></i>
                           </button>
+
                         </>
                       )}
+                      <button
+                        className="btn btn-sm btn-danger"
+                        onClick={() => deleteSession(s.id)}
+                      >
+                        <i className="fa-regular fa-trash-can"></i>
+                      </button>
                     </div>
                   </div>
                 ))}
