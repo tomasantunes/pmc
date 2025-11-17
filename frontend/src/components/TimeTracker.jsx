@@ -8,8 +8,11 @@ import config from "../config";
 export default function TimeTracker() {
   const [description, setDescription] = useState("");
   const [sessions, setSessions] = useState([]);
+  const [closedSessions, setClosedSessions] = useState([]);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [suggestionsList, setSuggestionsList] = useState([]);
+  const [showCurrentSessions, setShowCurrentSessions] = useState(true);
+  const [showClosedSessions, setShowClosedSessions] = useState(false);
   const navigate = useNavigate();
 
   // ================================
@@ -21,6 +24,17 @@ export default function TimeTracker() {
       const res = await axios.get(`${config.BASE_URL}/api/time-tracker/list`);
       if (res.data.status === "OK") {
         setSessions(res.data.sessions);
+      }
+    } catch (err) {
+      console.error("Error fetching sessions:", err);
+    }
+  };
+
+  const fetchClosedSessions = async () => {
+    try {
+      const res = await axios.get(`${config.BASE_URL}/api/time-tracker/list-closed`);
+      if (res.data.status === "OK") {
+        setClosedSessions(res.data.sessions);
       }
     } catch (err) {
       console.error("Error fetching sessions:", err);
@@ -113,10 +127,21 @@ export default function TimeTracker() {
       });
   }
 
+  function tabCurrentSessions() {
+    setShowCurrentSessions(true);
+    setShowClosedSessions(false);
+  }
+
+  function tabClosedSessions() {
+    setShowClosedSessions(true);
+    setShowCurrentSessions(false);
+  }
+
   // Periodically refresh timers
   useEffect(() => {
     checkLogin();
     fetchSessions();
+    fetchClosedSessions();
     getSuggestionsList();
     const timer = setInterval(fetchSessions, 1000);
     return () => clearInterval(timer);
@@ -155,70 +180,148 @@ export default function TimeTracker() {
               </div>
             </div>
 
-            <div className="list-group">
-              {sessions.map((s) => (
-                <div
-                  key={s.id}
-                  className="list-group-item d-flex justify-content-between align-items-center"
-                >
-                  <div className="me-3 flex-grow-1">
-                    <h6 className="mb-1">{s.description}</h6>
-                    <small className="text-muted">
-                      {formatDuration(s.total_seconds)}
-                    </small>
-                  </div>
-                  <div>
-                    {s.end_time ? (
-                      <button
-                        key={Math.random()}
-                        className="btn btn-sm btn-secondary me-2"
-                        disabled
-                      >
-                        <i className="fas fa-check"></i>
-                      </button>
-                    ) : s.is_running ? (
-                      <>
-                        <button
-                          key={Math.random()}
-                          className="btn btn-sm btn-warning me-2"
-                          onClick={() => pauseSession(s.id)}
-                        >
-                          <i className="fas fa-pause"></i>
-                        </button>
-                        <button
-                          className="btn btn-sm btn-danger"
-                          onClick={() => stopSession(s.id)}
-                        >
-                          <i className="fas fa-stop"></i>
-                        </button>
-                      </>
-                    ) : (
-                      <>
-                        <button
-                          key={Math.random()}
-                          className="btn btn-sm btn-success me-2"
-                          onClick={() => resumeSession(s.id)}
-                        >
-                          <i className="fas fa-play"></i>
-                        </button>
-                        <button
-                          className="btn btn-sm btn-danger"
-                          onClick={() => stopSession(s.id)}
-                        >
-                          <i className="fas fa-stop"></i>
-                        </button>
-                      </>
-                    )}
-                  </div>
-                </div>
-              ))}
+            <ul class="nav nav-tabs">
+              <li class="nav-item">
+                <a class="nav-link" href="#" onClick={tabCurrentSessions}>Current</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="#" onClick={tabClosedSessions}>Closed</a>
+              </li>
+            </ul>
 
-              {sessions.length === 0 && (
-                <div className="text-center text-muted py-3">
-                  No sessions yet.
-                </div>
-              )}
-            </div>
+            {showCurrentSessions &&
+              <div className="list-group">
+                {sessions.map((s) => (
+                  <div
+                    key={s.id}
+                    className="list-group-item d-flex justify-content-between align-items-center"
+                  >
+                    <div className="me-3 flex-grow-1">
+                      <h6 className="mb-1">{s.description}</h6>
+                      <small className="text-muted">
+                        {formatDuration(s.total_seconds)}
+                      </small>
+                    </div>
+                    <div>
+                      {s.end_time ? (
+                        <button
+                          key={Math.random()}
+                          className="btn btn-sm btn-secondary me-2"
+                          disabled
+                        >
+                          <i className="fas fa-check"></i>
+                        </button>
+                      ) : s.is_running ? (
+                        <>
+                          <button
+                            key={Math.random()}
+                            className="btn btn-sm btn-warning me-2"
+                            onClick={() => pauseSession(s.id)}
+                          >
+                            <i className="fas fa-pause"></i>
+                          </button>
+                          <button
+                            className="btn btn-sm btn-danger"
+                            onClick={() => stopSession(s.id)}
+                          >
+                            <i className="fas fa-stop"></i>
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <button
+                            key={Math.random()}
+                            className="btn btn-sm btn-success me-2"
+                            onClick={() => resumeSession(s.id)}
+                          >
+                            <i className="fas fa-play"></i>
+                          </button>
+                          <button
+                            className="btn btn-sm btn-danger"
+                            onClick={() => stopSession(s.id)}
+                          >
+                            <i className="fas fa-stop"></i>
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                ))}
+
+                {sessions.length === 0 && (
+                  <div className="text-center text-muted py-3">
+                    No sessions yet.
+                  </div>
+                )}
+              </div>
+            }
+
+            {showClosedSessions &&
+              <div className="list-group">
+                {closedSessions.map((s) => (
+                  <div
+                    key={s.id}
+                    className="list-group-item d-flex justify-content-between align-items-center"
+                  >
+                    <div className="me-3 flex-grow-1">
+                      <h6 className="mb-1">{s.description}</h6>
+                      <small className="text-muted">
+                        {formatDuration(s.total_seconds)}
+                      </small>
+                    </div>
+                    <div>
+                      {s.end_time ? (
+                        <button
+                          key={Math.random()}
+                          className="btn btn-sm btn-secondary me-2"
+                          disabled
+                        >
+                          <i className="fas fa-check"></i>
+                        </button>
+                      ) : s.is_running ? (
+                        <>
+                          <button
+                            key={Math.random()}
+                            className="btn btn-sm btn-warning me-2"
+                            onClick={() => pauseSession(s.id)}
+                          >
+                            <i className="fas fa-pause"></i>
+                          </button>
+                          <button
+                            className="btn btn-sm btn-danger"
+                            onClick={() => stopSession(s.id)}
+                          >
+                            <i className="fas fa-stop"></i>
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <button
+                            key={Math.random()}
+                            className="btn btn-sm btn-success me-2"
+                            onClick={() => resumeSession(s.id)}
+                          >
+                            <i className="fas fa-play"></i>
+                          </button>
+                          <button
+                            className="btn btn-sm btn-danger"
+                            onClick={() => stopSession(s.id)}
+                          >
+                            <i className="fas fa-stop"></i>
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                ))}
+
+                {sessions.length === 0 && (
+                  <div className="text-center text-muted py-3">
+                    No sessions yet.
+                  </div>
+                )}
+              </div>
+            }
           </div>
         </div>
       </>

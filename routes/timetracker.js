@@ -136,6 +136,48 @@ router.get("/api/time-tracker/list", async (req, res) => {
       FROM time_tracking_sessions s
       LEFT JOIN time_tracking_sub_sessions sub ON s.id = sub.session_id
       WHERE s.id IS NOT NULL
+      AND s.end_time IS NULL
+      GROUP BY s.id
+      ORDER BY s.id DESC
+    `;
+    const [rows, fields] = await con2.query(sql);
+
+    const sessions = rows
+      .filter((r) => r.id) // defensive
+      .map((r) => ({
+        id: r.id,
+        description: r.description,
+        start_time: r.start_time,
+        end_time: r.end_time,
+        total_seconds: Number(r.total_seconds) || 0,
+        is_running: Boolean(Number(r.has_open_sub)), // convert 0/1 -> true/false
+      }));
+
+    res.json({ status: "OK", sessions });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to list sessions" });
+  }
+});
+
+router.get("/api/time-tracker/list-closed", async (req, res) => {
+  if (!req.session.isLoggedIn) {
+    res.json({ status: "NOK", error: "Invalid Authorization." });
+    return;
+  }
+  try {
+    const sql = `
+      SELECT
+        s.id,
+        s.description,
+        s.start_time,
+        s.end_time,
+        IFNULL(SUM(TIMESTAMPDIFF(SECOND, sub.start_time, IFNULL(sub.end_time, NOW()))), 0) AS total_seconds,
+        MAX(sub.end_time IS NULL) AS has_open_sub -- 1 if there's at least one open sub-session
+      FROM time_tracking_sessions s
+      LEFT JOIN time_tracking_sub_sessions sub ON s.id = sub.session_id
+      WHERE s.id IS NOT NULL
+      AND s.end_time IS NOT NULL
       GROUP BY s.id
       ORDER BY s.id DESC
     `;
