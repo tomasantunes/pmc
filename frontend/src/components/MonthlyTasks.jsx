@@ -341,8 +341,8 @@ export default function MonthlyTasks({ folder_id, folder }) {
       text: "Are you sure you want to delete this folder?",
       icon: "warning",
       showCancelButton: true,
-      confirmButtonColor: "#3085d6",
-      cancelButtonColor: "#d33",
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#7a7a7a",
       confirmButtonText: "Yes"
     }).then((result) => {
       if (result.isConfirmed) {
@@ -492,13 +492,13 @@ export default function MonthlyTasks({ folder_id, folder }) {
               <div className="modal-body">
                 <div className="mb-3">
                   <label>Description</label>
-                  <input
-                    type="text"
+                  <textarea
                     className="form-control"
+                    rows="3"
                     value={newTaskDescription}
                     onChange={(e) => setNewTaskDescription(e.target.value)}
                     required
-                  />
+                  ></textarea>
                 </div>
                 <div className="mb-3">
                   <label>Select Months</label>
@@ -559,13 +559,13 @@ export default function MonthlyTasks({ folder_id, folder }) {
               <div className="modal-body">
                 <div className="mb-3">
                   <label>Description</label>
-                  <input
-                    type="text"
+                  <textarea
                     className="form-control"
+                    rows="3"
                     value={editTaskDescription}
                     onChange={(e) => setEditTaskDescription(e.target.value)}
                     required
-                  />
+                  ></textarea>
                 </div>
                 <div className="mb-3">
                   <label>Select Months</label>

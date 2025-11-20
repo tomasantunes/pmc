@@ -343,8 +343,8 @@ export default function Tasks({folder_id, folder}) {
       text: "Are you sure you want to delete this task?",
       icon: "warning",
       showCancelButton: true,
-      confirmButtonColor: "#3085d6",
-      cancelButtonColor: "#d33",
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#7a7a7a",
       confirmButtonText: "Yes",
     }).then((result) => {
       if (result.isConfirmed) {
@@ -514,7 +514,7 @@ export default function Tasks({folder_id, folder}) {
                 <div className="form-group py-2">
                   <label className="control-label">Description</label>
                   <div>
-                      <input type="text" className="form-control input-lg" name="description" value={newTaskDescription} onChange={changeNewTaskDescription}/>
+                      <textarea className="form-control input-lg mt-2" rows="3" name="description" value={newTaskDescription} onChange={changeNewTaskDescription}></textarea>
                   </div>
                 </div>
                 <div className="form-group py-2">
@@ -551,7 +551,7 @@ export default function Tasks({folder_id, folder}) {
                 <div className="form-group py-2">
                   <label className="control-label">Description</label>
                   <div>
-                      <input type="text" className="form-control input-lg" name="description" value={editTaskDescription} onChange={changeEditTaskDescription}/>
+                      <textarea className="form-control input-lg mt-2" rows="3" name="description" value={editTaskDescription} onChange={changeEditTaskDescription}></textarea>
                   </div>
                 </div>
                 <div className="form-group py-2">
