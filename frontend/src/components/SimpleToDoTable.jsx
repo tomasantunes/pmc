@@ -162,20 +162,20 @@ export default function SimpleToDoTable({title, tasks, setTasks, folder_id, sele
               <td><input type="checkbox" checked={t.is_done} onChange={(e) => { updateTaskDone(e, t.id) }} /></td>
               <td>
                 {editingTaskId === t.id ? (
-                  <input 
-                    type="text" 
+                  <textarea 
                     className="form-control" 
+                    rows="3" 
                     value={editingDescription} 
                     onChange={(e) => setEditingDescription(e.target.value)}
-                    onKeyPress={(e) => {
-                      if (e.key === 'Enter') {
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
                         saveTaskDescription(t.id);
                       }
                       if (e.key === 'Escape') {
                         cancelEditing();
                       }
                     }}
-                    autoFocus
                   />
                 ) : (
                   <span onDoubleClick={() => startEditingTask(t)}>{t.description}</span>
@@ -220,7 +220,9 @@ export default function SimpleToDoTable({title, tasks, setTasks, folder_id, sele
         <tfoot>
           <tr>
             <td></td>
-            <td><input type="text" className="form-control" value={newTaskDescription} onChange={changeNewTaskDescription} /></td>
+            <td>
+              <textarea className="form-control mt-2" rows="2" placeholder="Enter task description..." value={newTaskDescription} onChange={changeNewTaskDescription}></textarea>
+            </td>
             <td><button className="btn btn-success" onClick={addTask}><i className="fas fa-plus" /></button></td>
           </tr>
         </tfoot>

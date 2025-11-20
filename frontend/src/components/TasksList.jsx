@@ -308,7 +308,7 @@ export default function Tasks({folder_id, folder}) {
                 <div className="form-group py-2">
                   <label className="control-label">Description</label>
                   <div>
-                      <input type="text" className="form-control input-lg" name="description" value={newTask.description} onChange={changeNewTaskDescription}/>
+                      <textarea className="form-control input-lg" rows="3" name="description" value={newTask.description} onChange={changeNewTaskDescription}></textarea>
                   </div>
                 </div>
                 <div className="form-group">
@@ -333,7 +333,7 @@ export default function Tasks({folder_id, folder}) {
                 <div className="form-group py-2">
                   <label className="control-label">Description</label>
                   <div>
-                      <input type="text" className="form-control input-lg" name="description" value={editTask.description} onChange={changeEditTaskDescription}/>
+                      <textarea className="form-control input-lg" rows="3" name="description" value={editTask.description} onChange={changeEditTaskDescription}></textarea>
                   </div>
                 </div>
                 <div className="form-group">
