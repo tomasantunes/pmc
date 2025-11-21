@@ -234,3 +234,7 @@ tbody {
 a.dropdown-item {
     cursor: pointer;
 }
+
+.bg-black {
+    background-color: black;
+}
