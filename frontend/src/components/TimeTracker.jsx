@@ -147,6 +147,21 @@ export default function TimeTracker() {
     setShowCurrentSessions(false);
   }
 
+  function shareToX() {
+    let message = "I am currently: ";
+
+    for (let i in sessions) {
+      message += sessions[i].description;
+      if (i < sessions.length - 1) {
+        message += " and ";
+      }
+      else {
+        message += ".";
+      }
+    }
+    window.open("https://twitter.com/intent/tweet?text=" + message, "_blank");
+  }
+
   // Periodically refresh timers
   useEffect(() => {
     checkLogin();
@@ -181,10 +196,14 @@ export default function TimeTracker() {
                 <br />
                 <div className="text-end">
                   <button
-                    className="btn btn-primary ms-1"
+                    className="btn btn-primary ms-1 me-2"
                     onClick={startSession}
                   >
                     <i className="fas fa-play me-1"></i> Start
+                  </button>
+                  <button className="btn bg-black text-white" onClick={shareToX}>
+                    <i class="fa-brands fa-x-twitter me-1"></i>
+                    Share
                   </button>
                 </div>
               </div>
@@ -231,7 +250,7 @@ export default function TimeTracker() {
                             <i className="fas fa-pause"></i>
                           </button>
                           <button
-                            className="btn btn-sm btn-danger"
+                            className="btn btn-sm btn-danger me-2"
                             onClick={() => stopSession(s.id)}
                           >
                             <i className="fas fa-stop"></i>
@@ -247,7 +266,7 @@ export default function TimeTracker() {
                             <i className="fas fa-play"></i>
                           </button>
                           <button
-                            className="btn btn-sm btn-danger"
+                            className="btn btn-sm btn-danger me-2"
                             onClick={() => stopSession(s.id)}
                           >
                             <i className="fas fa-stop"></i>
@@ -305,7 +324,7 @@ export default function TimeTracker() {
                             <i className="fas fa-pause"></i>
                           </button>
                           <button
-                            className="btn btn-sm btn-danger"
+                            className="btn btn-sm btn-danger me-2"
                             onClick={() => stopSession(s.id)}
                           >
                             <i className="fas fa-stop"></i>
@@ -321,7 +340,7 @@ export default function TimeTracker() {
                             <i className="fas fa-play"></i>
                           </button>
                           <button
-                            className="btn btn-sm btn-danger"
+                            className="btn btn-sm btn-danger me-2"
                             onClick={() => stopSession(s.id)}
                           >
                             <i className="fas fa-stop"></i>
