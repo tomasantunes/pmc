@@ -15,8 +15,12 @@ import {toLocaleISOString} from '../libs/utils';
 export default function Home() {
   const calendarRef = useRef(null);
   const [newEventTitle, setNewEventTitle] = useState("");
+  const [editEventId, setEditEventId] = useState(null);
+  const [editEventTitle, setEditEventTitle] = useState("");
   const [selectedNewStartTime, setSelectedNewStartTime] = useState(null);
   const [selectedNewEndTime, setSelectedNewEndTime] = useState(null);
+  const [selectedEditStartTime, setSelectedEditStartTime] = useState(null);
+  const [selectedEditEndTime, setSelectedEditEndTime] = useState(null);
   const [events, setEvents] = useState([]);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const navigate = useNavigate();
@@ -27,6 +31,15 @@ export default function Home() {
     setSelectedNewStartTime(moment(info.start).format("YYYY-MM-DD HH:mm"));
     setSelectedNewEndTime(moment(info.end).format("YYYY-MM-DD HH:mm"));
     openAddEvent();
+  };
+
+  const handleEventClick = (info) => {
+    console.log(info.event);
+    setEditEventId(info.event.id);
+    setEditEventTitle(info.event.title);
+    setSelectedEditStartTime(moment(info.event.start).format("YYYY-MM-DD HH:mm"));
+    setSelectedEditEndTime(moment(info.event.end).format("YYYY-MM-DD HH:mm"));
+    openEditEvent();
   };
 
   const handleDateClick = (info) => {
@@ -54,12 +67,25 @@ export default function Home() {
     modal.show();
   }
 
+  function openEditEvent() {
+    var modal = bootstrap.Modal.getOrCreateInstance(document.querySelector('.editEventModal'))
+    modal.show();
+  }
+
   function closeAddEvent() {
     var modal = bootstrap.Modal.getOrCreateInstance(document.querySelector('.addEventModal'))
     modal.hide();
     setNewEventTitle("");
     setSelectedNewStartTime(null);
     setSelectedNewEndTime(null);
+  }
+
+  function closeEditEvent() {
+    var modal = bootstrap.Modal.getOrCreateInstance(document.querySelector('.editEventModal'))
+    modal.hide();
+    setEditEventTitle("");
+    setSelectedEditStartTime(null);
+    setSelectedEditEndTime(null);
   }
 
   function submitAddEvent(e) {
@@ -90,6 +116,42 @@ export default function Home() {
     });
   }
 
+  function submitEditEvent(e) {
+    e.preventDefault();
+    const calendarApi = calendarRef.current.getApi();
+
+    // find the event to edit
+    var event = calendarApi.getEvents().find(ev => ev.id === editEventId);
+    if (event) {
+      event.setProp('title', editEventTitle);
+      event.setStart(moment(selectedEditStartTime, "YYYY-MM-DD HH:mm").toDate());
+      event.setEnd(moment(selectedEditEndTime, "YYYY-MM-DD HH:mm").toDate());
+    }
+
+    var db_event = events.find(ev => ev.id === event.id);
+    if (!db_event) {
+      alert("Error: Event not found.");
+      return;
+    }
+    axios.post(config.BASE_URL + "/api/edit-event", {
+      id: db_event.id,
+      start: selectedEditStartTime,
+      end: selectedEditEndTime,
+      title: editEventTitle
+    })
+    .then((response) => {
+      if (response.data.status == "OK") {
+        closeEditEvent();
+      }
+      else {
+        alert("Error: " + response.data.error);
+      }
+    })
+    .catch((error) => {
+      alert("Error: " + error.message);
+    });
+  }
+
   function handleChangeNewStartTime(value) {
     setSelectedNewStartTime(value);
     // set time to an hour later and set it as end time
@@ -99,6 +161,17 @@ export default function Home() {
 
   function handleChangeNewEndTime(value) {
     setSelectedNewEndTime(value);
+    // set time to an hour later and set it as end time
+    var edit_end_time = moment(value).add(60, 'minutes').format('YYYY-MM-DD HH:mm');
+    setSelectedEditEndTime(edit_end_time);
+  }
+
+  function handleChangeEditStartTime(value) {
+    setSelectedEditStartTime(value);
+  }
+
+  function handleChangeEditEndTime(value) {
+    setSelectedEditEndTime(value);
   }
 
   function loadEvents() {
@@ -106,6 +179,7 @@ export default function Home() {
     .then((response) => {
       if (response.data.status == "OK") {
         const formattedEvents = response.data.data.map((e) => ({
+          id: String(e.id),
           title: e.value,
           start: new Date(e.start),
           end: new Date(e.end),
@@ -161,6 +235,7 @@ export default function Home() {
             select={handleSelect}
             events={events}
             dateClick={handleDateClick}
+            eventClick={handleEventClick}
           />
         </div>
         <div class="modal addEventModal" tabindex="-1">
@@ -193,6 +268,43 @@ export default function Home() {
                   <div className="form-group">
                       <div style={{textAlign: "right"}}>
                         <button type="submit" className="btn btn-primary">Add</button>
+                      </div>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal editEventModal" tabindex="-1">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title">Edit Event</h5>
+                <button type="button" class="btn-close" onClick={closeEditEvent} aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                <form onSubmit={submitEditEvent}>
+                  <div className="form-group py-2">
+                    <label className="control-label">Title</label>
+                    <div>
+                        <input type="text" className="form-control input-lg" name="description" value={editEventTitle} onChange={(e) => setEditEventTitle(e.target.value)}/>
+                    </div>
+                  </div>
+                  <div className="form-group py-2">
+                    <label className="control-label">Start</label>
+                    <div>
+                      <DateTimePicker value={selectedEditStartTime} defaultValue={selectedEditStartTime} onChange={handleChangeEditStartTime} />
+                    </div>
+                  </div>
+                  <div className="form-group py-2">
+                    <label className="control-label">End</label>
+                    <div>
+                      <DateTimePicker value={selectedEditEndTime} defaultValue={selectedEditEndTime} onChange={handleChangeEditEndTime} />
+                    </div>
+                  </div>
+                  <div className="form-group">
+                      <div style={{textAlign: "right"}}>
+                        <button type="submit" className="btn btn-primary">Edit</button>
                       </div>
                   </div>
                 </form>

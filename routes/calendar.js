@@ -24,13 +24,34 @@ router.post("/api/add-event", (req, res) => {
   });
 });
 
+router.post("/api/edit-event", (req, res) => {
+  if (!req.session.isLoggedIn) {
+    res.json({status: "NOK", error: "Invalid Authorization."});
+    return;
+  }
+
+  var id = req.body.id;
+  var start_date = req.body.start;
+  var end_date = req.body.end;
+  var description = req.body.title;
+
+  var sql = "UPDATE events SET start_date = ?, end_date = ?, description = ? WHERE id = ?";
+  con.query(sql, [start_date, end_date, description, id], function (err, result) {
+    if (err) {
+      console.log(err);
+      res.json({status: "NOK", error: err});
+    }
+    res.json({status: "OK", data: {message: "Event has been updated successfully."}});
+  });
+});
+
 router.get("/api/get-events", (req, res) => {
   if (!req.session.isLoggedIn) {
     res.json({status: "NOK", error: "Invalid Authorization."});
     return;
   }
   
-  var sql = "SELECT description AS value, start_date AS start, end_date AS end FROM events";
+  var sql = "SELECT id, description AS value, start_date AS start, end_date AS end FROM events";
   con.query(sql, function (err, result) {
     if (err) {
       console.log(err);
