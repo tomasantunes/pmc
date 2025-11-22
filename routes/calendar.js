@@ -45,6 +45,22 @@ router.post("/api/edit-event", (req, res) => {
   });
 });
 
+router.post("/api/delete-event", (req, res) => {
+  if (!req.session.isLoggedIn) {
+    res.json({status: "NOK", error: "Invalid Authorization."});
+    return;
+  }
+  var id = req.body.id;
+  var sql = "DELETE FROM events WHERE id = ?";
+  con.query(sql, [id], function (err, result) {
+    if (err) {
+      console.log(err);
+      res.json({status: "NOK", error: err});
+    }
+    res.json({status: "OK", data: {message: "Event has been deleted successfully."}});
+  });
+});
+
 router.get("/api/get-events", (req, res) => {
   if (!req.session.isLoggedIn) {
     res.json({status: "NOK", error: "Invalid Authorization."});

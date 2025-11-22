@@ -174,6 +174,25 @@ export default function Home() {
     setSelectedEditEndTime(value);
   }
 
+  function deleteEvent(e) {
+    e.preventDefault();
+    axios.post(config.BASE_URL + "/api/delete-event", {
+      id: editEventId
+    })
+    .then((response) => {
+      if (response.data.status == "OK") {
+        closeEditEvent();
+        loadEvents();
+      }
+      else {
+        alert("Error: " + response.data.error);
+      }
+    })
+    .catch((error) => {
+      alert("Error: " + error.message);
+    });
+  }
+
   function loadEvents() {
     axios.get(config.BASE_URL + "/api/get-events")
     .then((response) => {
@@ -304,6 +323,7 @@ export default function Home() {
                   </div>
                   <div className="form-group">
                       <div style={{textAlign: "right"}}>
+                        <button className="btn btn-danger me-2" onClick={deleteEvent}>Delete</button>
                         <button type="submit" className="btn btn-primary">Edit</button>
                       </div>
                   </div>
