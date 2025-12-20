@@ -16,7 +16,10 @@ export default function ForgotPassword() {
     axios.post(config.BASE_URL + "/api/reset-password", {emailUsername})
     .then(async res => {
       if (res.data.status == "OK") {
-        navigate("/login");
+        MySwal.fire("A password reset link has been sent to the associated email address.")
+        .then(function() {
+          navigate("/login");
+        });
       }
       else {
         MySwal.fire(res.data.error);
@@ -47,7 +50,7 @@ export default function ForgotPassword() {
         </div>
         <div className="form-floating mb-3">
           <input
-            type="email"
+            type="text"
             id="email"
             name="email"
             value={emailUsername}

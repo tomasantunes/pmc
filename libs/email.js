@@ -14,7 +14,7 @@ function sendEmail(text) {
   var mailOptions = {
     from: secretConfig.SMTP_EMAIL,
     to: secretConfig.RECIPIENT_EMAIL,
-    subject: "Message From Utopia GPT",
+    subject: "Message From PMC",
     html: text,
   };
 

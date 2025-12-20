@@ -85,7 +85,7 @@ router.post("/api/sign-up", async (req, res) => {
 
   const hashedPassword = await bcrypt.hash(pass, SALT_ROUNDS);
 
-  var sql1 = "INSERT INTO users (username, email, password) VALUES (?, ?, ?);";
+  var sql1 = "INSERT INTO users (username, email, password_hash) VALUES (?, ?, ?);";
 
   try {
     await con2.execute(sql1, [user, email, hashedPassword]);
@@ -122,7 +122,7 @@ router.post("/api/reset-password", async (req, res) => {
 
   try {
     await con2.execute(sql2, [resetPasswordToken, toLocaleISOString(new Date(resetPasswordExpires)), user_id]);
-    var resetLink = `${secretConfig.FRONTEND_BASE_URL}/reset-password?token=${resetPasswordToken}&id=${user_id}`;
+    var resetLink = `${secretConfig.BASE_URL}/set-new-password?token=${resetPasswordToken}&id=${user_id}`;
     var emailText = `Click the following link to reset your password: <a href="${resetLink}">${resetLink}</a>`;
     sendEmail(emailText);
   } catch (err) {
@@ -155,7 +155,7 @@ router.post("/api/set-new-password", async (req, res) => {
 
   const hashedPassword = await bcrypt.hash(pass, SALT_ROUNDS);
 
-  var sql2 = "UPDATE users SET password = ?, reset_password_token = NULL, reset_password_expires = NULL WHERE id = ?;";
+  var sql2 = "UPDATE users SET password_hash = ?, reset_password_token = NULL, reset_password_expires = NULL WHERE id = ?;";
   try {
     await con2.execute(sql2, [hashedPassword, resetPasswordUserId]);
   } catch (err) {

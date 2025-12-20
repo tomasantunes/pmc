@@ -117,3 +117,6 @@ UPDATE daily_todos_tasks SET user_id = 0;
 UPDATE time_tracking_sessions SET user_id = 0;
 UPDATE time_tracking_sub_sessions SET user_id = 0;
 UPDATE alerts SET user_id = 0;
+
+ALTER TABLE users ADD COLUMN reset_password_token VARCHAR(512) DEFAULT NULL AFTER email;
+ALTER TABLE users ADD COLUMN reset_password_expires DATETIME DEFAULT NULL AFTER reset_password_token;
