@@ -88,3 +88,32 @@ CREATE TABLE alerts (
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
+
+CREATE TABLE users (
+    id INT(11) AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(256) NOT NULL UNIQUE,
+    password_hash VARCHAR(512) NOT NULL,
+    email VARCHAR(512) NOT NULL UNIQUE,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+ALTER TABLE logins ADD COLUMN user_id INT(11) NOT NULL AFTER id;
+ALTER TABLE folders ADD COLUMN user_id INT(11) NOT NULL AFTER id;
+ALTER TABLE tasks ADD COLUMN user_id INT(11) NOT NULL AFTER id;
+ALTER TABLE recurrent_checks ADD COLUMN user_id INT(11) NOT NULL AFTER id;
+ALTER TABLE events ADD COLUMN user_id INT(11) NOT NULL AFTER id;
+ALTER TABLE daily_todos_tasks ADD COLUMN user_id INT(11) NOT NULL AFTER id;
+ALTER TABLE time_tracking_sessions ADD COLUMN user_id INT(11) NOT NULL AFTER id;
+ALTER TABLE time_tracking_sub_sessions ADD COLUMN user_id INT(11) NOT NULL AFTER id;
+ALTER TABLE alerts ADD COLUMN user_id INT(11) NOT NULL AFTER id;
+
+UDPATE logins SET user_id = 0;
+UPDATE folders SET user_id = 0;
+UPDATE tasks SET user_id = 0;
+UPDATE recurrent_checks SET user_id = 0;
+UPDATE events SET user_id = 0;
+UPDATE daily_todos_tasks SET user_id = 0;
+UPDATE time_tracking_sessions SET user_id = 0;
+UPDATE time_tracking_sub_sessions SET user_id = 0;
+UPDATE alerts SET user_id = 0;

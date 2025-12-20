@@ -12,30 +12,30 @@ router.get("/api/get-stats", (req, res) => {
     return;
   }
 
-  var sql = "SELECT COUNT(*) FROM tasks WHERE type='single'";
-  con.query(sql, function (err, result) {
+  var sql = "SELECT COUNT(*) FROM tasks WHERE type='single' AND user_id = ?";
+  con.query(sql, [req.session.userId], function (err, result) {
     if (err) {
       console.log(err);
       res.json({status: "NOK", error: err.message});
     }
     var total_tasks = result[0]["COUNT(*)"];
-    var sql2 = "SELECT COUNT(*) FROM tasks WHERE type='single' AND is_done = 1";
-    con.query(sql2, function (err2, result2) {
+    var sql2 = "SELECT COUNT(*) FROM tasks WHERE type='single' AND is_done = 1 AND user_id = ?";
+    con.query(sql2, [req.session.userId], function (err2, result2) {
       if (err) {
         console.log(err);
         res.json({status: "NOK", error: err.message});
       }
       var total_tasks_done = result2[0]["COUNT(*)"];
-      var sql3 = "SELECT * FROM tasks WHERE type = 'recurrent'";
-      con.query(sql3, function (err3, result3) {
+      var sql3 = "SELECT * FROM tasks WHERE type = 'recurrent' AND user_id = ?";
+      con.query(sql3, [req.session.userId], function (err3, result3) {
         if (err) {
           console.log(err);
           res.json({status: "NOK", error: err.message});
         }
         tasks.getTasksOnThisWeekDay(result3, function(tasks_on_this_week_day) {
           if (tasks_on_this_week_day.length > 0) {
-            var sql4 = "SELECT * FROM recurrent_checks WHERE task_id IN (?) AND date = DATE(NOW())";
-            con.query(sql4, [tasks_on_this_week_day], function (err4, result4) {
+            var sql4 = "SELECT * FROM recurrent_checks WHERE task_id IN (?) AND date = DATE(NOW()) AND user_id = ?";
+            con.query(sql4, [tasks_on_this_week_day, req.session.userId], function (err4, result4) {
               if (err4) {
                 console.log(err4);
                 res.json({status: "NOK", error: err4.message});
@@ -77,7 +77,7 @@ router.get("/api/get-count-tasks-last-15-days", async (req, res) => {
             t.type = 'single'
             AND t.is_done = 1
             AND t.date_done >= CURDATE() - INTERVAL 15 DAY
-
+            AND t.user_id = ?
         UNION ALL
 
         SELECT 
@@ -88,10 +88,11 @@ router.get("/api/get-count-tasks-last-15-days", async (req, res) => {
             t.type = 'recurrent'
             AND rc.is_done = 1
             AND rc.date >= CURDATE() - INTERVAL 15 DAY
+            AND rc.user_id = ?
     ) AS all_done
     GROUP BY done_date
     ORDER BY done_date;
-  `);
+  `, [req.session.userId, req.session.userId]);
 
   const filledData = fillMissingDays(rows);
 

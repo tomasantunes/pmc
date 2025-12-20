@@ -6,7 +6,7 @@ var axios = require("axios");
 var octokit = github.getOctokit();
 
 router.get("/api/get-github-tasks", async (req, res) => {
-  if (!req.session.isLoggedIn) {
+  if (!req.session.isLoggedIn || !req.session.isAdmin || !github.hasGithubToken()) {
     return res.json({ status: "NOK", error: "Invalid Authorization." });
   }
 
@@ -76,7 +76,7 @@ router.get("/api/get-github-tasks", async (req, res) => {
 });
 
 router.get("/api/check-github-status", (req, res) => {
-  if (!req.session.isLoggedIn) {
+  if (!req.session.isLoggedIn || !req.session.isAdmin) {
     return res.json({ status: "NOK", error: "Invalid Authorization." });
   }
 

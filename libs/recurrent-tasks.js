@@ -4,14 +4,14 @@ var utils = require('./utils');
 var { con, con2 } = database.getMySQLConnections();
 
 async function getTaskChecks(task_id, dti, dtf) {
-  var sql = "SELECT * FROM recurrent_checks WHERE task_id = ? AND date BETWEEN ? AND ?";
-  const [rows, fields] = await con2.execute(sql, [task_id, dti, dtf]);
+  var sql = "SELECT * FROM recurrent_checks WHERE task_id = ? AND date BETWEEN ? AND ? AND user_id = ?";
+  const [rows, fields] = await con2.execute(sql, [task_id, dti, dtf, user_id]);
   return rows;
 }
 
 async function checkIfTaskIsCancelled(task_id, dt) {
-  var sql = "SELECT * FROM recurrent_checks WHERE task_id = ? AND date = ?";
-  var [rows, fields] = await con2.execute(sql, [task_id, dt]);
+  var sql = "SELECT * FROM recurrent_checks WHERE task_id = ? AND date = ? AND user_id = ?";
+  var [rows, fields] = await con2.execute(sql, [task_id, dt, user_id]);
   if (rows.length > 0) {
     if (rows[0].is_cancelled == 1) {
       return true;

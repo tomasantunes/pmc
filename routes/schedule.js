@@ -9,8 +9,8 @@ router.get("/api/get-schedule", (req, res) => {
   var last_monday = utils.toLocaleISOString(utils.previousMonday());
   var next_sunday = utils.toLocaleISOString(utils.nextDate(7));
 
-  var sql = "SELECT * FROM events WHERE start_date BETWEEN ? AND ? ORDER BY start_date ASC";
-  con.query(sql, [last_monday, next_sunday], function (err, result) {
+  var sql = "SELECT * FROM events WHERE start_date BETWEEN ? AND ? AND user_id = ? ORDER BY start_date ASC";
+  con.query(sql, [last_monday, next_sunday, req.session.userId], function (err, result) {
     if (err) {
       console.log(err);
       res.json({status: "NOK", error: err});

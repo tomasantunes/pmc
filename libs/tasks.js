@@ -4,7 +4,7 @@ var {checkIfTaskIsOnThisWeekDay} = require('./recurrent-tasks');
 var { con, con2 } = database.getMySQLConnections();
 
 async function getTaskList() {
-  var sql = "SELECT description FROM tasks WHERE is_done = 0";
+  var sql = "SELECT description FROM tasks WHERE is_done = 0 AND user_id = ?";
 
   const [rows, fields] = await con2.execute(sql);
   var arr = rows.map(a => a.description);

@@ -21,8 +21,8 @@ router.get("/api/get-recurrent-tasks", (req, res) => {
   var dti = req.query.dti;
   var dtf = req.query.dtf;
   var sql =
-    "SELECT *, CONCAT(DATE_FORMAT(start_time, '%H:%i'), ' - ', DATE_FORMAT(end_time, '%H:%i')) AS time FROM tasks WHERE folder_id = ? ORDER BY sort_index ASC";
-  con.query(sql, [folder_id], async function (err, result) {
+    "SELECT *, CONCAT(DATE_FORMAT(start_time, '%H:%i'), ' - ', DATE_FORMAT(end_time, '%H:%i')) AS time FROM tasks WHERE folder_id = ? AND user_id = ?ORDER BY sort_index ASC";
+  con.query(sql, [folder_id, req.session.userId], async function (err, result) {
     if (err) {
       console.log(err);
       res.json({ status: "NOK", error: err.message });
@@ -71,16 +71,16 @@ router.get("/api/get-recurrent-task", (req, res) => {
     return;
   }
   var task_id = req.query.task_id;
-  var sql = "SELECT * FROM tasks WHERE id = ? AND type = 'recurrent'";
-  con.query(sql, [task_id], function (err, result) {
+  var sql = "SELECT * FROM tasks WHERE id = ? AND type = 'recurrent' AND user_id = ?";
+  con.query(sql, [task_id, req.session.userId], function (err, result) {
     if (err) {
       console.log(err);
       res.json({ status: "NOK", error: err.message });
     }
 
     if (result.length > 0) {
-      var sql2 = "SELECT * FROM alerts WHERE task_id = ?";
-      con.query(sql2, [task_id], function (err2, result2) {
+      var sql2 = "SELECT * FROM alerts WHERE task_id = ? AND user_id = ?";
+      con.query(sql2, [task_id, req.session.userId], function (err2, result2) {
         if (err2) {
           console.log(err2);
           res.json({ status: "NOK", error: err2.message });
@@ -145,7 +145,7 @@ router.post("/api/add-recurrent-task", (req, res) => {
   }
 
   var sql =
-    "INSERT INTO tasks (folder_id, description, start_time, end_time, type, days, sort_index, is_done) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+    "INSERT INTO tasks (folder_id, description, start_time, end_time, type, days, sort_index, is_done, user_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
   con.query(
     sql,
     [
@@ -157,6 +157,7 @@ router.post("/api/add-recurrent-task", (req, res) => {
       days,
       sort_index,
       0,
+      req.session.userId,
     ],
     async function (err, result) {
       if (err) {
@@ -169,11 +170,12 @@ router.post("/api/add-recurrent-task", (req, res) => {
 
       for (var i in dates) {
         var sql2 =
-          "INSERT INTO recurrent_checks (task_id, date, is_done) VALUES (?, ?, ?)";
+          "INSERT INTO recurrent_checks (task_id, date, is_done, user_id) VALUES (?, ?, ?, ?)";
         await con2.query(sql2, [
           result.insertId,
           dates[i].toISOString().slice(0, 10),
           0,
+          req.session.userId,
         ]);
 
         if (has_time) {
@@ -186,18 +188,19 @@ router.post("/api/add-recurrent-task", (req, res) => {
           end_date.setHours(et[0], et[1], 0);
           end_date = end_date.toISOString().slice(0, 19).replace("T", " ");
           var sql3 =
-            "INSERT INTO events (task_id, start_date, end_date, description) VALUES (?, ?, ?, ?)";
+            "INSERT INTO events (task_id, start_date, end_date, description, user_id) VALUES (?, ?, ?, ?, ?)";
           await con2.query(sql3, [
             result.insertId,
             start_date,
             end_date,
             description,
+            req.session.userId,
           ]);
         }
       }
 
       if (alert_active && has_time) {
-        insertRecurrentAlert(start_time, days, result.insertId, alert_text);
+        insertRecurrentAlert(start_time, days, result.insertId, alert_text, req.session.userId);
       }
       res.json({ status: "OK", data: "Task has been added successfully." });
     },
@@ -212,8 +215,8 @@ router.post("/api/update-recurrent-task-done", (req, res) => {
   var task_id = req.body.task_id;
   var is_done = req.body.is_done;
   var date = req.body.date;
-  var sql = "SELECT * FROM recurrent_checks WHERE task_id = ? AND date = ?";
-  con.query(sql, [task_id, date], function (err, result) {
+  var sql = "SELECT * FROM recurrent_checks WHERE task_id = ? AND date = ? AND user_id = ?";
+  con.query(sql, [task_id, date, req.session.userId], function (err, result) {
     if (err) {
       console.log(err);
       res.json({ status: "NOK", error: err.message });
@@ -221,8 +224,8 @@ router.post("/api/update-recurrent-task-done", (req, res) => {
     }
     if (result.length > 0) {
       var sql2 =
-        "UPDATE recurrent_checks SET is_done = ? WHERE task_id = ? AND date = ?";
-      con.query(sql2, [is_done, task_id, date], function (err, result) {
+        "UPDATE recurrent_checks SET is_done = ? WHERE task_id = ? AND date = ? AND user_id = ?";
+      con.query(sql2, [is_done, task_id, date, req.session.userId], function (err, result) {
         if (err) {
           console.log(err);
           res.json({ status: "NOK", error: err.message });
@@ -231,8 +234,8 @@ router.post("/api/update-recurrent-task-done", (req, res) => {
       });
     } else {
       var sql2 =
-        "INSERT INTO recurrent_checks (task_id, date, is_done) VALUES (?, ?, ?)";
-      con.query(sql2, [task_id, date, is_done], function (err, result) {
+        "INSERT INTO recurrent_checks (task_id, date, is_done, user_id) VALUES (?, ?, ?, ?, ?)";
+      con.query(sql2, [task_id, date, is_done, req.session.userId], function (err, result) {
         if (err) {
           console.log(err);
           res.json({ status: "NOK", error: err.message });
@@ -280,10 +283,10 @@ router.post("/api/edit-recurrent-task", (req, res) => {
   }
 
   var sql =
-    "UPDATE tasks SET description = ?, start_time = ?, end_time = ?, days = ? WHERE id = ?";
+    "UPDATE tasks SET description = ?, start_time = ?, end_time = ?, days = ? WHERE id = ? AND user_id = ?";
   con.query(
     sql,
-    [description, start_time2, end_time2, days, task_id],
+    [description, start_time2, end_time2, days, task_id, req.session.userId],
     async function (err, result) {
       if (err) {
         console.log(err);
@@ -292,18 +295,17 @@ router.post("/api/edit-recurrent-task", (req, res) => {
       }
 
       var sql2 =
-        "DELETE FROM recurrent_checks WHERE task_id = ? AND date > DATE(NOW())";
-      await con2.query(sql2, [task_id]);
+        "DELETE FROM recurrent_checks WHERE task_id = ? AND date > DATE(NOW()) AND user_id = ?";
+      await con2.query(sql2, [task_id, req.session.userId]);
       var sql3 =
-        "DELETE FROM events WHERE task_id = ? AND start_date > DATE(NOW())";
-      await con2.query(sql3, [task_id]);
-
+        "DELETE FROM events WHERE task_id = ? AND start_date > DATE(NOW()) AND user_id = ?";
+      await con2.query(sql3, [task_id, req.session.userId]);
       var dates = utils.getDatesUntilNextYear(days);
 
       for (var i in dates) {
         var sql2 =
-          "INSERT INTO recurrent_checks (task_id, date, is_done) VALUES (?, ?, 0)";
-        await con2.query(sql2, [task_id, dates[i].toISOString().slice(0, 10)]);
+          "INSERT INTO recurrent_checks (task_id, date, is_done, user_id) VALUES (?, ?, 0, ?)";
+        await con2.query(sql2, [task_id, dates[i].toISOString().slice(0, 10), req.session.userId]);
 
         if (has_time) {
           var start_date = dates[i];
@@ -315,8 +317,8 @@ router.post("/api/edit-recurrent-task", (req, res) => {
           end_date.setHours(et[0], et[1], 0);
           end_date = end_date.toISOString().slice(0, 19).replace("T", " ");
           var sql3 =
-            "INSERT INTO events (task_id, start_date, end_date, description) VALUES (?, ?, ?, ?)";
-          await con2.query(sql3, [task_id, start_date, end_date, description]);
+            "INSERT INTO events (task_id, start_date, end_date, description, user_id) VALUES (?, ?, ?, ?, ?) AND user_id = ?";
+          await con2.query(sql3, [task_id, start_date, end_date, description, req.session.userId]);
         }
       }
 
@@ -344,15 +346,15 @@ router.post("/api/restart-recurrent-task", async (req, res) => {
   var now_date = utils.toLocaleISOString(now).slice(0, 10);
   var now_datetime = utils.toLocaleISOString(now);
 
-  var sql = "DELETE FROM recurrent_checks WHERE task_id = ? AND date < ?";
-  await con2.query(sql, [task_id, now_date]);
+  var sql = "DELETE FROM recurrent_checks WHERE task_id = ? AND date < ? AND user_id = ?";
+  await con2.query(sql, [task_id, now_date, req.session.userId]);
 
   var sql2 =
-    "DELETE FROM events WHERE task_id = ? AND start_date < DATE(NOW())";
-  await con2.query(sql2, [task_id]);
+    "DELETE FROM events WHERE task_id = ? AND start_date < DATE(NOW()) AND user_id = ?";
+  await con2.query(sql2, [task_id, req.session.userId]);
 
-  var sql3 = "UPDATE tasks SET created_at = ? WHERE id = ?";
-  await con2.query(sql3, [now_datetime, task_id]);
+  var sql3 = "UPDATE tasks SET created_at = ? WHERE id = ? AND user_id = ?";
+  await con2.query(sql3, [now_datetime, task_id, req.session.userId]);
 
   res.json({ status: "OK", data: "Recurrent task has been restarted." });
 });
@@ -366,8 +368,8 @@ router.post("/api/cancel-task", (req, res) => {
   var task_id = req.body.task_id;
   var dt = req.body.date;
 
-  var sql = "SELECT * FROM recurrent_checks WHERE task_id = ? AND date = ?";
-  con.query(sql, [task_id, dt], function (err, result) {
+  var sql = "SELECT * FROM recurrent_checks WHERE task_id = ? AND date = ? AND user_id = ?";
+  con.query(sql, [task_id, dt, req.session.userId], function (err, result) {
     if (err) {
       console.log(err);
       res.json({ status: "NOK", error: err.message });
@@ -379,8 +381,8 @@ router.post("/api/cancel-task", (req, res) => {
         return;
       } else {
         var sql2 =
-          "UPDATE recurrent_checks SET is_cancelled = 1 WHERE task_id = ? AND date = ?";
-        con.query(sql2, [task_id, dt], function (err2, result2) {
+          "UPDATE recurrent_checks SET is_cancelled = 1 WHERE task_id = ? AND date = ? AND user_id = ?";
+        con.query(sql2, [task_id, dt, req.session.userId], function (err2, result2) {
           if (err2) {
             console.log(err2);
             res.json({ status: "NOK", error: err2.message });
@@ -394,8 +396,8 @@ router.post("/api/cancel-task", (req, res) => {
       }
     } else {
       var sql2 =
-        "INSERT INTO recurrent_checks (task_id, date, is_cancelled, is_done) VALUES (?, ?, 1, 0)";
-      con.query(sql2, [task_id, dt], function (err2, result2) {
+        "INSERT INTO recurrent_checks (task_id, date, is_cancelled, is_done, user_id) VALUES (?, ?, 1, 0, ?)";
+      con.query(sql2, [task_id, dt, req.session.userId], function (err2, result2) {
         if (err2) {
           console.log(err2);
           res.json({ status: "NOK", error: err2.message });
@@ -419,8 +421,8 @@ router.post("/api/uncancel-task", (req, res) => {
   var task_id = req.body.task_id;
   var dt = req.body.date;
 
-  var sql = "SELECT * FROM recurrent_checks WHERE task_id = ? AND date = ?";
-  con.query(sql, [task_id, dt], function (err, result) {
+  var sql = "SELECT * FROM recurrent_checks WHERE task_id = ? AND date = ? AND user_id = ?";
+  con.query(sql, [task_id, dt, req.session.userId], function (err, result) {
     if (err) {
       console.log(err);
       res.json({ status: "NOK", error: err.message });
@@ -432,8 +434,8 @@ router.post("/api/uncancel-task", (req, res) => {
         return;
       } else {
         var sql2 =
-          "UPDATE recurrent_checks SET is_cancelled = 0 WHERE task_id = ? AND date = ?";
-        con.query(sql2, [task_id, dt], function (err2, result2) {
+          "UPDATE recurrent_checks SET is_cancelled = 0 WHERE task_id = ? AND date = ? AND user_id = ?";
+        con.query(sql2, [task_id, dt, req.session.userId], function (err2, result2) {
           if (err2) {
             console.log(err2);
             res.json({ status: "NOK", error: err2.message });
@@ -447,8 +449,8 @@ router.post("/api/uncancel-task", (req, res) => {
       }
     } else {
       var sql2 =
-        "INSERT INTO recurrent_checks (task_id, date, is_cancelled, is_done) VALUES (?, ?, 0, 0)";
-      con.query(sql2, [task_id, dt], function (err2, result2) {
+        "INSERT INTO recurrent_checks (task_id, date, is_cancelled, is_done, user_id) VALUES (?, ?, 0, 0, ?)";
+      con.query(sql2, [task_id, dt, req.session.userId], function (err2, result2) {
         if (err2) {
           console.log(err2);
           res.json({ status: "NOK", error: err2.message });

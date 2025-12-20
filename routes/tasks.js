@@ -22,8 +22,8 @@ router.get("/api/get-tasks-from-folder", (req, res) => {
   }
   var folder_id = req.query.folder_id;
   var sql =
-    "SELECT *, CONCAT(start_time, ' - ', end_time) AS time FROM tasks WHERE folder_id = ? ORDER BY sort_index ASC";
-  con.query(sql, [folder_id], function (err, result) {
+    "SELECT *, CONCAT(start_time, ' - ', end_time) AS time FROM tasks WHERE folder_id = ? AND user_id = ? ORDER BY sort_index ASC";
+  con.query(sql, [folder_id, req.session.userId], function (err, result) {
     if (err) {
       console.log(err);
       res.json({ status: "NOK", error: err.message });
@@ -56,8 +56,8 @@ router.post("/api/update-task-done", (req, res) => {
       res.json({ status: "NOK", error: err.message });
     }
     if (is_done == true) {
-      var sql2 = "UPDATE tasks SET date_done = ? WHERE id = ?";
-      con.query(sql2, [date_done, task_id]);
+      var sql2 = "UPDATE tasks SET date_done = ? WHERE id = ? AND user_id = ?";
+      con.query(sql2, [date_done, task_id, req.session.userId]);
     }
     res.json({ status: "OK", data: "Task has been updated successfully." });
   });
@@ -70,8 +70,8 @@ router.post("/api/update-task-starred", (req, res) => {
   }
   var task_id = req.body.task_id;
   var is_starred = req.body.is_starred;
-  var sql = "UPDATE tasks SET starred = ? WHERE id = ?";
-  con.query(sql, [is_starred, task_id], function (err, result) {
+  var sql = "UPDATE tasks SET starred = ? WHERE id = ? AND user_id = ?";
+  con.query(sql, [is_starred, task_id, req.session.userId], function (err, result) {
     if (err) {
       console.log(err);
       res.json({ status: "NOK", error: err.message });
@@ -89,8 +89,8 @@ router.post("/api/update-all-tasks-done", (req, res) => {
   var folder_id = req.body.folder_id;
   var is_done = req.body.is_done;
 
-  var sql = "UPDATE tasks SET is_done = ? WHERE folder_id = ? AND starred = 0";
-  con.query(sql, [is_done, folder_id], function (err, result) {
+  var sql = "UPDATE tasks SET is_done = ? WHERE folder_id = ? AND user_id = ? AND starred = 0";
+  con.query(sql, [is_done, folder_id, req.session.userId], function (err, result) {
     if (err) {
       console.log(err);
       res.json({ status: "NOK", error: err.message });
@@ -131,10 +131,10 @@ router.post("/api/add-task", (req, res) => {
   }
 
   var sql =
-    "INSERT INTO tasks (folder_id, description, start_time, end_time, is_done, sort_index, type) VALUES (?, ?, ?, ?, ?, ?, ?)";
+    "INSERT INTO tasks (folder_id, description, start_time, end_time, is_done, sort_index, type, user_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
   con.query(
     sql,
-    [folder_id, description, start_time, end_time, 0, sort_index, type],
+    [folder_id, description, start_time, end_time, 0, sort_index, type, req.session.userId],
     async function (err, result) {
       if (err) {
         console.log(err);
@@ -142,12 +142,13 @@ router.post("/api/add-task", (req, res) => {
       }
 
       var sql2 =
-        "INSERT INTO events (task_id, start_date, end_date, description) VALUES (?, ?, ?, ?)";
+        "INSERT INTO events (task_id, start_date, end_date, description, user_id) VALUES (?, ?, ?, ?, ?)";
       await con2.query(sql2, [
         result.insertId,
         start_time,
         end_time,
         description,
+        req.session.userId,
       ]);
 
       res.json({ status: "OK", data: "Task has been added successfully." });
@@ -162,8 +163,8 @@ router.post("/api/handle-sort", (req, res) => {
   }
   var task_id = req.body.task_id;
   var sort_index = req.body.sort_index;
-  var sql = "UPDATE tasks SET sort_index = ? WHERE id = ?";
-  con.query(sql, [sort_index, task_id], function (err, result) {
+  var sql = "UPDATE tasks SET sort_index = ? WHERE id = ? AND user_id = ?";
+  con.query(sql, [sort_index, task_id, req.session.userId], function (err, result) {
     if (err) {
       console.log(err);
       res.json({ status: "NOK", error: err.message });
@@ -178,8 +179,8 @@ router.get("/api/get-task", (req, res) => {
     return;
   }
   var task_id = req.query.task_id;
-  var sql = "SELECT * FROM tasks WHERE id = ?";
-  con.query(sql, [task_id], function (err, result) {
+  var sql = "SELECT * FROM tasks WHERE id = ? AND user_id = ?";
+  con.query(sql, [task_id, req.session.userId], function (err, result) {
     if (err) {
       console.log(err);
       res.json({ status: "NOK", error: err.message });
@@ -215,10 +216,10 @@ router.post("/api/edit-task", (req, res) => {
   }
 
   var sql =
-    "UPDATE tasks SET description = ?, start_time = ?, end_time = ? WHERE id = ?";
+    "UPDATE tasks SET description = ?, start_time = ?, end_time = ? WHERE id = ? AND user_id = ?";
   con.query(
     sql,
-    [description, start_time, end_time, task_id],
+    [description, start_time, end_time, task_id, req.session.userId],
     async function (err, result) {
       if (err) {
         console.log(err);
@@ -226,8 +227,8 @@ router.post("/api/edit-task", (req, res) => {
       }
 
       var sql2 =
-        "UPDATE events SET start_date = ?, end_date = ?, description = ? WHERE task_id = ?";
-      await con2.query(sql2, [start_time, end_time, description, task_id]);
+        "UPDATE events SET start_date = ?, end_date = ?, description = ? WHERE task_id = ? AND user_id = ?";
+      await con2.query(sql2, [start_time, end_time, description, task_id, req.session.userId]);
 
       res.json({ status: "OK", data: "Task has been updated successfully." });
     },
@@ -246,22 +247,22 @@ router.post("/api/delete-task", (req, res) => {
       console.log(err);
       res.json({ status: "NOK", error: err.message });
     }
-    var sql2 = "DELETE FROM recurrent_checks WHERE task_id = ?";
-    con.query(sql2, [task_id], function (err2, result2) {
+    var sql2 = "DELETE FROM recurrent_checks WHERE task_id = ? AND user_id = ?";
+    con.query(sql2, [task_id, req.session.userId], function (err2, result2) {
       if (err2) {
         console.log(err2);
         res.json({ status: "NOK", error: err2.message });
       }
 
-      var sql3 = "DELETE FROM events WHERE task_id = ?";
-      con.query(sql3, [task_id], function (err3, result3) {
+      var sql3 = "DELETE FROM events WHERE task_id = ? AND user_id = ?";
+      con.query(sql3, [task_id, req.session.userId], function (err3, result3) {
         if (err3) {
           console.log(err3);
           res.json({ status: "NOK", error: err3.message });
         }
 
-        var sql4 = "DELETE FROM alerts WHERE task_id = ?";
-        con.query(sql4, [task_id], function (err4, result4) {
+        var sql4 = "DELETE FROM alerts WHERE task_id = ? AND user_id = ?";
+        con.query(sql4, [task_id, req.session.userId], function (err4, result4) {
           if (err4) {
             console.log(err4);
             res.json({ status: "NOK", error: err4.message });
@@ -278,8 +279,8 @@ router.post("/api/delete-task", (req, res) => {
 
 router.get("/api/get-random-task", (req, res) => {
   var sql =
-    "SELECT description FROM tasks WHERE is_done = 0 ORDER BY RAND() LIMIT 1";
-  con.query(sql, function (err, result) {
+    "SELECT description FROM tasks WHERE is_done = 0 AND user_id = ? ORDER BY RAND() LIMIT 1";
+  con.query(sql, [req.session.userId], function (err, result) {
     if (err) {
       console.log(err);
       res.json({ status: "NOK", error: err });
@@ -297,8 +298,8 @@ router.post("/api/move-simple-task", (req, res) => {
   var task_id = req.body.task_id;
   var target_folder_id = req.body.target_folder_id;
 
-  var sql = "UPDATE tasks SET folder_id = ? WHERE id = ?";
-  con.query(sql, [target_folder_id, task_id], function (err, result) {
+  var sql = "UPDATE tasks SET folder_id = ? WHERE id = ? AND user_id = ?";
+  con.query(sql, [target_folder_id, task_id, req.session.userId], function (err, result) {
     if (err) {
       console.log(err);
       res.json({ status: "NOK", error: err.message });

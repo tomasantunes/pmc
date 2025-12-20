@@ -8,16 +8,16 @@ function upsertRecurrentAlert(dt, days, task_id, text) {
   var t = dt.split(" ")[1];
   var cron_string = utils.toCron(days, t);
 
-  var sql1 = "SELECT * FROM alerts WHERE task_id = ?";
-  con.query(sql1, [task_id], function (err, result) {
+  var sql1 = "SELECT * FROM alerts WHERE task_id = ? AND user_id = ?";
+  con.query(sql1, [task_id, user_id], function (err, result) {
     if (err) {
       console.log(err);
       return false;
     }
     if (result.length < 1) {
       var sql2 =
-        "INSERT INTO alerts (task_id, cron_string, text) VALUES (?, ?, ?)";
-      con.query(sql2, [task_id, cron_string, text], function (err2, result2) {
+        "INSERT INTO alerts (task_id, cron_string, text, user_id) VALUES (?, ?, ?, ?)";
+      con.query(sql2, [task_id, cron_string, text, user_id], function (err2, result2) {
         if (err2) {
           console.log(err2);
           return false;
@@ -26,10 +26,10 @@ function upsertRecurrentAlert(dt, days, task_id, text) {
       });
     } else {
       var sql2 =
-        "UPDATE alerts SET cron_string = ?, text = ? WHERE task_id = ?";
+        "UPDATE alerts SET cron_string = ?, text = ? WHERE task_id = ? AND user_id = ?";
       con.query(
         sql2,
-        [cron_string, alert_text, task_id],
+        [cron_string, alert_text, user_id, task_id, user_id],
         function (err2, result2) {
           if (err2) {
             console.log(err2);
@@ -46,8 +46,8 @@ function insertRecurrentAlert(dt, days, task_id, text) {
   var t = dt.split(" ")[1];
   var cron_string = utils.toCron(days, t);
 
-  var sql = "INSERT INTO alerts (task_id, cron_string, text) VALUES (?, ?, ?)";
-  con.query(sql, [cron_string, text, task_id], function (err, result) {
+  var sql = "INSERT INTO alerts (task_id, cron_string, text, user_id) VALUES (?, ?, ?, ?)";
+  con.query(sql, [task_id, cron_string, text, user_id], function (err, result) {
     if (err) {
       console.log(err);
       return false;
@@ -57,12 +57,12 @@ function insertRecurrentAlert(dt, days, task_id, text) {
 }
 
 function deleteRecurrentAlert(task_id) {
-  var sql = "DELETE FROM alerts WHERE task_id = ?";
-  con.query(sql, [task_id]);
+  var sql = "DELETE FROM alerts WHERE task_id = ? AND user_id = ?";
+  con.query(sql, [task_id, user_id]);
 }
 
 async function listAlerts() {
-  var sql = "SELECT * FROM alerts";
+  var sql = "SELECT * FROM alerts WHERE user_id = ?";
   var [rows, fields] = await con2.query(sql);
   return rows;
 }
@@ -70,10 +70,12 @@ async function listAlerts() {
 module.exports = {
   upsertRecurrentAlert,
   insertRecurrentAlert,
+  deleteRecurrentAlert,
   listAlerts,
   default: {
     upsertRecurrentAlert,
     insertRecurrentAlert,
+    deleteRecurrentAlert,
     listAlerts
   },
 };

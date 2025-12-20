@@ -15,9 +15,9 @@ router.get("/api/get-daily-todo", (req, res) => {
   var folder_id = req.query.folder_id;
   var dt = req.query.dt;
 
-  var sql = "SELECT * FROM daily_todos_tasks WHERE folder_id = ? AND tdate = ?";
+  var sql = "SELECT * FROM daily_todos_tasks WHERE folder_id = ? AND tdate = ? AND user_id = ?";
 
-  con.query(sql, [folder_id, dt], function (err, result) {
+  con.query(sql, [folder_id, dt, req.session.userId], function (err, result) {
     if (err) {
       console.log(err);
       res.json({status: "NOK", error: err.message});
@@ -40,8 +40,8 @@ router.post("/api/add-daily-todo-task", (req, res) => {
   var sort_index = req.body.sort_index;
   var is_done = req.body.is_done;
 
-  var sql = "INSERT INTO daily_todos_tasks (folder_id, description, tdate, sort_index, is_done) VALUES (?, ?, ?, ?, ?)";
-  con.query(sql, [folder_id, description, tdate, sort_index, is_done], function (err, result) {
+  var sql = "INSERT INTO daily_todos_tasks (folder_id, description, tdate, sort_index, is_done, user_id) VALUES (?, ?, ?, ?, ?, ?)";
+  con.query(sql, [folder_id, description, tdate, sort_index, is_done, req.session.userId], function (err, result) {
     if (err) {
       console.log(err);
       res.json({status: "NOK", error: err.message});
@@ -65,9 +65,9 @@ router.post("/api/update-daily-todo-task-done", (req, res) => {
   console.log("Is Done:");
   console.log(is_done);
 
-  var sql = "UPDATE daily_todos_tasks SET is_done = ? WHERE id = ?";
+  var sql = "UPDATE daily_todos_tasks SET is_done = ? WHERE id = ? AND user_id = ?";
 
-  con.query(sql, [is_done, task_id], function(err, result) {
+  con.query(sql, [is_done, task_id, req.session.userId], function(err, result) {
     if (err) {
       console.log(err);
       res.json({status: "NOK", error: err.message});
@@ -87,9 +87,9 @@ router.post("/api/update-eisenhower-category", (req, res) => {
   var id = req.body.id;
   var eisenhower_category = req.body.eisenhower_category;
 
-  var sql = "UPDATE daily_todos_tasks SET eisenhower_category = ? WHERE id = ?";
+  var sql = "UPDATE daily_todos_tasks SET eisenhower_category = ? WHERE id = ? AND user_id = ?";
 
-  con.query(sql, [eisenhower_category, id], function(err, result) {
+  con.query(sql, [eisenhower_category, id, req.session.userId], function(err, result) {
     if (err) {
       console.log(err);
       res.json({status: "NOK", error: err.message});
@@ -114,9 +114,9 @@ router.post("/api/update-daily-todo-task-description", (req, res) => {
   console.log("New Description:");
   console.log(description);
 
-  var sql = "UPDATE daily_todos_tasks SET description = ? WHERE id = ?";
+  var sql = "UPDATE daily_todos_tasks SET description = ? WHERE id = ? AND user_id = ?";
 
-  con.query(sql, [description, task_id], function(err, result) {
+  con.query(sql, [description, task_id, req.session.userId], function(err, result) {
     if (err) {
       console.log(err);
       res.json({status: "NOK", error: err.message});
@@ -138,9 +138,9 @@ router.delete("/api/delete-daily-todo-task", (req, res) => {
   console.log("Deleting Task ID:");
   console.log(task_id);
 
-  var sql = "DELETE FROM daily_todos_tasks WHERE id = ?";
+  var sql = "DELETE FROM daily_todos_tasks WHERE id = ? AND user_id = ?";
 
-  con.query(sql, [task_id], function(err, result) {
+  con.query(sql, [task_id, req.session.userId], function(err, result) {
     if (err) {
       console.log(err);
       res.json({status: "NOK", error: err.message});

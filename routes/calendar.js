@@ -14,8 +14,8 @@ router.post("/api/add-event", (req, res) => {
   var end_date = req.body.end;
   var description = req.body.value;
 
-  var sql = "INSERT INTO events (start_date, end_date, description) VALUES (?, ?, ?)";
-  con.query(sql, [start_date, end_date, description], function (err, result) {
+  var sql = "INSERT INTO events (start_date, end_date, description, user_id) VALUES (?, ?, ?, ?)";
+  con.query(sql, [start_date, end_date, description, req.session.userId], function (err, result) {
     if (err) {
       console.log(err);
       res.json({status: "NOK", error: err});
@@ -35,8 +35,8 @@ router.post("/api/edit-event", (req, res) => {
   var end_date = req.body.end;
   var description = req.body.title;
 
-  var sql = "UPDATE events SET start_date = ?, end_date = ?, description = ? WHERE id = ?";
-  con.query(sql, [start_date, end_date, description, id], function (err, result) {
+  var sql = "UPDATE events SET start_date = ?, end_date = ?, description = ? WHERE id = ? AND user_id = ?";
+  con.query(sql, [start_date, end_date, description, id, req.session.userId], function (err, result) {
     if (err) {
       console.log(err);
       res.json({status: "NOK", error: err});
@@ -51,8 +51,8 @@ router.post("/api/delete-event", (req, res) => {
     return;
   }
   var id = req.body.id;
-  var sql = "DELETE FROM events WHERE id = ?";
-  con.query(sql, [id], function (err, result) {
+  var sql = "DELETE FROM events WHERE id = ? AND user_id = ?";
+  con.query(sql, [id, req.session.userId], function (err, result) {
     if (err) {
       console.log(err);
       res.json({status: "NOK", error: err});
@@ -67,8 +67,8 @@ router.get("/api/get-events", (req, res) => {
     return;
   }
   
-  var sql = "SELECT id, description AS value, start_date AS start, end_date AS end FROM events";
-  con.query(sql, function (err, result) {
+  var sql = "SELECT id, description AS value, start_date AS start, end_date AS end FROM events WHERE user_id = ?";
+  con.query(sql, [req.session.userId], function (err, result) {
     if (err) {
       console.log(err);
       res.json({status: "NOK", error: err});

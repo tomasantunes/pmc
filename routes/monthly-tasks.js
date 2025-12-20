@@ -29,11 +29,11 @@ router.get("/api/get-monthly-tasks", async (req, res) => {
              CONCAT(DATE_FORMAT(start_time, '%H:%i'), ' - ', DATE_FORMAT(end_time, '%H:%i')) AS time
       FROM tasks
       WHERE folder_id = ?
+      AND user_id = ?
       ORDER BY sort_index ASC
     `;
 
-    const [tasks] = await con.promise().query(sql, [folder_id]);
-
+    const [tasks] = await con.promise().query(sql, [folder_id, req.session.userId]);
     for (const task of tasks) {
       const task_id = task.id;
 
@@ -97,11 +97,11 @@ router.post("/api/add-monthly-task", async (req, res) => {
   let end_time2 = "1970-01-01 00:00";
 
   const sql =
-    "INSERT INTO tasks (folder_id, description, start_time, end_time, type, months, sort_index, is_done) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+    "INSERT INTO tasks (folder_id, description, start_time, end_time, type, months, sort_index, is_done, user_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
   con.query(
     sql,
-    [folder_id, description, start_time2, end_time2, "monthly", months, sort_index, 0],
+    [folder_id, description, start_time2, end_time2, "monthly", months, sort_index, 0, req.session.userId],
     async function (err, result) {
       if (err) {
         console.log(err);
@@ -114,8 +114,8 @@ router.post("/api/add-monthly-task", async (req, res) => {
         const dates = utils.getMonthlyDates(months);
 
         for (let date of dates) {
-          const sql2 = "INSERT INTO recurrent_checks (task_id, date, is_done) VALUES (?, ?, ?)";
-          await con2.query(sql2, [result.insertId, date.toISOString().slice(0, 10), 0]);
+          const sql2 = "INSERT INTO recurrent_checks (task_id, date, is_done, user_id) VALUES (?, ?, ?, ?)";
+          await con2.query(sql2, [result.insertId, date.toISOString().slice(0, 10), 0, req.session.userId]);
         }
 
         res.json({ status: "OK", data: "Monthly task has been added successfully." });
@@ -135,16 +135,16 @@ router.post("/api/update-monthly-task-done", (req, res) => {
   var task_id = req.body.task_id;
   var is_done = req.body.is_done;
   var date = req.body.date;
-  var sql = "SELECT * FROM recurrent_checks WHERE task_id = ? AND date = ?";
-  con.query(sql, [task_id, date], function (err, result) {
+  var sql = "SELECT * FROM recurrent_checks WHERE task_id = ? AND date = ? AND user_id = ?";
+  con.query(sql, [task_id, date, req.session.userId], function (err, result) {
     if (err) {
       console.log(err);
       res.json({status: "NOK", error: err.message});
       return;
     }
     if (result.length > 0) {
-      var sql2 = "UPDATE recurrent_checks SET is_done = ? WHERE task_id = ? AND date = ?";
-      con.query(sql2, [is_done, task_id, date], function (err, result) {
+      var sql2 = "UPDATE recurrent_checks SET is_done = ? WHERE task_id = ? AND date = ? AND user_id = ?";
+      con.query(sql2, [is_done, task_id, date, req.session.userId], function (err, result) {
         if (err) {
           console.log(err);
           res.json({status: "NOK", error: err.message});
@@ -153,8 +153,8 @@ router.post("/api/update-monthly-task-done", (req, res) => {
       });
     }
     else {
-      var sql2 = "INSERT INTO recurrent_checks (task_id, date, is_done) VALUES (?, ?, ?)";
-      con.query(sql2, [task_id, date, is_done], function (err, result) {
+      var sql2 = "INSERT INTO recurrent_checks (task_id, date, is_done, user_id) VALUES (?, ?, ?, ?)";
+      con.query(sql2, [task_id, date, is_done, req.session.userId], function (err, result) {
         if (err) {
           console.log(err);
           res.json({status: "NOK", error: err.message});
@@ -185,9 +185,9 @@ router.post("/api/edit-monthly-task", async (req, res) => {
       .replace("T", " ");
 
   const sql =
-    "UPDATE tasks SET description = ?, start_time = ?, end_time = ?, months = ? WHERE id = ?";
+    "UPDATE tasks SET description = ?, start_time = ?, end_time = ?, months = ? WHERE id = ? AND user_id = ?";
 
-  con.query(sql, [description, start_time2, end_time2, months, task_id], async function (err, result) {
+  con.query(sql, [description, start_time2, end_time2, months, task_id, req.session.userId], async function (err, result) {
     if (err) {
       console.log(err);
       res.json({ status: "NOK", error: err.message });
@@ -196,18 +196,17 @@ router.post("/api/edit-monthly-task", async (req, res) => {
 
     try {
       // Remove all future checks and events
-      const sql2 = "DELETE FROM recurrent_checks WHERE task_id = ? AND date > DATE(NOW())";
-      await con2.query(sql2, [task_id]);
+      const sql2 = "DELETE FROM recurrent_checks WHERE task_id = ? AND date > DATE(NOW()) AND user_id = ?";
+      await con2.query(sql2, [task_id, req.session.userId]);
 
-      const sql3 = "DELETE FROM events WHERE task_id = ? AND start_date > DATE(NOW())";
-      await con2.query(sql3, [task_id]);
-
+      const sql3 = "DELETE FROM events WHERE task_id = ? AND start_date > DATE(NOW()) AND user_id = ?";
+      await con2.query(sql3, [task_id, req.session.userId]);
       // Generate future monthly dates
       const dates = utils.getMonthlyDates(months);
 
       for (let date of dates) {
-        const sql4 = "INSERT INTO recurrent_checks (task_id, date, is_done) VALUES (?, ?, 0)";
-        await con2.query(sql4, [task_id, date.toISOString().slice(0, 10)]);
+        const sql4 = "INSERT INTO recurrent_checks (task_id, date, is_done, user_id) VALUES (?, ?, 0, ?)";
+        await con2.query(sql4, [task_id, date.toISOString().slice(0, 10), req.session.userId]);
       }
 
       res.json({ status: "OK", data: "Monthly task has been updated successfully." });
@@ -230,14 +229,13 @@ router.post("/api/restart-monthly-task", async (req, res) => {
   var now_date = utils.toLocaleISOString(now).slice(0, 10);
   var now_datetime = utils.toLocaleISOString(now);
 
-  var sql = "DELETE FROM recurrent_checks WHERE task_id = ? AND date < ?";
-  await con2.query(sql, [task_id, now_date]);
+  var sql = "DELETE FROM recurrent_checks WHERE task_id = ? AND date < ? AND user_id = ?";
+  await con2.query(sql, [task_id, now_date, req.session.userId]);
 
-  var sql2 = "DELETE FROM events WHERE task_id = ? AND start_date < DATE(NOW())";
-  await con2.query(sql2, [task_id]);
-
-  var sql3 = "UPDATE tasks SET created_at = ? WHERE id = ?";
-  await con2.query(sql3, [now_datetime, task_id]);
+  var sql2 = "DELETE FROM events WHERE task_id = ? AND start_date < DATE(NOW()) AND user_id = ?";
+  await con2.query(sql2, [task_id, req.session.userId]);
+  var sql3 = "UPDATE tasks SET created_at = ? WHERE id = ? AND user_id = ?";
+  await con2.query(sql3, [now_datetime, task_id, req.session.userId]);
 
   res.json({status: "OK", data: "Recurrent task has been restarted."})
 });
@@ -251,8 +249,8 @@ router.post("/api/cancel-monthly-task", (req, res) => {
   var task_id = req.body.task_id;
   var dt = req.body.date;
 
-  var sql = "SELECT * FROM recurrent_checks WHERE task_id = ? AND date = ?";
-  con.query(sql, [task_id, dt], function (err, result) {
+  var sql = "SELECT * FROM recurrent_checks WHERE task_id = ? AND date = ? AND user_id = ?";
+  con.query(sql, [task_id, dt, req.session.userId], function (err, result) {
     if (err) {
       console.log(err);
       res.json({status: "NOK", error: err.message});
@@ -264,8 +262,8 @@ router.post("/api/cancel-monthly-task", (req, res) => {
         return;
       }
       else {
-        var sql2 = "UPDATE recurrent_checks SET is_cancelled = 1 WHERE task_id = ? AND date = ?";
-        con.query(sql2, [task_id, dt], function (err2, result2) {
+        var sql2 = "UPDATE recurrent_checks SET is_cancelled = 1 WHERE task_id = ? AND date = ? AND user_id = ?";
+        con.query(sql2, [task_id, dt, req.session.userId], function (err2, result2) {
           if (err2) {
             console.log(err2);
             res.json({status: "NOK", error: err2.message});
@@ -276,8 +274,8 @@ router.post("/api/cancel-monthly-task", (req, res) => {
       }
     }
     else {
-      var sql2 = "INSERT INTO recurrent_checks (task_id, date, is_cancelled, is_done) VALUES (?, ?, 1, 0)";
-      con.query(sql2, [task_id, dt], function (err2, result2) {
+      var sql2 = "INSERT INTO recurrent_checks (task_id, date, is_cancelled, is_done, user_id) VALUES (?, ?, 1, 0, ?)";
+      con.query(sql2, [task_id, dt, req.session.userId], function (err2, result2) {
         if (err2) {
           console.log(err2);
           res.json({status: "NOK", error: err2.message});
@@ -298,8 +296,8 @@ router.post("/api/uncancel-monthly-task", (req, res) => {
   var task_id = req.body.task_id;
   var dt = req.body.date;
 
-  var sql = "SELECT * FROM recurrent_checks WHERE task_id = ? AND date = ?";
-  con.query(sql, [task_id, dt], function (err, result) {
+  var sql = "SELECT * FROM recurrent_checks WHERE task_id = ? AND date = ? AND user_id = ?";
+  con.query(sql, [task_id, dt, req.session.userId], function (err, result) {
     if (err) {
       console.log(err);
       res.json({status: "NOK", error: err.message});
@@ -311,8 +309,8 @@ router.post("/api/uncancel-monthly-task", (req, res) => {
         return;
       }
       else {
-        var sql2 = "UPDATE recurrent_checks SET is_cancelled = 0 WHERE task_id = ? AND date = ?";
-        con.query(sql2, [task_id, dt], function (err2, result2) {
+        var sql2 = "UPDATE recurrent_checks SET is_cancelled = 0 WHERE task_id = ? AND date = ? AND user_id = ?";
+        con.query(sql2, [task_id, dt, req.session.userId], function (err2, result2) {
           if (err2) {
             console.log(err2);
             res.json({status: "NOK", error: err2.message});
@@ -323,8 +321,8 @@ router.post("/api/uncancel-monthly-task", (req, res) => {
       }
     }
     else {
-      var sql2 = "INSERT INTO recurrent_checks (task_id, date, is_cancelled, is_done) VALUES (?, ?, 0, 0)";
-      con.query(sql2, [task_id, dt], function (err2, result2) {
+      var sql2 = "INSERT INTO recurrent_checks (task_id, date, is_cancelled, is_done, user_id) VALUES (?, ?, 0, 0, ?)";
+      con.query(sql2, [task_id, dt, req.session.userId], function (err2, result2) {
         if (err2) {
           console.log(err2);
           res.json({status: "NOK", error: err2.message});

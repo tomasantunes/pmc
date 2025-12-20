@@ -52,12 +52,24 @@ export default function Login() {
 
   return (
     <>
-      <form onSubmit={(e) => requestLogin(e)} method="POST" action="/login" autoComplete="on" className="login-box">
-        <div style={{textAlign: "center"}}>
-          <h3>Login</h3>
+      <form
+        onSubmit={requestLogin}
+        method="POST"
+        action="/login"
+        autoComplete="on"
+        className="card shadow-sm p-4 mx-auto mt-5"
+        style={{ maxWidth: "420px" }}
+      >
+        {/* Header */}
+        <div className="text-center mb-4">
+          <h1 className="fw-bold mb-0">PMC</h1>
+          <small className="text-muted">Productivity Management Center</small>
         </div>
-        <div className="form-group">
-          <label htmlFor="username">Username</label>
+
+        <h4 className="text-center mb-3">Login</h4>
+
+        {/* Username */}
+        <div className="form-floating mb-3">
           <input
             type="text"
             id="username"
@@ -67,12 +79,14 @@ export default function Login() {
             onChange={changeUser}
             onKeyDown={handleKeyDown}
             className="form-control"
+            placeholder="Username"
             required
           />
+          <label htmlFor="username">Username</label>
         </div>
 
-        <div className="form-group mb-4">
-          <label htmlFor="password">Password</label>
+        {/* Password */}
+        <div className="form-floating mb-4">
           <input
             type="password"
             id="password"
@@ -82,14 +96,28 @@ export default function Login() {
             onChange={changePass}
             onKeyDown={handleKeyDown}
             className="form-control"
+            placeholder="Password"
             required
           />
+          <label htmlFor="password">Password</label>
         </div>
 
-        <div className="text-end">
-            <button className="btn btn-primary" type="submit">Login</button>
+        {/* Submit */}
+        <button className="btn btn-primary w-100 py-2" type="submit">
+          Login
+        </button>
+
+        {/* Links */}
+        <div className="text-center mt-4">
+          <a href="/sign-up" className="text-muted d-block mb-1">
+            Don&apos;t have an account? Sign up
+          </a>
+          <a href="/forgot-password" className="text-muted d-block mb-1">
+            Forgot your password?
+          </a>
         </div>
       </form>
+
     </>
   )
 }

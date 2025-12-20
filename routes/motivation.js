@@ -4,7 +4,7 @@ var { getMotivationalText } = require('../libs/openai');
 var router = express.Router();
 
 router.get("/api/generate-motivational-text", async (req, res) => {
-  if (!req.session.isLoggedIn) {
+  if (!req.session.isLoggedIn || !req.session.isAdmin) {
     res.json({status: "NOK", error: "Invalid Authorization."});
     return;
   }

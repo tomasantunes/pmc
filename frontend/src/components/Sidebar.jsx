@@ -143,24 +143,28 @@ export default function Sidebar() {
           <i className="fa-solid fa-bars fa-lg"></i>
         </button>
       </nav>
-      <div className={collapseSidebarMobile ? "sidebar": "sidebar open"} style={{height: documentHeight}}>
-          <h1><b>PMC</b></h1>
-          <ul className="menu">
-              <li><Link to="/home">Home</Link></li>
-              <li><Link to="/calendar">Calendar</Link></li>
-              <li><Link to="/schedule">Schedule</Link></li>
-              <li><Link to="/alerts">Alerts</Link></li>
-              <li><Link to="/time-tracker">Time Tracker</Link></li>
-              <li><Link to="/random-task">Random Task</Link></li>
-              {showGithubPage && <li><Link to="/github-tasks">Github Tasks</Link></li>}
-              {/*<li><Link to="/motivation">Motivation</Link></li>*/}
-              <li><a href="#" onClick={openAddFolder}>Add Folder</a></li>
-              {folders.map((folder) => {
-                return (
-                  <li key={folder.id}><a href="#" onClick={() => goToLink("/folder/" + folder.id)}>{folder.name}</a></li>
-                )
-              })}
-          </ul>
+      <div
+        ref={sidebarRef}
+        className={collapseSidebarMobile ? "sidebar" : "sidebar open"}
+        style={{ height: documentHeight }}
+      >
+        <h1><b>PMC</b></h1>
+        <ul className="menu">
+            <li><Link to="/home">Home</Link></li>
+            <li><Link to="/calendar">Calendar</Link></li>
+            <li><Link to="/schedule">Schedule</Link></li>
+            <li><Link to="/alerts">Alerts</Link></li>
+            <li><Link to="/time-tracker">Time Tracker</Link></li>
+            <li><Link to="/random-task">Random Task</Link></li>
+            {showGithubPage && <li><Link to="/github-tasks">Github Tasks</Link></li>}
+            {/*<li><Link to="/motivation">Motivation</Link></li>*/}
+            <li><a href="#" onClick={openAddFolder}>Add Folder</a></li>
+            {folders.map((folder) => {
+              return (
+                <li key={folder.id}><a href="#" onClick={() => goToLink("/folder/" + folder.id)}>{folder.name}</a></li>
+              )
+            })}
+        </ul>
       </div>
       <div class="modal addFolderModal" tabindex="-1">
         <div class="modal-dialog">
