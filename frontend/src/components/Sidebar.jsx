@@ -151,6 +151,7 @@ export default function Sidebar() {
         <h1><b>PMC</b></h1>
         <ul className="menu">
             <li><Link to="/home">Home</Link></li>
+            <li><a href="/static/pmc-user-manual.pdf" target="_blank" rel="noopener noreferrer">User Manual</a></li>
             <li><Link to="/calendar">Calendar</Link></li>
             <li><Link to="/schedule">Schedule</Link></li>
             <li><Link to="/alerts">Alerts</Link></li>

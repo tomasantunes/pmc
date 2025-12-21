@@ -20,6 +20,7 @@ var dailyTodosRouter = require("./routes/daily-todos");
 var monthlyTasksRouter = require("./routes/monthly-tasks");
 var timetrackerRouter = require("./routes/timetracker");
 var alertsRouter = require("./routes/alerts");
+var staticFilesRouter = require("./routes/static-files");
 
 var app = express();
 
@@ -31,7 +32,7 @@ app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, "public")));
+
 
 app.use(
   session({
@@ -43,7 +44,8 @@ app.use(
 
 cronJobs.loadCron();
 
-app.use(express.static(path.resolve(__dirname) + "/frontend/dist"));
+
+
 app.use("/", authRouter);
 app.use("/", dashboardRouter);
 app.use("/", foldersRouter);
@@ -57,6 +59,16 @@ app.use("/", dailyTodosRouter);
 app.use("/", monthlyTasksRouter);
 app.use("/", timetrackerRouter);
 app.use("/", alertsRouter);
+
+app.use("/static", staticFilesRouter);
+app.use(express.static(path.join(__dirname, "public")));
+app.use(express.static(path.resolve(__dirname) + "/frontend/dist", {
+  index: false
+}));
+
+app.use((req, res) => {
+  res.sendFile(path.join(__dirname, 'frontend/dist/index.html'));
+});
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

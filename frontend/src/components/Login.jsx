@@ -115,6 +115,9 @@ export default function Login() {
           <a href="/forgot-password" className="text-muted d-block mb-1">
             Forgot your password?
           </a>
+          <a href="/static/pmc-user-manual.pdf" className="text-muted d-block mb-1" target="_blank" rel="noopener noreferrer">
+            User Manual
+          </a>
         </div>
       </form>
 

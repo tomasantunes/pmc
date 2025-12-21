@@ -32,6 +32,21 @@ export default defineConfig({
             type: "image/png"
           },
         ]
+      },
+      workbox: {
+        // Don't let service worker cache /static routes
+        navigateFallback: '/index.html',
+        navigateFallbackDenylist: [
+          /^\/static/,  // Exclude /static routes
+          /^\/api/      // Also exclude API routes if you have them
+        ],
+        // Also exclude from runtime caching
+        runtimeCaching: [
+          {
+            urlPattern: /^\/static\/.*/,
+            handler: 'NetworkOnly'  // Always fetch from network, never cache
+          }
+        ]
       }
     })
   ],
