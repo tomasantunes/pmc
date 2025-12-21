@@ -241,8 +241,8 @@ router.post("/api/delete-task", (req, res) => {
     return;
   }
   var task_id = req.body.task_id;
-  var sql = "DELETE FROM tasks WHERE id = ?";
-  con.query(sql, [task_id], function (err, result) {
+  var sql = "DELETE FROM tasks WHERE id = ? AND user_id = ?";
+  con.query(sql, [task_id, req.session.userId], function (err, result) {
     if (err) {
       console.log(err);
       res.json({ status: "NOK", error: err.message });

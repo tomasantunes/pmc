@@ -77,7 +77,23 @@ router.post("/api/delete-folder", (req, res) => {
           console.log(err3);
           res.json({status: "NOK", error: err3.message});
         }
-        res.json({status: "OK", data: "Folder has been deleted successfully."});
+
+        var sql4 = "DELETE FROM events WHERE task_id IN (SELECT id FROM tasks WHERE folder_id = ? AND user_id = ?)";
+        con.query(sql4, [folder_id, req.session.userId], function (err4, result4) {
+          if (err4) {
+            console.log(err4);
+            res.json({status: "NOK", error: err4.message});
+          }
+
+          var sql5 = "DELETE FROM alerts WHERE task_id IN (SELECT id FROM tasks WHERE folder_id = ? AND user_id = ?)";
+          con.query(sql5, [folder_id, req.session.userId], function (err5, result5) {
+            if (err5) {
+              console.log(err5);
+              res.json({status: "NOK", error: err5.message});
+            }
+            res.json({status: "OK", data: "Folder has been deleted successfully."});
+          });
+        });
       });
     });
   });
