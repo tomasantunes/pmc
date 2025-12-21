@@ -21,7 +21,7 @@ router.get("/api/get-recurrent-tasks", (req, res) => {
   var dti = req.query.dti;
   var dtf = req.query.dtf;
   var sql =
-    "SELECT *, CONCAT(DATE_FORMAT(start_time, '%H:%i'), ' - ', DATE_FORMAT(end_time, '%H:%i')) AS time FROM tasks WHERE folder_id = ? AND user_id = ?ORDER BY sort_index ASC";
+    "SELECT *, CONCAT(DATE_FORMAT(start_time, '%H:%i'), ' - ', DATE_FORMAT(end_time, '%H:%i')) AS time FROM tasks WHERE folder_id = ? AND user_id = ? ORDER BY sort_index ASC";
   con.query(sql, [folder_id, req.session.userId], async function (err, result) {
     if (err) {
       console.log(err);

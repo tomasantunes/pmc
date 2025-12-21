@@ -1,7 +1,7 @@
 var nodemailer = require("nodemailer");
 var secretConfig = require("../secret-config");
 
-function sendEmail(text) {
+function sendEmail(text, email) {
   var transport = nodemailer.createTransport({
     host: secretConfig.SMTP_HOST,
     port: secretConfig.SMTP_PORT,
@@ -13,7 +13,7 @@ function sendEmail(text) {
 
   var mailOptions = {
     from: secretConfig.SMTP_EMAIL,
-    to: secretConfig.RECIPIENT_EMAIL,
+    to: email,
     subject: "Message From PMC",
     html: text,
   };

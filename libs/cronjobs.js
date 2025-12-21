@@ -11,7 +11,7 @@ function loadCron() {
     cronjobs_arr[i].stop();
   }
   cronjobs_arr = [];
-  var sql = "SELECT  * FROM alerts";
+  var sql = "SELECT alerts.*, users.email FROM alerts INNER JOIN users ON alerts.user_id = users.id";
   con.query(sql, function (err, result) {
     if (err) {
       console.log(err);
@@ -21,7 +21,7 @@ function loadCron() {
     result.forEach(item => {
       const cronjob = cron.schedule(item.cron_string, () => {
         console.log("Triggered cron email alert.");
-        sendEmail(item.text);
+        sendEmail(item.text, item.email);
       });
 
       cronjobs_arr.push(cronjob);
