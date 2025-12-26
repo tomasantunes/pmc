@@ -165,6 +165,7 @@ export default function Sidebar() {
                 <li key={folder.id}><a href="#" onClick={() => goToLink("/folder/" + folder.id)}>{folder.name}</a></li>
               )
             })}
+            <li><a href="/api/logout">Logout</a></li>
         </ul>
       </div>
       <div class="modal addFolderModal" tabindex="-1">

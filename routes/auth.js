@@ -15,6 +15,8 @@ router.post("/api/check-login", async (req, res) => {
   var pass = req.body.pass;
   var user_id = null;
 
+  console.log(user);
+
   if (user == secretConfig.USER && pass == secretConfig.PASS) {
     user_id = 0;
   }
@@ -45,7 +47,9 @@ router.post("/api/check-login", async (req, res) => {
         req.session.userId = 0;
         var sql2 = "INSERT INTO logins (is_valid, user_id) VALUES (1, ?);";
         con.query(sql2, [user_id]);
-        res.json({status: "OK", data: "Login successful."});
+        req.session.save(() => {
+          res.json({ status: "OK", data: "Login successful." });
+        });
       }
       else {
         // check login for regular users here
@@ -57,7 +61,9 @@ router.post("/api/check-login", async (req, res) => {
           req.session.isLoggedIn = true;
           req.session.isAdmin = false;
           req.session.userId = user_id;
-          res.json({status: "OK", data: "Login successful."});
+          req.session.save(() => {
+            res.json({ status: "OK", data: "Login successful." });
+          });
         }
         else {
           var sql2 = "INSERT INTO logins (is_valid, user_id) VALUES (0, ?);";
@@ -132,6 +138,22 @@ router.post("/api/reset-password", async (req, res) => {
   }
 
   res.json({status: "OK", data: "Password reset initiated."});
+});
+
+router.get("/api/logout", (req, res) => {
+  req.session.isLoggedIn = false;
+  req.session.isAdmin = false;
+  req.session.userId = null;
+  req.session.save(() => {
+    res.redirect("/");
+  });
+});
+
+router.get("/debug-session", (req, res) => {
+  res.json({
+    sessionId: req.sessionID,
+    session: req.session
+  });
 });
 
 router.post("/api/set-new-password", async (req, res) => {

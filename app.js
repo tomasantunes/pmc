@@ -6,6 +6,8 @@ var logger = require("morgan");
 var secretConfig = require("./secret-config");
 var session = require("express-session");
 var cronJobs = require("./libs/cronjobs");
+const { RedisStore } = require("connect-redis");
+const { createClient } = require('redis');
 
 var authRouter = require("./routes/auth");
 var dashboardRouter = require("./routes/dashboard");
@@ -24,9 +26,25 @@ var staticFilesRouter = require("./routes/static-files");
 
 var app = express();
 
+const redisClient = createClient({
+  url: secretConfig.REDIS_URL,
+  password: secretConfig.REDIS_PASSWORD
+});
+
+redisClient.connect().catch(console.error);
+
+redisClient.on('error', (err) => {
+  console.error('Redis Client Error', err);
+});
+
+redisClient.on('connect', () => {
+  console.log('Connected to Redis');
+});
+
 // view engine setup
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
+app.set("trust proxy", 1);
 
 app.use(logger("dev"));
 app.use(express.json());
@@ -36,11 +54,21 @@ app.use(cookieParser());
 
 app.use(
   session({
+    store: new RedisStore({ 
+      client: redisClient,
+      prefix: 'pmc:sess:', // Optional: prefix for session keys in Redis
+    }),
     secret: secretConfig.SESSION_KEY,
     resave: false,
-    saveUninitialized: true,
+    saveUninitialized: false,
   }),
 );
+
+app.use((req, res, next) => {
+  console.log('Session ID:', req.sessionID);
+  console.log('Session Data:', req.session);
+  next();
+});
 
 cronJobs.loadCron();
 
@@ -86,6 +114,11 @@ app.use(function (err, req, res, next) {
   // render the error page
   res.status(err.status || 500);
   res.render("error");
+});
+
+process.on('SIGINT', async () => {
+  await redisClient.quit();
+  process.exit(0);
 });
 
 module.exports = app;
