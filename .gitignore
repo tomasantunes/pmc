@@ -1,4 +1,5 @@
 node_modules
 secret-config.json
 frontend/src/config.json
+frontend/dist
 .DS_Store

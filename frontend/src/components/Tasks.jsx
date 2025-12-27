@@ -229,7 +229,7 @@ export default function Tasks({folder_id, folder}) {
       st = "";
       et = "";
     }
-    axios.post(config.BASE_URL + "/api/edit-task", {id: editTaskId, start_time: st, end_time: et})
+    axios.post(config.BASE_URL + "/api/edit-task", {task_id: editTaskId, description: editTaskDescription, start_time: st, end_time: et})
     .then(function(response) {
       if (response.data.status == "OK") {
         loadTasks();
@@ -268,7 +268,7 @@ export default function Tasks({folder_id, folder}) {
     .then(function(response) {
       if (response.data.status == "OK") {
         var task = response.data.data;
-        setEditTaskId(task.task_id);
+        setEditTaskId(task_id);
         setEditTaskDescription(task.description);
         setSelectedEditStartTime(moment(task.start_time).format('YYYY-MM-DD HH:mm'));
         setSelectedEditEndTime(moment(task.end_time).format('YYYY-MM-DD HH:mm'));

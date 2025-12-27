@@ -199,6 +199,8 @@ router.post("/api/edit-task", (req, res) => {
   var start_time = req.body.start_time;
   var end_time = req.body.end_time;
 
+  console.log(description);
+
   if (
     typeof start_time == "undefined" ||
     start_time == "" ||

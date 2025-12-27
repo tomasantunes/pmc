@@ -15,8 +15,6 @@ router.post("/api/check-login", async (req, res) => {
   var pass = req.body.pass;
   var user_id = null;
 
-  console.log(user);
-
   if (user == secretConfig.USER && pass == secretConfig.PASS) {
     user_id = 0;
   }
