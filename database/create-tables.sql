@@ -64,6 +64,7 @@ CREATE TABLE daily_todos_tasks (
 
 CREATE TABLE time_tracking_sessions (
     id INT(11) AUTO_INCREMENT PRIMARY KEY,
+    user_id INT(11) NOT NULL,
     description VARCHAR(2048) NOT NULL,
     start_time DATETIME DEFAULT NULL,
     end_time DATETIME DEFAULT NULL,
@@ -73,6 +74,7 @@ CREATE TABLE time_tracking_sessions (
 
 CREATE TABLE time_tracking_sub_sessions (
     id INT(11) AUTO_INCREMENT PRIMARY KEY,
+    user_id INT(11) NOT NULL,
     session_id INT(11) NOT NULL,
     start_time DATETIME DEFAULT NULL,
     end_time DATETIME DEFAULT NULL,
@@ -104,8 +106,6 @@ ALTER TABLE tasks ADD COLUMN user_id INT(11) NOT NULL AFTER id;
 ALTER TABLE recurrent_checks ADD COLUMN user_id INT(11) NOT NULL AFTER id;
 ALTER TABLE events ADD COLUMN user_id INT(11) NOT NULL AFTER id;
 ALTER TABLE daily_todos_tasks ADD COLUMN user_id INT(11) NOT NULL AFTER id;
-ALTER TABLE time_tracking_sessions ADD COLUMN user_id INT(11) NOT NULL AFTER id;
-ALTER TABLE time_tracking_sub_sessions ADD COLUMN user_id INT(11) NOT NULL AFTER id;
 ALTER TABLE alerts ADD COLUMN user_id INT(11) NOT NULL AFTER id;
 
 UDPATE logins SET user_id = 0;

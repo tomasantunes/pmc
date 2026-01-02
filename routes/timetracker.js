@@ -234,4 +234,36 @@ router.get("/api/time-tracker/get-autocomplete", (req, res) => {
   });
 });
 
+router.get("/api/time-tracker/get-total-time", async (req, res) => {
+  if (!req.session.isLoggedIn) {
+    res.json({ status: "NOK", error: "Invalid Authorization." });
+    return;
+  }
+
+  let sql = `
+    SELECT
+        SEC_TO_TIME(
+            SUM(
+                TIMESTAMPDIFF(SECOND, start_time, end_time)
+            )
+        ) AS total_time,
+        SUM(
+            TIMESTAMPDIFF(SECOND, start_time, end_time)
+        ) / 3600 AS total_hours
+    FROM time_tracking_sub_sessions
+    WHERE start_time IS NOT NULL
+      AND end_time IS NOT NULL
+      AND user_id = ?
+  `;
+
+  con.query(sql, [req.session.userId], function (err, result) {
+    if (err) {
+      console.log(err);
+      return res.status(500).json({ status: "NOK", error: "Database error." });
+    }
+
+    res.json({ status: "OK", data: result[0] });
+  });
+});
+
 module.exports = router;

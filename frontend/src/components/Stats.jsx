@@ -8,6 +8,7 @@ export default function Stats() {
   const [tasksTotal, setTasksTotal] = useState(0);
   const [recurrentTasksTotal, setRecurrentTasksTotal] = useState(0);
   const [recurrentTasksDone, setRecurrentTasksDone] = useState(0);
+  const [totalTimeTracked, setTotalTimeTracked] = useState("");
   const [totalAllTasks, setTotalAllTasks] = useState(0);
   const [totalAllTasksDone, setTotalAllTasksDone] = useState(0);
   const [totalAllRecurrentTasks, setTotalAllRecurrentTasks] = useState(0);
@@ -127,9 +128,25 @@ export default function Stats() {
     });
   }
 
+  function getTotalTimeTracked() {
+    axios.get(config.BASE_URL + "/api/time-tracker/get-total-time")
+    .then(function(response) {
+      if (response.data.status == "OK") {
+        setTotalTimeTracked(response.data.data.total_time);
+      }
+      else {
+        alert(response.data.error);
+      }
+    })
+    .catch(function(err) {
+      console.log(err);
+    });
+  }
+
   useEffect(() => {
     loadStats();
     loadTasksLast15Days();
+    getTotalTimeTracked();
   }, []);
   return (
     <>
@@ -159,6 +176,10 @@ export default function Stats() {
           <tr>
             <th className="table-dark bg-blue">Recurrent Tasks Today Progress</th>
             <td className="text-center">{recurrentTasksTodayProgressPercentage}%</td>
+          </tr>
+          <tr>
+            <th className="table-dark bg-blue">Total Time Tracked</th>
+            <td className="text-center">{totalTimeTracked}</td>
           </tr>
           {/*}
           <tr>
