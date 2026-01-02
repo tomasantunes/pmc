@@ -1,4 +1,6 @@
 const OpenAI = require("openai");
+const {getTaskList} = require('./tasks');
+const secretConfig = require('../secret-config');
 
 function getOpenAIInstance() {
     const configuration = {

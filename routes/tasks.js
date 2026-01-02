@@ -11,7 +11,7 @@ router.get("/api/get-task-list", async (req, res) => {
     res.json({ status: "NOK", error: "Invalid Authorization." });
     return;
   }
-  var task_list = await tasks.getTaskList();
+  var task_list = await tasks.getTaskList(req.session.userId);
   res.json({ status: "OK", data: task_list });
 });
 

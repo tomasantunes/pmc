@@ -38,7 +38,7 @@ router.get("/api/get-monthly-tasks", async (req, res) => {
       const task_id = task.id;
 
       // Get recurrent checks for this task within the given range
-      const checks = await recurrentTasks.getTaskChecks(task_id, dti, dtf);
+      const checks = await recurrentTasks.getTaskChecks(task_id, req.session.userId, dti, dtf);
       task.checks = checks;
 
       // --- Build the list of months between dti and dtf (inclusive)
@@ -52,7 +52,7 @@ router.get("/api/get-monthly-tasks", async (req, res) => {
         const isoMonth = utils.toLocaleISOString(m).slice(0, 10);
 
         // Check if this month is cancelled
-        const isCancelled = await recurrentTasks.checkIfTaskIsCancelled(task_id, isoMonth);
+        const isCancelled = await recurrentTasks.checkIfTaskIsCancelled(task_id, req.session.userId, isoMonth);
 
         if (isCancelled) {
           const idx = monthsArray.indexOf(monthIndex.toString());

@@ -3,13 +3,13 @@ var utils = require('./utils');
 
 var { con, con2 } = database.getMySQLConnections();
 
-async function getTaskChecks(task_id, dti, dtf) {
+async function getTaskChecks(task_id, user_id, dti, dtf) {
   var sql = "SELECT * FROM recurrent_checks WHERE task_id = ? AND date BETWEEN ? AND ? AND user_id = ?";
   const [rows, fields] = await con2.execute(sql, [task_id, dti, dtf, user_id]);
   return rows;
 }
 
-async function checkIfTaskIsCancelled(task_id, dt) {
+async function checkIfTaskIsCancelled(task_id, user_id, dt) {
   var sql = "SELECT * FROM recurrent_checks WHERE task_id = ? AND date = ? AND user_id = ?";
   var [rows, fields] = await con2.execute(sql, [task_id, dt, user_id]);
   if (rows.length > 0) {
@@ -25,11 +25,11 @@ async function checkIfTaskIsCancelled(task_id, dt) {
   }
 }
 
-async function checkIfTaskIsOnThisWeekDay(task) {
+async function checkIfTaskIsOnThisWeekDay(task, user_id) {
   var today = new Date();
   var wd = today.getDay() - 1;
 
-  var is_cancelled = await checkIfTaskIsCancelled(task.id, utils.toLocaleISOString(today).slice(0, 10));
+  var is_cancelled = await checkIfTaskIsCancelled(task.id, user_id, utils.toLocaleISOString(today).slice(0, 10));
 
   var days = task.days.split(",");
   days = days.map(Number);

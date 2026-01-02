@@ -31,7 +31,7 @@ router.get("/api/get-recurrent-tasks", (req, res) => {
 
     for (var i in result) {
       var task_id = result[i].id;
-      var checks = await recurrentTasks.getTaskChecks(task_id, dti, dtf);
+      var checks = await recurrentTasks.getTaskChecks(task_id, req.session.userId, dti, dtf);
       result[i].checks = checks;
 
       var dt_range = utils.getRangeOfDates(new Date(dti), new Date(dtf));
@@ -40,6 +40,7 @@ router.get("/api/get-recurrent-tasks", (req, res) => {
         var wd = dt.getDay();
         var is_cancelled = await recurrentTasks.checkIfTaskIsCancelled(
           task_id,
+          req.session.userId,
           utils.toLocaleISOString(dt).slice(0, 10),
         );
         if (is_cancelled) {
