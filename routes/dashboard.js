@@ -32,7 +32,7 @@ router.get("/api/get-stats", (req, res) => {
           console.log(err);
           res.json({status: "NOK", error: err.message});
         }
-        tasks.getTasksOnThisWeekDay(result3, function(tasks_on_this_week_day) {
+        tasks.getTasksOnThisWeekDay(result3, req.session.userId, function(tasks_on_this_week_day) {
           if (tasks_on_this_week_day.length > 0) {
             var sql4 = "SELECT * FROM recurrent_checks WHERE task_id IN (?) AND date = DATE(NOW()) AND user_id = ?";
             con.query(sql4, [tasks_on_this_week_day, req.session.userId], function (err4, result4) {

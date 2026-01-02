@@ -12,6 +12,7 @@ export default function SignUp() {
   const [email, setEmail] = useState("");
   const [pass, setPass] = useState("");
   const [confirmPass, setConfirmPass] = useState("");
+  const [licenseKey, setLicenseKey] = useState("");
   const navigate = useNavigate();
 
   function changeUser(event) {
@@ -24,7 +25,7 @@ export default function SignUp() {
 
   function requestSignUp(e) {
     e.preventDefault();
-    axios.post(config.BASE_URL + "/api/sign-up", {user, email, pass, confirmPass})
+    axios.post(config.BASE_URL + "/api/sign-up", {user, email, pass, confirmPass, licenseKey})
     .then(async res => {
       if (res.data.status == "OK") {
         navigate("/home");
@@ -116,6 +117,20 @@ export default function SignUp() {
             required
           />
           <label htmlFor="password">Confirm Password</label>
+        </div>
+
+        <div className="form-floating mb-3">
+          <input
+            type="text"
+            id="license-key"
+            name="license-key"
+            value={licenseKey}
+            onChange={(e) => setLicenseKey(e.target.value)}
+            onKeyDown={handleKeyDown}
+            className="form-control"
+            required
+          />
+          <label htmlFor="license-key">License Key</label>
         </div>
 
         <button className="btn btn-primary w-100 py-2" type="submit">

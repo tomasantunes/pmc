@@ -54,6 +54,10 @@ router.post("/api/check-login", async (req, res) => {
         const isValid = await bcrypt.compare(pass, rows[0].password_hash);
 
         if (isValid) {
+          if (new Date(rows[0].license_expires) < new Date()) {
+            res.json({status: "NOK", error: "License expired."});
+            return;
+          }
           var sql2 = "INSERT INTO logins (is_valid, user_id) VALUES (1, ?);";
           con.query(sql2, [user_id]);
           req.session.isLoggedIn = true;
@@ -77,30 +81,84 @@ router.post("/api/check-login", async (req, res) => {
 });
 
 router.post("/api/sign-up", async (req, res) => {
-  var user = req.body.user;
-  var email = req.body.email;
-  var pass = req.body.pass;
-  var confirmPass = req.body.confirmPass;
+  const { user, email, pass, confirmPass, licenseKey } = req.body;
 
   if (pass !== confirmPass) {
-    res.json({status: "NOK", error: "Passwords do not match."});
-    return;
+    return res.json({ status: "NOK", error: "Passwords do not match." });
   }
 
-  const hashedPassword = await bcrypt.hash(pass, SALT_ROUNDS);
-
-  var sql1 = "INSERT INTO users (username, email, password_hash) VALUES (?, ?, ?);";
+  const conn = await con2.getConnection();
 
   try {
-    await con2.execute(sql1, [user, email, hashedPassword]);
-  } catch (err) {
-    console.log(err);
-    res.json({status: "NOK", error: "Username or email already exists."});
-    return;
-  }
+    await conn.beginTransaction();
 
-  res.json({status: "OK", data: "Sign-up successful."});
+    const [licenses] = await conn.execute(
+      `SELECT *
+       FROM licenses
+       WHERE license_key = ?
+       FOR UPDATE`,
+      [licenseKey]
+    );
+
+    if (licenses.length === 0) {
+      throw new Error("Invalid license key.");
+    }
+
+    const license = licenses[0];
+
+    if (license.used_at) {
+      throw new Error("License already used.");
+    }
+
+    if (new Date(license.expires_at) < new Date()) {
+      throw new Error("License expired.");
+    }
+
+    const hashedPassword = await bcrypt.hash(pass, SALT_ROUNDS);
+
+    const [result] = await conn.execute(
+      `INSERT INTO users
+       (username, email, password_hash, license_key, license_expires)
+       VALUES (?, ?, ?, ?, ?)`,
+      [
+        user,
+        email,
+        hashedPassword,
+        licenseKey,
+        license.expires_at
+      ]
+    );
+
+    const userId = result.insertId;
+
+    await conn.execute(
+      `UPDATE licenses
+       SET used_at = NOW(), used_by_user_id = ?
+       WHERE id = ?`,
+      [userId, license.id]
+    );
+
+    await conn.commit();
+
+    res.json({ status: "OK", data: "Sign-up successful." });
+
+  } catch (err) {
+    await conn.rollback();
+
+    console.error(err);
+
+    let msg = err.message;
+    if (err.code === 'ER_DUP_ENTRY') {
+      msg = "Username or email already exists.";
+    }
+
+    res.json({ status: "NOK", error: msg });
+
+  } finally {
+    conn.release();
+  }
 });
+
 
 router.post("/api/reset-password", async (req, res) => {
   var emailUsername = req.body.emailUsername;

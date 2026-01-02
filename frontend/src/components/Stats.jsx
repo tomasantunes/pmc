@@ -131,8 +131,9 @@ export default function Stats() {
   function getTotalTimeTracked() {
     axios.get(config.BASE_URL + "/api/time-tracker/get-total-time")
     .then(function(response) {
+      console.log(response.data);
       if (response.data.status == "OK") {
-        setTotalTimeTracked(response.data.data.total_time);
+        if (response.data.data.total_time) setTotalTimeTracked(response.data.data.total_time);
       }
       else {
         alert(response.data.error);

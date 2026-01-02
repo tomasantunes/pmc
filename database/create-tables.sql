@@ -100,6 +100,15 @@ CREATE TABLE users (
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
+CREATE TABLE licenses (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    license_key CHAR(64) NOT NULL UNIQUE,
+    expires_at DATETIME NOT NULL,
+    used_at DATETIME DEFAULT NULL,
+    used_by_user_id INT DEFAULT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
 ALTER TABLE logins ADD COLUMN user_id INT(11) NOT NULL AFTER id;
 ALTER TABLE folders ADD COLUMN user_id INT(11) NOT NULL AFTER id;
 ALTER TABLE tasks ADD COLUMN user_id INT(11) NOT NULL AFTER id;
@@ -120,3 +129,5 @@ UPDATE alerts SET user_id = 0;
 
 ALTER TABLE users ADD COLUMN reset_password_token VARCHAR(512) DEFAULT NULL AFTER email;
 ALTER TABLE users ADD COLUMN reset_password_expires DATETIME DEFAULT NULL AFTER reset_password_token;
+ALTER TABLE users ADD COLUMN license_key CHAR(64) DEFAULT NULL AFTER reset_password_expires;
+ALTER TABLE users ADD COLUMN license_expires DATETIME DEFAULT NULL AFTER license_key;
