@@ -253,4 +253,25 @@ router.post("/check-login", (req, res) => {
   }
 });
 
+router.get("/api/get-user-info", async (req, res) => {
+  if (!req.session.isLoggedIn) {
+    res.json({status: "NOK", error: "Not logged in."});
+    return;
+  }
+
+  var sql1 = "SELECT username, email, created_at, license_expires FROM users WHERE id = ? LIMIT 1";
+
+  var [rows, fields] = await con2.execute(sql1, [req.session.userId]);
+  if (rows.length === 0) {
+    res.json({status: "NOK", error: "User not found."});
+    return;
+  }
+  res.json({status: "OK", data: {
+    username: rows[0].username,
+    email: rows[0].email,
+    registration_date: rows[0].created_at,
+    license_expiration_date: rows[0].license_expires
+  }});
+});
+
 module.exports = router;

@@ -2,6 +2,7 @@ import React, {useEffect, useState} from 'react';
 import {useNavigate} from 'react-router-dom';
 import Sidebar from './Sidebar';
 import Stats from './Stats';
+import UserInfo from './UserInfo';
 import axios from 'axios';
 import config from '../config.json';
 
@@ -29,6 +30,7 @@ export default function Home() {
       <>
         <Sidebar />
         <div className="page">
+          <UserInfo />
           <Stats />
         </div>
       </>
