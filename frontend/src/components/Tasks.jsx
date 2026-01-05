@@ -14,7 +14,7 @@ function TRow(props) {
   return (
     <tr {...props}>
       <td><input type="checkbox" checked={props.is_done} onChange={(e) => { props.updateTaskDone(e, props.task_id); }} /></td>
-      <td className={props.is_done ? "strikethrough" : ""}>{props.description}</td>
+      <td className={props.is_done && !props.hideStrikethrough ? "strikethrough" : ""}>{props.description}</td>
       <td>{props.time}</td>
       <td>
         <button className="btn btn-secondary" onClick={() => { props.updateTaskStarred(props.task_id); }} key={Math.random()}>
@@ -42,7 +42,7 @@ function TBodyPlain(props) {
     <tbody {...props} className="table-group-divider">
       {props.data.map((task, i) => {
         return (
-          <TRow key={task.id} index={i} task_id={task.id} description={task.description} time={task.time} is_done={task.is_done} starred={task.starred} updateTaskDone={props.updateTaskDone} openEditTask={props.openEditTask} openMoveModal={props.openMoveModal} deleteTask={props.deleteTask} updateTaskStarred={props.updateTaskStarred} />
+          <TRow key={task.id} index={i} task_id={task.id} description={task.description} time={task.time} is_done={task.is_done} starred={task.starred} updateTaskDone={props.updateTaskDone} openEditTask={props.openEditTask} openMoveModal={props.openMoveModal} deleteTask={props.deleteTask} updateTaskStarred={props.updateTaskStarred} hideStrikethrough={props.hideStrikethrough} />
         )
       })}
     </tbody>
@@ -63,6 +63,7 @@ export default function Tasks({folder_id, folder}) {
   const [showNew, setShowNew] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
   const [hideDone, setHideDone] = useState(folder.hide_done == 1 ? true : false);
+  const [hideStrikethrough, setHideStrikethrough] = useState(false);
   const [totalTasks, setTotalTasks] = useState(0);
   const [nrTasksNotDone, setNrTasksNotDone] = useState(0);
   const [nrTasksDone, setNrTasksDone] = useState(0);
@@ -426,6 +427,10 @@ export default function Tasks({folder_id, folder}) {
     });
   }
 
+  function toggleHideStrikethrough() {
+    setHideStrikethrough(!hideStrikethrough);
+  }
+
   useEffect(() => {
     loadTasks();
     const handleResize = () => {
@@ -457,6 +462,7 @@ export default function Tasks({folder_id, folder}) {
                 <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
                   <li><a class="dropdown-item" href="#" onClick={deleteFolder}>Delete folder</a></li>
                   <li><a class="dropdown-item" href="#" onClick={toggleHideDone}>{hideDone ? "Show Done" : "Hide Done"}</a></li>
+                  <li><a class="dropdown-item" href="#" onClick={toggleHideStrikethrough}>{hideStrikethrough ? "Show Strikethrough" : "Hide Strikethrough"}</a></li>
                 </ul>
               </div>
             </div>
@@ -479,7 +485,7 @@ export default function Tasks({folder_id, folder}) {
                       <th style={{width: "15%"}}>Actions</th>
                   </tr>
               </thead>
-              <TBodyPlain data={tasks.filter(task => task.starred == true).sort((a, b) => (a.id || 0) - (b.id || 0))} updateTaskDone={updateTaskDone} updateTaskStarred={updateTaskStarred} openEditTask={openEditTask} openMoveModal={openMoveModal} deleteTask={deleteTask} />
+              <TBodyPlain data={tasks.filter(task => task.starred == true).sort((a, b) => (a.id || 0) - (b.id || 0))} updateTaskDone={updateTaskDone} updateTaskStarred={updateTaskStarred} openEditTask={openEditTask} openMoveModal={openMoveModal} deleteTask={deleteTask} hideStrikethrough={hideStrikethrough} />
           </table>
         </div>
       }
@@ -499,7 +505,7 @@ export default function Tasks({folder_id, folder}) {
                     <th style={{width: "15%"}}>Actions</th>
                 </tr>
             </thead>
-            <TBodyPlain data={tasks.filter(task => task.starred == false).sort((a, b) => (a.id || 0) - (b.id || 0))} updateTaskDone={updateTaskDone} updateTaskStarred={updateTaskStarred} openEditTask={openEditTask} openMoveModal={openMoveModal} deleteTask={deleteTask} />
+            <TBodyPlain data={tasks.filter(task => task.starred == false).sort((a, b) => (a.id || 0) - (b.id || 0))} updateTaskDone={updateTaskDone} updateTaskStarred={updateTaskStarred} openEditTask={openEditTask} openMoveModal={openMoveModal} deleteTask={deleteTask} hideStrikethrough={hideStrikethrough} />
         </table>
       </div>
       <div class="modal addTaskModal" tabindex="-1">
