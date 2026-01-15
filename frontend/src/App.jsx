@@ -14,6 +14,7 @@ import Alerts from './components/Alerts';
 import SignUp from './components/SignUp';
 import ForgotPassword from './components/ForgotPassword';
 import SetNewPassword from './components/SetNewPassword';
+import LandingPage from './components/LandingPage.jsx';
 
 function App() {
   return (
@@ -33,6 +34,7 @@ function App() {
         <Route path="/sign-up" element={<SignUp />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/set-new-password" element={<SetNewPassword />} />
+        <Route path="/landing" element={<LandingPage />} />
       </Routes>
     </Router>
   );
