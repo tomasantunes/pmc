@@ -3,6 +3,7 @@ import {useNavigate} from 'react-router-dom';
 import Sidebar from './Sidebar';
 import axios from 'axios';
 import config from '../config.json';
+import {i18n} from '../libs/translations';
 
 export default function RandomTask() {
   const [randomTask, setRandomTask] = useState("");
@@ -44,7 +45,7 @@ export default function RandomTask() {
       <>
         <Sidebar />
         <div className="page">
-          <h2>Random Task</h2>
+          <h2>{i18n("Random Task")}</h2>
           <h3>{randomTask}</h3>
         </div>
       </>

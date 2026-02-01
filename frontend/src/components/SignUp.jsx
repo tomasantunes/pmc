@@ -2,6 +2,7 @@ import React, {useState} from 'react';
 import axios from 'axios';
 import config from '../config.json';
 import {useNavigate} from 'react-router-dom';
+import {i18n} from '../libs/translations';
 
 import Swal from 'sweetalert2'
 import withReactContent from 'sweetalert2-react-content'
@@ -56,10 +57,10 @@ export default function SignUp() {
       >
         <div className="text-center mb-4">
           <h1 className="fw-bold mb-0">PMC</h1>
-          <small className="text-muted">Productivity Management Center</small>
+          <small className="text-muted">{i18n("Productivity Management Center")}</small>
         </div>
 
-        <h4 className="text-center mb-3">Sign Up</h4>
+        <h4 className="text-center mb-3">{i18n("Sign Up")}</h4>
 
         <div className="form-floating mb-3">
           <input
@@ -70,10 +71,10 @@ export default function SignUp() {
             onChange={changeUser}
             onKeyDown={handleKeyDown}
             className="form-control"
-            placeholder="Username"
+            placeholder={i18n("Username")}
             required
           />
-          <label htmlFor="username">Username</label>
+          <label htmlFor="username">{i18n("Username")}</label>
         </div>
 
         <div className="form-floating mb-3">
@@ -85,10 +86,10 @@ export default function SignUp() {
             onChange={(e) => setEmail(e.target.value)}
             onKeyDown={handleKeyDown}
             className="form-control"
-            placeholder="Email"
+            placeholder={i18n("Email")}
             required
           />
-          <label htmlFor="email">Email</label>
+          <label htmlFor="email">{i18n("Email")}</label>
         </div>
 
         <div className="form-floating mb-3">
@@ -102,7 +103,7 @@ export default function SignUp() {
             className="form-control"
             required
           />
-          <label htmlFor="password">Password</label>
+          <label htmlFor="password">{i18n("Password")}</label>
         </div>
 
         <div className="form-floating mb-3">
@@ -116,7 +117,7 @@ export default function SignUp() {
             className="form-control"
             required
           />
-          <label htmlFor="password">Confirm Password</label>
+          <label htmlFor="password">{i18n("Confirm Password")}</label>
         </div>
 
         <div className="form-floating mb-3">
@@ -130,11 +131,11 @@ export default function SignUp() {
             className="form-control"
             required
           />
-          <label htmlFor="license-key">License Key</label>
+          <label htmlFor="license-key">{i18n("License Key")}</label>
         </div>
 
         <button className="btn btn-primary w-100 py-2" type="submit">
-          Sign Up
+          {i18n("Sign Up")}
         </button>
       </form>
     </>

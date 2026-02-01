@@ -2,6 +2,7 @@ import React, {useState} from 'react';
 import axios from 'axios';
 import config from '../config.json';
 import {useNavigate} from 'react-router-dom';
+import {i18n} from '../libs/translations'
 
 import Swal from 'sweetalert2'
 import withReactContent from 'sweetalert2-react-content'
@@ -63,10 +64,10 @@ export default function Login() {
         {/* Header */}
         <div className="text-center mb-4">
           <h1 className="fw-bold mb-0">PMC</h1>
-          <small className="text-muted">Productivity Management Center</small>
+          <small className="text-muted">{i18n("Productivity Management Center")}</small>
         </div>
 
-        <h4 className="text-center mb-3">Login</h4>
+        <h4 className="text-center mb-3">{i18n("Login")}</h4>
 
         {/* Username */}
         <div className="form-floating mb-3">
@@ -79,10 +80,10 @@ export default function Login() {
             onChange={changeUser}
             onKeyDown={handleKeyDown}
             className="form-control"
-            placeholder="Username"
+            placeholder={i18n("Username")}
             required
           />
-          <label htmlFor="username">Username</label>
+          <label htmlFor="username">{i18n("Username")}</label>
         </div>
 
         {/* Password */}
@@ -96,27 +97,27 @@ export default function Login() {
             onChange={changePass}
             onKeyDown={handleKeyDown}
             className="form-control"
-            placeholder="Password"
+            placeholder={i18n("Password")}
             required
           />
-          <label htmlFor="password">Password</label>
+          <label htmlFor="password">{i18n("Password")}</label>
         </div>
 
         {/* Submit */}
         <button className="btn btn-primary w-100 py-2" type="submit">
-          Login
+          {i18n("Login")}
         </button>
 
         {/* Links */}
         <div className="text-center mt-4">
           <a href="/sign-up" className="text-muted d-block mb-1">
-            Don&apos;t have an account? Sign up
+            {i18n("Don't have an account? Sign up")}
           </a>
           <a href="/forgot-password" className="text-muted d-block mb-1">
-            Forgot your password?
+            {i18n("Forgot your password?")}
           </a>
           <a href="/static/pmc-user-manual.pdf" className="text-muted d-block mb-1" target="_blank" rel="noopener noreferrer">
-            User Manual
+            {i18n("User Manual")}
           </a>
         </div>
       </form>

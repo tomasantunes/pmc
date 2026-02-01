@@ -8,6 +8,7 @@ import DateTimePicker from '../libs/bs5-datetime/DateTimePicker';
 import Select from "react-select";
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
+import {i18n} from '../libs/translations';
 const MySwal = withReactContent(Swal);
 
 function TRow(props) {
@@ -24,12 +25,12 @@ function TRow(props) {
       <td>
       <div class="dropdown">
         <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
-          Actions
+          {i18n("Actions")}
         </button>
         <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-          <li><a class="dropdown-item" href="javascript:void(0)" onClick={() => { props.openEditTask(props.task_id) }}>Edit</a></li>
-          <li><a class="dropdown-item" href="javascript:void(0)" onClick={() => { props.openMoveModal(props.task_id) }}>Move to...</a></li>
-          <li><a class="dropdown-item" href="javascript:void(0)" onClick={() => { props.deleteTask(props.task_id) }}>Delete</a></li>
+          <li><a class="dropdown-item" href="javascript:void(0)" onClick={() => { props.openEditTask(props.task_id) }}>{i18n("Edit")}</a></li>
+          <li><a class="dropdown-item" href="javascript:void(0)" onClick={() => { props.openMoveModal(props.task_id) }}>{i18n("Move to...")}</a></li>
+          <li><a class="dropdown-item" href="javascript:void(0)" onClick={() => { props.deleteTask(props.task_id) }}>{i18n("Delete")}</a></li>
         </ul>
       </div>
       </td>
@@ -340,13 +341,14 @@ export default function Tasks({folder_id, folder}) {
 
   function deleteTask(task_id) {
     MySwal.fire({
-      title: "Are you sure?",
-      text: "Are you sure you want to delete this task?",
+      title: i18n("Are you sure?"),
+      text: i18n("Are you sure you want to delete this task?"),
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#d33",
       cancelButtonColor: "#7a7a7a",
-      confirmButtonText: "Yes",
+      confirmButtonText: i18n("Yes"),
+      cancelButtonText: i18n("No")
     }).then((result) => {
       if (result.isConfirmed) {
         axios.post(config.BASE_URL + "/api/delete-task", {task_id: task_id})
@@ -367,13 +369,14 @@ export default function Tasks({folder_id, folder}) {
 
   function deleteFolder() {
     MySwal.fire({
-      title: "Are you sure?",
-      text: "Are you sure you want to delete this folder?",
+      title: i18n("Are you sure?"),
+      text: i18n("Are you sure you want to delete this folder?"),
       icon: "warning",
       showCancelButton: true,
-      confirmButtonColor: "#3085d6",
-      cancelButtonColor: "#d33",
-      confirmButtonText: "Yes"
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#7a7a7a",
+      confirmButtonText: i18n("Yes"),
+      cancelButtonText: i18n("No")
     }).then((result) => {
       if (result.isConfirmed) {
         axios.post(config.BASE_URL + "/api/delete-folder", {folder_id: folder_id})
@@ -447,22 +450,22 @@ export default function Tasks({folder_id, folder}) {
         <div className="col-md-4">
           <div className="simple-tasks-header">
             <div className="text-end">
-                <p><b>Total Tasks:</b> {totalTasks}</p>
-                <p><b>Tasks Done:</b> {nrTasksDone}</p>
-                <p><b>Tasks Not Done:</b> {nrTasksNotDone}</p>
+                <p><b>{i18n("Total Tasks:")}</b> {totalTasks}</p>
+                <p><b>{i18n("Tasks Done:")}</b> {nrTasksDone}</p>
+                <p><b>{i18n("Tasks Not Done:")}</b> {nrTasksNotDone}</p>
             </div>
           </div>
           <div>
             <div className="buttons-menu my-3">
-              <button className="btn btn-success" onClick={openAddTask}>Add Task</button>
+              <button className="btn btn-success" onClick={openAddTask}>{i18n("Add Task")}</button>
               <div class="dropdown">
                 <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
-                  Options
+                  {i18n("Options")}
                 </button>
                 <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-                  <li><a class="dropdown-item" href="#" onClick={deleteFolder}>Delete folder</a></li>
-                  <li><a class="dropdown-item" href="#" onClick={toggleHideDone}>{hideDone ? "Show Done" : "Hide Done"}</a></li>
-                  <li><a class="dropdown-item" href="#" onClick={toggleHideStrikethrough}>{hideStrikethrough ? "Show Strikethrough" : "Hide Strikethrough"}</a></li>
+                  <li><a class="dropdown-item" href="#" onClick={deleteFolder}>{i18n("Delete folder")}</a></li>
+                  <li><a class="dropdown-item" href="#" onClick={toggleHideDone}>{hideDone ? i18n("Show Done") : i18n("Hide Done")}</a></li>
+                  <li><a class="dropdown-item" href="#" onClick={toggleHideStrikethrough}>{hideStrikethrough ? i18n("Show Strikethrough") : i18n("Hide Strikethrough")}</a></li>
                 </ul>
               </div>
             </div>
@@ -472,17 +475,17 @@ export default function Tasks({folder_id, folder}) {
       {tasks.filter(task => task.starred == true).length > 0 && 
         <div className="mb-4">
           <div className="text-center">
-            <h3>Starred Tasks</h3>
+            <h3>{i18n("Starred Tasks")}</h3>
           </div>
       <table className="table table-striped table-bordered align-middle tasks">
               <thead class="table-dark">
                   <tr>
                       <th style={{width: "10%"}}>
                       </th>
-                      <th style={{width: "50%"}}>Task</th>
-                      <th style={{width: "15%"}}>Time</th>
-                      <th style={{width: "10%"}}>Starred</th>
-                      <th style={{width: "15%"}}>Actions</th>
+                      <th style={{width: "50%"}}>{i18n("Task")}</th>
+                      <th style={{width: "15%"}}>{i18n("Time")}</th>
+                      <th style={{width: "10%"}}>{i18n("Starred")}</th>
+                      <th style={{width: "15%"}}>{i18n("Actions")}</th>
                   </tr>
               </thead>
               <TBodyPlain data={tasks.filter(task => task.starred == true).sort((a, b) => (a.id || 0) - (b.id || 0))} updateTaskDone={updateTaskDone} updateTaskStarred={updateTaskStarred} openEditTask={openEditTask} openMoveModal={openMoveModal} deleteTask={deleteTask} hideStrikethrough={hideStrikethrough} />
@@ -499,10 +502,10 @@ export default function Tasks({folder_id, folder}) {
                     <th style={{width: "10%"}}>
                       <input type="checkbox" checked={tasks.filter(task => task.is_done == true && task.starred == false).length > 0 && tasks.length > 0} onChange={(e) => { e.target.checked ? setAllTasksDone() : setAllTasksNotDone() }} />
                     </th>
-                    <th style={{width: "50%"}}>Task</th>
-                    <th style={{width: "15%"}}>Time</th>
-                    <th style={{width: "10%"}}>Starred</th>
-                    <th style={{width: "15%"}}>Actions</th>
+                    <th style={{width: "50%"}}>{i18n("Task")}</th>
+                    <th style={{width: "15%"}}>{i18n("Time")}</th>
+                    <th style={{width: "10%"}}>{i18n("Starred")}</th>
+                    <th style={{width: "15%"}}>{i18n("Actions")}</th>
                 </tr>
             </thead>
             <TBodyPlain data={tasks.filter(task => task.starred == false).sort((a, b) => (a.id || 0) - (b.id || 0))} updateTaskDone={updateTaskDone} updateTaskStarred={updateTaskStarred} openEditTask={openEditTask} openMoveModal={openMoveModal} deleteTask={deleteTask} hideStrikethrough={hideStrikethrough} />
@@ -512,32 +515,32 @@ export default function Tasks({folder_id, folder}) {
         <div class="modal-dialog">
           <div class="modal-content">
             <div class="modal-header">
-              <h5 class="modal-title">Add Task</h5>
+              <h5 class="modal-title">{i18n("Add Task")}</h5>
               <button type="button" class="btn-close" onClick={closeAddTask} aria-label="Close"></button>
             </div>
             <div class="modal-body">
               <form onSubmit={submitAddTask}>
                 <div className="form-group py-2">
-                  <label className="control-label">Description</label>
+                  <label className="control-label">{i18n("Description")}</label>
                   <div>
                       <textarea className="form-control input-lg mt-2" rows="3" name="description" value={newTaskDescription} onChange={changeNewTaskDescription}></textarea>
                   </div>
                 </div>
                 <div className="form-group py-2">
-                  <label className="control-label">Start</label>
+                  <label className="control-label">{i18n("Start")}</label>
                     <div>
                       <DateTimePicker defaultValue={selectedNewStartTime} onChange={handleChangeNewStartTime} />
                     </div>
                 </div>
                 <div className="form-group py-2">
-                  <label className="control-label">End</label>
+                  <label className="control-label">{i18n("End")}</label>
                   <div>
                     <DateTimePicker defaultValue={selectedNewEndTime} onChange={handleChangeNewEndTime} />
                   </div>
                 </div>
                 <div className="form-group">
                     <div style={{textAlign: "right"}}>
-                      <button type="submit" className="btn btn-primary">Add</button>
+                      <button type="submit" className="btn btn-primary">{i18n("Add")}</button>
                     </div>
                 </div>
               </form>
@@ -549,32 +552,32 @@ export default function Tasks({folder_id, folder}) {
         <div class="modal-dialog">
           <div class="modal-content">
             <div class="modal-header">
-              <h5 class="modal-title">Edit Task</h5>
+              <h5 class="modal-title">{i18n("Edit Task")}</h5>
               <button type="button" class="btn-close" onClick={closeEditTask} aria-label="Close"></button>
             </div>
             <div class="modal-body">
               <form onSubmit={submitEditTask}>
                 <div className="form-group py-2">
-                  <label className="control-label">Description</label>
+                  <label className="control-label">{i18n("Description")}</label>
                   <div>
                       <textarea className="form-control input-lg mt-2" rows="3" name="description" value={editTaskDescription} onChange={changeEditTaskDescription}></textarea>
                   </div>
                 </div>
                 <div className="form-group py-2">
-                  <label className="control-label">Start</label>
+                  <label className="control-label">{i18n("Start")}</label>
                   <div>
                     <DateTimePicker defaultValue={selectedEditStartTime} onChange={setSelectedEditStartTime} />
                   </div>
                 </div>
                 <div className="form-group py-2">
-                  <label className="control-label">End</label>
+                  <label className="control-label">{i18n("End")}</label>
                   <div>
                     <DateTimePicker defaultValue={selectedEditEndTime} onChange={setSelectedEditEndTime} />
                   </div>
                 </div>
                 <div className="form-group">
                     <div style={{textAlign: "right"}}>
-                        <button type="submit" className="btn btn-primary">Save</button>
+                        <button type="submit" className="btn btn-primary">{i18n("Save")}</button>
                     </div>
                 </div>
               </form>
@@ -587,20 +590,20 @@ export default function Tasks({folder_id, folder}) {
         <div class="modal-dialog">
           <div class="modal-content">
             <div class="modal-header">
-              <h5 class="modal-title">Move Task</h5>
+              <h5 class="modal-title">{i18n("Move Task")}</h5>
               <button type="button" class="btn-close" onClick={closeMoveModal} aria-label="Close"></button>
             </div>
             <div class="modal-body">
               <form onSubmit={submitMoveTask}>
                 <div className="form-group py-2">
-                  <label className="control-label">Select folder...</label>
+                  <label className="control-label">{i18n("Select folder...")}</label>
                   <div>
                       <Select options={simpleFolders.map(folder => ({ value: folder.id, label: folder.name }))} onChange={handleSimpleFolderChange} value={selectedSimpleFolder} />
                   </div>
                 </div>
                 <div className="form-group">
                     <div style={{textAlign: "right"}}>
-                        <button type="submit" className="btn btn-primary">Move</button>
+                        <button type="submit" className="btn btn-primary">{i18n("Move")}</button>
                     </div>
                 </div>
               </form>

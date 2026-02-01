@@ -2,6 +2,7 @@ import React, {useEffect, useState} from 'react';
 import Chart from "react-apexcharts";
 import axios from 'axios';
 import config from '../config';
+import {i18n} from '../libs/translations';
 
 export default function UserInfo() {
   const [username, setUsername] = useState("");
@@ -32,11 +33,13 @@ export default function UserInfo() {
   }, []);
   return (
     <>
-      <h2>User Info</h2>
-      <p><b>Username:</b> {username}</p>
-      <p><b>Email:</b> {email}</p>
-      <p><b>Registration Date:</b> {registrationDate}</p>
-      <p><b>License Expiration Date:</b> {licenseExpirationDate}</p>
+      <div style={{width: "90%", margin: "0 auto"}}>
+        <h2>{i18n("User Info")}</h2>
+        <p><b>{i18n("Username")}:</b> {username}</p>
+        <p><b>{i18n("Email")}:</b> {email}</p>
+        <p><b>{i18n("Registration Date")}:</b> {registrationDate}</p>
+        <p><b>{i18n("License Expiration Date")}:</b> {licenseExpirationDate}</p>
+      </div>
     </>
   )
 }

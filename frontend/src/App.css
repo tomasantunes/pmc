@@ -238,3 +238,8 @@ a.dropdown-item {
 .bg-black {
     background-color: black;
 }
+
+.set-language-btn {
+  padding: 15px;
+  cursor: pointer;
+}

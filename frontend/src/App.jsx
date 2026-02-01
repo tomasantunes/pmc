@@ -15,6 +15,9 @@ import SignUp from './components/SignUp';
 import ForgotPassword from './components/ForgotPassword';
 import SetNewPassword from './components/SetNewPassword';
 import LandingPage from './components/LandingPage.jsx';
+import translations from './libs/translations';
+
+translations.init();
 
 function App() {
   return (

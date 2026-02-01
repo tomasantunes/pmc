@@ -2,6 +2,7 @@ import React, {useEffect, useState} from 'react';
 import Chart from "react-apexcharts";
 import axios from 'axios';
 import config from '../config';
+import {i18n} from '../libs/translations';
 
 export default function Stats() {
   const [tasksDone, setTasksDone] = useState(0);
@@ -17,7 +18,7 @@ export default function Stats() {
   const [recurrentTasksTodayProgressPercentage, setRecurrentTasksTodayProgressPercentage] = useState(0);
 
   const [tasksLast15Days, setTasksLast15Days] = useState({
-    series: [{ name: "Tasks Done", data: [] }],
+    series: [{ name: i18n("Tasks Done"), data: [] }],
     options: {
       chart: {
         type: "bar",
@@ -26,10 +27,10 @@ export default function Stats() {
       },
       xaxis: {
         categories: [],
-        title: { text: "Date" },
+        title: { text: i18n("Date") },
       },
       yaxis: {
-        title: { text: "Tasks Done" },
+        title: { text: i18n("Tasks Done") },
         min: 0,
         forceNiceScale: true,
       },
@@ -44,11 +45,11 @@ export default function Stats() {
         enabled: true,
       },
       title: {
-        text: "Tasks Done in the Last 15 Days",
+        text: i18n("Tasks Done in the Last 15 Days"),
         align: "center",
       },
       subtitle: {
-        text: "Includes both simple and recurrent tasks",
+        text: i18n("Includes both simple and recurrent tasks"),
         align: "center",
       }
     },
@@ -151,56 +152,58 @@ export default function Stats() {
   }, []);
   return (
     <>
-      <h2>Stats</h2>
-      <table className="table table-sm table-bordered small-table">
-        <tbody>
-          <tr>
-            <th className="table-dark bg-blue">Total Simple Tasks</th>
-            <td className="text-center">{tasksTotal}</td>
-          </tr>
-          <tr>
-            <th className="table-dark bg-blue">Total Simple Tasks Done</th>
-            <td className="text-center">{tasksDone}</td>
-          </tr>
-          <tr>
-            <th className="table-dark bg-blue">Recurrent Tasks Today</th>
-            <td className="text-center">{recurrentTasksTotal}</td>
-          </tr>
-          <tr>
-            <th className="table-dark bg-blue">Recurrent Tasks Done Today</th>
-            <td className="text-center">{recurrentTasksDone}</td>
-          </tr>
-          <tr>
-            <th className="table-dark bg-blue">Total Tasks Progress</th>
-            <td className="text-center">{progressPercentage}%</td>
-          </tr>
-          <tr>
-            <th className="table-dark bg-blue">Recurrent Tasks Today Progress</th>
-            <td className="text-center">{recurrentTasksTodayProgressPercentage}%</td>
-          </tr>
-          <tr>
-            <th className="table-dark bg-blue">Total Time Tracked</th>
-            <td className="text-center">{totalTimeTracked}</td>
-          </tr>
-          {/*}
-          <tr>
-            <th className="table-dark bg-blue">Total Tasks</th>
-            <td className="text-center">{totalAllTasks}</td>
-          </tr>
-          <tr>
-            <th className="table-dark bg-blue">Total Tasks Done</th>
-            <td className="text-center">{totalAllTasksDone}</td>
-          </tr>
-          <tr>
-            <th className="table-dark bg-blue">Total Recurrent Tasks</th>
-            <td className="text-center">{totalAllRecurrentTasks}</td>
-          </tr>
-          <tr>
-            <th className="table-dark bg-blue">Total Recurrent Tasks Done</th>
-            <td className="text-center">{totalAllRecurrentTasksDone}</td>
-          </tr>*/}
-        </tbody>
-      </table>
+      <div style={{width: "90%", margin: "0 auto"}}>
+        <h2>Stats</h2>
+        <table className="table table-sm table-bordered small-table">
+          <tbody>
+            <tr>
+              <th className="table-dark bg-blue">{i18n("Total Simple Tasks")}</th>
+              <td className="text-center">{tasksTotal}</td>
+            </tr>
+            <tr>
+              <th className="table-dark bg-blue">{i18n("Total Simple Tasks Done")}</th>
+              <td className="text-center">{tasksDone}</td>
+            </tr>
+            <tr>
+              <th className="table-dark bg-blue">{i18n("Recurrent Tasks Today")}</th>
+              <td className="text-center">{recurrentTasksTotal}</td>
+            </tr>
+            <tr>
+              <th className="table-dark bg-blue">{i18n("Recurrent Tasks Done Today")}</th>
+              <td className="text-center">{recurrentTasksDone}</td>
+            </tr>
+            <tr>
+              <th className="table-dark bg-blue">{i18n("Total Tasks Progress")}</th>
+              <td className="text-center">{progressPercentage}%</td>
+            </tr>
+            <tr>
+              <th className="table-dark bg-blue">{i18n("Recurrent Tasks Today Progress")}</th>
+              <td className="text-center">{recurrentTasksTodayProgressPercentage}%</td>
+            </tr>
+            <tr>
+              <th className="table-dark bg-blue">{i18n("Total Time Tracked")}</th>
+              <td className="text-center">{totalTimeTracked}</td>
+            </tr>
+            {/*}
+            <tr>
+              <th className="table-dark bg-blue">Total Tasks</th>
+              <td className="text-center">{totalAllTasks}</td>
+            </tr>
+            <tr>
+              <th className="table-dark bg-blue">Total Tasks Done</th>
+              <td className="text-center">{totalAllTasksDone}</td>
+            </tr>
+            <tr>
+              <th className="table-dark bg-blue">Total Recurrent Tasks</th>
+              <td className="text-center">{totalAllRecurrentTasks}</td>
+            </tr>
+            <tr>
+              <th className="table-dark bg-blue">Total Recurrent Tasks Done</th>
+              <td className="text-center">{totalAllRecurrentTasksDone}</td>
+            </tr>*/}
+          </tbody>
+        </table>
+      </div>
       <Chart
         options={tasksLast15Days.options}
         series={tasksLast15Days.series}

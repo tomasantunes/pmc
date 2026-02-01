@@ -7,16 +7,17 @@ import TimePicker from "../libs/bs5-timepicker/TimePicker";
 import { toLocaleISOString } from "../libs/utils";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
+import {i18n} from '../libs/translations';
 const MySwal = withReactContent(Swal);
 
 const weekDays = [
-  { value: 1, label: "Monday" },
-  { value: 2, label: "Tuesday" },
-  { value: 3, label: "Wednesday" },
-  { value: 4, label: "Thursday" },
-  { value: 5, label: "Friday" },
-  { value: 6, label: "Saturday" },
-  { value: 0, label: "Sunday" },
+  { value: 1, label: i18n("Monday") },
+  { value: 2, label: i18n("Tuesday") },
+  { value: 3, label: i18n("Wednesday") },
+  { value: 4, label: i18n("Thursday") },
+  { value: 5, label: i18n("Friday") },
+  { value: 6, label: i18n("Saturday") },
+  { value: 0, label: i18n("Sunday") },
 ];
 
 function TRow(props) {
@@ -158,7 +159,7 @@ function TRow(props) {
             data-bs-toggle="dropdown"
             aria-expanded="false"
           >
-            Actions
+            {i18n("Actions")}
           </button>
           <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
             <li>
@@ -169,7 +170,7 @@ function TRow(props) {
                   props.openEditTask(props.task_id);
                 }}
               >
-                Edit
+                {i18n("Edit")}
               </a>
             </li>
             <li>
@@ -180,7 +181,7 @@ function TRow(props) {
                   props.deleteTask(props.task_id);
                 }}
               >
-                Delete
+                {i18n("Delete")}
               </a>
             </li>
             {!checksCancelled[currentIdx] ? (
@@ -192,7 +193,7 @@ function TRow(props) {
                     props.cancelTask(props.task_id);
                   }}
                 >
-                  Cancel Today's Task
+                  {i18n("Cancel Today's Task")}
                 </a>
               </li>
             ) : (
@@ -204,7 +205,7 @@ function TRow(props) {
                     props.uncancelTask(props.task_id);
                   }}
                 >
-                  Uncancel Today's Task
+                  {i18n("Uncancel Today's Task")}
                 </a>
               </li>
             )}
@@ -216,7 +217,7 @@ function TRow(props) {
                   props.restartTask(props.task_id);
                 }}
               >
-                Restart Task
+                {i18n("Restart Task")}
               </a>
             </li>
           </ul>
@@ -894,13 +895,14 @@ export default function Tasks({ folder_id, folder }) {
 
   function deleteTask(task_id) {
     MySwal.fire({
-      title: "Are you sure?",
-      text: "Are you sure you want to delete this task?",
+      title: i18n("Are you sure?"),
+      text: i18n("Are you sure you want to delete this task?"),
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#d33",
       cancelButtonColor: "#7a7a7a",
-      confirmButtonText: "Yes",
+      cancelButtonText: i18n("No"),
+      confirmButtonText: i18n("Yes"),
     }).then((result) => {
       if (result.isConfirmed) {
         axios
@@ -921,13 +923,14 @@ export default function Tasks({ folder_id, folder }) {
 
   function deleteFolder() {
     MySwal.fire({
-      title: "Are you sure?",
-      text: "Are you sure you want to delete this folder?",
+      title: i18n("Are you sure?"),
+      text: i18n("Are you sure you want to delete this folder?"),
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#3085d6",
       cancelButtonColor: "#d33",
-      confirmButtonText: "Yes",
+      confirmButtonText: i18n("Yes"),
+      cancelButtonText: i18n("No"),
     }).then((result) => {
       if (result.isConfirmed) {
         axios
@@ -1174,13 +1177,13 @@ export default function Tasks({ folder_id, folder }) {
       <div className="row">
         <div className="col-md-6">
           <p>
-            <b>Total tasks today:</b> {totalTasks}
+            <b>{i18n("Total tasks today:")}</b> {totalTasks}
           </p>
           <p>
-            <b>Tasks done today:</b> {nrTasksDone}
+            <b>{i18n("Tasks done today:")}</b> {nrTasksDone}
           </p>
           <p>
-            <b>Tasks pending today:</b> {nrTasksPending}
+            <b>{i18n("Tasks pending today:")}</b> {nrTasksPending}
           </p>
         </div>
         <div className="col-md-6">
@@ -1192,7 +1195,7 @@ export default function Tasks({ folder_id, folder }) {
               <i class="fa-solid fa-arrow-right"></i>
             </button>
             <button className="btn btn-success" onClick={openAddTask}>
-              Add Task
+              {i18n("Add Task")}
             </button>
             <div class="dropdown">
               <button
@@ -1202,12 +1205,12 @@ export default function Tasks({ folder_id, folder }) {
                 data-bs-toggle="dropdown"
                 aria-expanded="false"
               >
-                Options
+                {i18n("Options")}
               </button>
               <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
                 <li>
                   <a class="dropdown-item" href="#" onClick={deleteFolder}>
-                    Delete folder
+                    {i18n("Delete folder")}
                   </a>
                 </li>
               </ul>
@@ -1218,37 +1221,37 @@ export default function Tasks({ folder_id, folder }) {
       <table className="table table-striped table-bordered align-middle recurrent-tasks">
         <thead class="table-dark">
           <tr>
-            <th style={{ width: "45%" }}>Task</th>
-            <th style={{ width: "10%" }}>Time</th>
+            <th style={{ width: "45%" }}>{i18n("Task")}</th>
+            <th style={{ width: "10%" }}>{i18n("Time")}</th>
             <th style={{ width: "5%" }}>
-              Mon <br />
+              {i18n("Mon")} <br />
               {days[0]}
             </th>
             <th style={{ width: "5%" }}>
-              Tue <br />
+              {i18n("Tue")} <br />
               {days[1]}
             </th>
             <th style={{ width: "5%" }}>
-              Wed <br />
+              {i18n("Wed")} <br />
               {days[2]}
             </th>
             <th style={{ width: "5%" }}>
-              Thu <br />
+              {i18n("Thu")} <br />
               {days[3]}
             </th>
             <th style={{ width: "5%" }}>
-              Fri <br />
+              {i18n("Fri")} <br />
               {days[4]}
             </th>
             <th style={{ width: "5%" }}>
-              Sat <br />
+              {i18n("Sat")} <br />
               {days[5]}
             </th>
             <th style={{ width: "5%" }}>
-              Sun <br />
+              {i18n("Sun")} <br />
               {days[6]}
             </th>
-            <th style={{ width: "10%" }}>Actions</th>
+            <th style={{ width: "10%" }}>{i18n("Actions")}</th>
           </tr>
         </thead>
         <TBodyPlain
@@ -1266,7 +1269,7 @@ export default function Tasks({ folder_id, folder }) {
         <div class="modal-dialog">
           <div class="modal-content">
             <div class="modal-header">
-              <h5 class="modal-title">Add Task</h5>
+              <h5 class="modal-title">{i18n("Add Task")}</h5>
               <button
                 type="button"
                 class="btn-close"
@@ -1277,7 +1280,7 @@ export default function Tasks({ folder_id, folder }) {
             <div class="modal-body">
               <form onSubmit={submitAddTask}>
                 <div className="form-group py-2">
-                  <label className="control-label">Description</label>
+                  <label className="control-label">{i18n("Description")}</label>
                   <div>
                     <textarea
                       className="form-control input-lg"
@@ -1288,7 +1291,7 @@ export default function Tasks({ folder_id, folder }) {
                   </div>
                 </div>
                 <div className="form-group py-2">
-                  <label className="control-label">Start Time</label>
+                  <label className="control-label">{i18n("Start Time")}</label>
                   <div>
                     <input
                       type="checkbox"
@@ -1309,7 +1312,7 @@ export default function Tasks({ folder_id, folder }) {
                   </div>
                 </div>
                 <div className="form-group py-2">
-                  <label className="control-label">End Time</label>
+                  <label className="control-label">{i18n("End Time")}</label>
                   <div>
                     <input
                       type="checkbox"
@@ -1330,14 +1333,14 @@ export default function Tasks({ folder_id, folder }) {
                   </div>
                 </div>
                 <div className="form-group py-2">
-                  <label className="control-label">Week Days</label>
+                  <label className="control-label">{i18n("Week Days")}</label>
                   <div className="my-2">
                     <input
                       type="checkbox"
                       checked={mondayChecked}
                       onChange={toggleMonday}
                     />{" "}
-                    Monday
+                    {i18n("Monday")}
                   </div>
                   <div className="mb-2">
                     <input
@@ -1345,7 +1348,7 @@ export default function Tasks({ folder_id, folder }) {
                       checked={tuesdayChecked}
                       onChange={toggleTuesday}
                     />{" "}
-                    Tuesday
+                    {i18n("Tuesday")}
                   </div>
                   <div className="mb-2">
                     <input
@@ -1353,7 +1356,7 @@ export default function Tasks({ folder_id, folder }) {
                       checked={wednesdayChecked}
                       onChange={toggleWednesday}
                     />{" "}
-                    Wesnesday
+                    {i18n("Wednesday")}
                   </div>
                   <div className="mb-2">
                     <input
@@ -1361,7 +1364,7 @@ export default function Tasks({ folder_id, folder }) {
                       checked={thursdayChecked}
                       onChange={toggleThursday}
                     />{" "}
-                    Thursday
+                    {i18n("Thursday")}
                   </div>
                   <div className="mb-2">
                     <input
@@ -1369,7 +1372,7 @@ export default function Tasks({ folder_id, folder }) {
                       checked={fridayChecked}
                       onChange={toggleFriday}
                     />{" "}
-                    Friday
+                    {i18n("Friday")}  
                   </div>
                   <div className="mb-2">
                     <input
@@ -1377,7 +1380,7 @@ export default function Tasks({ folder_id, folder }) {
                       checked={saturdayChecked}
                       onChange={toggleSaturday}
                     />{" "}
-                    Saturday
+                    {i18n("Saturday")}
                     <br />
                   </div>
                   <div className="mb-2">
@@ -1386,7 +1389,7 @@ export default function Tasks({ folder_id, folder }) {
                       checked={sundayChecked}
                       onChange={toggleSunday}
                     />{" "}
-                    Sunday
+                    {i18n("Sunday")}
                   </div>
                 </div>
                 <div className="form-group py-2">
@@ -1395,11 +1398,11 @@ export default function Tasks({ folder_id, folder }) {
                     checked={newAlertActive}
                     onChange={toggleNewAlertActive}
                   />
-                  <label>Alert</label>
+                  <label>{i18n("Alert")}</label>
                 </div>
                 {newAlertActive && (
                   <div className="form-group py-2">
-                    <label>Alert Text</label>
+                    <label>{i18n("Alert Text")}</label>
                     <textarea
                       className="form-control"
                       value={newAlertText}
@@ -1410,7 +1413,7 @@ export default function Tasks({ folder_id, folder }) {
                 <div className="form-group">
                   <div style={{ textAlign: "right" }}>
                     <button type="submit" className="btn btn-primary">
-                      Add
+                      {i18n("Add")}
                     </button>
                   </div>
                 </div>
@@ -1423,7 +1426,7 @@ export default function Tasks({ folder_id, folder }) {
         <div class="modal-dialog">
           <div class="modal-content">
             <div class="modal-header">
-              <h5 class="modal-title">Edit Task</h5>
+              <h5 class="modal-title">{i18n("Edit Task")}</h5>
               <button
                 type="button"
                 class="btn-close"
@@ -1434,7 +1437,7 @@ export default function Tasks({ folder_id, folder }) {
             <div class="modal-body">
               <form onSubmit={submitEditTask}>
                 <div className="form-group py-2">
-                  <label className="control-label">Description</label>
+                  <label className="control-label">{i18n("Description")}</label>
                   <div>
                     <textarea
                       className="form-control input-lg"
@@ -1445,7 +1448,7 @@ export default function Tasks({ folder_id, folder }) {
                   </div>
                 </div>
                 <div className="form-group py-2">
-                  <label className="control-label">Start Time</label>
+                  <label className="control-label">{i18n("Start Time")}</label>
                   <div>
                     <input
                       type="checkbox"
@@ -1466,7 +1469,7 @@ export default function Tasks({ folder_id, folder }) {
                   </div>
                 </div>
                 <div className="form-group py-2">
-                  <label className="control-label">End Time</label>
+                  <label className="control-label">{i18n("End Time")}</label>
                   <div>
                     <input
                       type="checkbox"
@@ -1487,14 +1490,14 @@ export default function Tasks({ folder_id, folder }) {
                   </div>
                 </div>
                 <div className="form-group py-2">
-                  <label className="control-label">Week Days</label>
+                  <label className="control-label">{i18n("Week Days")}</label>
                   <div className="my-2">
                     <input
                       type="checkbox"
                       checked={mondayChecked}
                       onChange={toggleMonday}
                     />{" "}
-                    Monday
+                    {i18n("Monday")}
                   </div>
                   <div className="mb-2">
                     <input
@@ -1502,7 +1505,7 @@ export default function Tasks({ folder_id, folder }) {
                       checked={tuesdayChecked}
                       onChange={toggleTuesday}
                     />{" "}
-                    Tuesday
+                    {i18n("Tuesday")}
                   </div>
                   <div className="mb-2">
                     <input
@@ -1510,7 +1513,7 @@ export default function Tasks({ folder_id, folder }) {
                       checked={wednesdayChecked}
                       onChange={toggleWednesday}
                     />{" "}
-                    Wesnesday
+                    {i18n("Wednesday")}
                   </div>
                   <div className="mb-2">
                     <input
@@ -1518,7 +1521,7 @@ export default function Tasks({ folder_id, folder }) {
                       checked={thursdayChecked}
                       onChange={toggleThursday}
                     />{" "}
-                    Thursday
+                    {i18n("Thursday")}
                   </div>
                   <div className="mb-2">
                     <input
@@ -1526,7 +1529,7 @@ export default function Tasks({ folder_id, folder }) {
                       checked={fridayChecked}
                       onChange={toggleFriday}
                     />{" "}
-                    Friday
+                    {i18n("Friday")}
                   </div>
                   <div className="mb-2">
                     <input
@@ -1534,7 +1537,7 @@ export default function Tasks({ folder_id, folder }) {
                       checked={saturdayChecked}
                       onChange={toggleSaturday}
                     />{" "}
-                    Saturday
+                    {i18n("Saturday")}
                     <br />
                   </div>
                   <div className="mb-2">
@@ -1543,7 +1546,7 @@ export default function Tasks({ folder_id, folder }) {
                       checked={sundayChecked}
                       onChange={toggleSunday}
                     />{" "}
-                    Sunday
+                    {i18n("Sunday")}
                   </div>
                 </div>
                 <div class="form-group py-2">
@@ -1552,11 +1555,11 @@ export default function Tasks({ folder_id, folder }) {
                     checked={editAlertActive}
                     onChange={toggleEditAlertActive}
                   />
-                  <label>Alert</label>
+                  <label>{i18n("Alert")}</label>
                 </div>
                 {editAlertActive && (
                   <div className="form-group py-2">
-                    <label>Alert Text</label>
+                    <label>{i18n("Alert Text")}</label>
                     <textarea
                       className="form-control"
                       value={editAlertText}
@@ -1567,7 +1570,7 @@ export default function Tasks({ folder_id, folder }) {
                 <div className="form-group">
                   <div style={{ textAlign: "right" }}>
                     <button type="submit" className="btn btn-primary">
-                      Save
+                      {i18n("Save")}
                     </button>
                   </div>
                 </div>

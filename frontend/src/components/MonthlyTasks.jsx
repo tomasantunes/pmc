@@ -6,22 +6,23 @@ import { toLocaleISOString } from '../libs/utils';
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 import moment from "moment";
+import {i18n} from "../libs/translations";
 
 const MySwal = withReactContent(Swal);
 
 const initialMonthsOfYear = [
-  { value: 0, label: "January" },
-  { value: 1, label: "February" },
-  { value: 2, label: "March" },
-  { value: 3, label: "April" },
-  { value: 4, label: "May" },
-  { value: 5, label: "June" },
-  { value: 6, label: "July" },
-  { value: 7, label: "August" },
-  { value: 8, label: "September" },
-  { value: 9, label: "October" },
-  { value: 10, label: "November" },
-  { value: 11, label: "December" },
+  { value: 0, label: i18n("January") },
+  { value: 1, label: i18n("February") },
+  { value: 2, label: i18n("March") },
+  { value: 3, label: i18n("April") },
+  { value: 4, label: i18n("May") },
+  { value: 5, label: i18n("June") },
+  { value: 6, label: i18n("July") },
+  { value: 7, label: i18n("August") },
+  { value: 8, label: i18n("September") },
+  { value: 9, label: i18n("October") },
+  { value: 10, label: i18n("November") },
+  { value: 11, label: i18n("December") },
 ];
 
 const now = new Date();
@@ -85,17 +86,17 @@ function TRow({
             type="button"
             data-bs-toggle="dropdown"
           >
-            Actions
+            {i18n("Actions")}
           </button>
           <ul className="dropdown-menu">
             <li>
               <a className="dropdown-item" onClick={() => openEditTask(task.id)}>
-                Edit
+                {i18n("Edit")}
               </a>
             </li>
             <li>
               <a className="dropdown-item" onClick={() => deleteTask(task.id)}>
-                Delete
+                {i18n("Delete")}
               </a>
             </li>
             {/*
@@ -408,19 +409,19 @@ export default function MonthlyTasks({ folder_id, folder }) {
       <div className="row">
         <div className="col-md-6">
           <h3 className="mb-3">
-            Monthly Tasks {folder ? `— ${folder.name}` : ""}
+            {i18n("Monthly Tasks")} {folder ? `— ${folder.name}` : ""}
           </h3>
           <button className="btn btn-primary mb-3" onClick={openAddTask}>
-            Add Monthly Task
+            {i18n("Add Monthly Task")}
           </button>
         </div>
         <div className="col-md-6 text-end">
-          <div class="dropdown">
-            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
-              Options
+          <div className="dropdown">
+            <button className="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+              {i18n("Options")}
             </button>
-            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-              <li><a class="dropdown-item" href="#" onClick={deleteFolder}>Delete folder</a></li>
+            <ul className="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+              <li><a className="dropdown-item" href="#" onClick={deleteFolder}>{i18n("Delete folder")}</a></li>
             </ul>
           </div>
         </div>
@@ -433,7 +434,7 @@ export default function MonthlyTasks({ folder_id, folder }) {
           onClick={previousYear}
           title="Previous Year"
         >
-          ← Previous Year
+          ← {i18n("Previous Year")}
         </button>
         <h4 className="mb-0 mx-3">{currentYear}</h4>
         <button 
@@ -441,18 +442,18 @@ export default function MonthlyTasks({ folder_id, folder }) {
           onClick={nextYear}
           title="Next Year"
         >
-          Next Year →
+          {i18n("Next Year")} →
         </button>
       </div>
 
       <table className="table table-bordered table-striped align-middle">
         <thead>
           <tr>
-            <th>Task</th>
+            <th>{i18n("Task")}</th>
             {monthsOfYear.map((m) => (
               <th key={m.value}>{m.label}</th>
             ))}
-            <th>Actions</th>
+            <th>{i18n("Actions")}</th>
           </tr>
         </thead>
         <tbody>
@@ -482,7 +483,7 @@ export default function MonthlyTasks({ folder_id, folder }) {
           <div className="modal-content">
             <form onSubmit={submitAddTask}>
               <div className="modal-header">
-                <h5 className="modal-title">Add Monthly Task</h5>
+                <h5 className="modal-title">{i18n("Add Monthly Task")}</h5>
                 <button
                   type="button"
                   className="btn-close"
@@ -491,7 +492,7 @@ export default function MonthlyTasks({ folder_id, folder }) {
               </div>
               <div className="modal-body">
                 <div className="mb-3">
-                  <label>Description</label>
+                  <label>{i18n("Description")}</label>
                   <textarea
                     className="form-control"
                     rows="3"
@@ -501,7 +502,7 @@ export default function MonthlyTasks({ folder_id, folder }) {
                   ></textarea>
                 </div>
                 <div className="mb-3">
-                  <label>Select Months</label>
+                  <label>{i18n("Select Months")}</label>
                   <div className="d-flex flex-wrap gap-2 mt-2">
                     {monthsOfYear.map((m) => (
                       <label key={m.value} className="me-3">
@@ -528,10 +529,10 @@ export default function MonthlyTasks({ folder_id, folder }) {
               </div>
               <div className="modal-footer">
                 <button className="btn btn-secondary" onClick={closeAddTask}>
-                  Cancel
+                  {i18n("Cancel")}
                 </button>
                 <button className="btn btn-primary" type="submit">
-                  Add Task
+                  {i18n("Add Task")}
                 </button>
               </div>
             </form>
@@ -549,7 +550,7 @@ export default function MonthlyTasks({ folder_id, folder }) {
           <div className="modal-content">
             <form onSubmit={submitEditTask}>
               <div className="modal-header">
-                <h5 className="modal-title">Edit Monthly Task</h5>
+                <h5 className="modal-title">{i18n("Edit Monthly Task")}</h5>
                 <button
                   type="button"
                   className="btn-close"
@@ -558,7 +559,7 @@ export default function MonthlyTasks({ folder_id, folder }) {
               </div>
               <div className="modal-body">
                 <div className="mb-3">
-                  <label>Description</label>
+                  <label>{i18n("Description")}</label>
                   <textarea
                     className="form-control"
                     rows="3"
@@ -568,7 +569,7 @@ export default function MonthlyTasks({ folder_id, folder }) {
                   ></textarea>
                 </div>
                 <div className="mb-3">
-                  <label>Select Months</label>
+                  <label>{i18n("Select Months")}</label>
                   <div className="d-flex flex-wrap gap-2 mt-2">
                     {monthsOfYear.map((m) => (
                       <label key={m.value} className="me-3">
@@ -595,10 +596,10 @@ export default function MonthlyTasks({ folder_id, folder }) {
               </div>
               <div className="modal-footer">
                 <button className="btn btn-secondary" onClick={closeEditTask}>
-                  Cancel
+                  {i18n("Cancel")}
                 </button>
                 <button className="btn btn-primary" type="submit">
-                  Edit Task
+                  {i18n("Edit Monthly Task")}
                 </button>
               </div>
             </form>

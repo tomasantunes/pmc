@@ -4,6 +4,7 @@ import config from '../config.json';
 import { toLocaleISOString } from "../libs/utils";
 import Sidebar from './Sidebar';
 import axios from 'axios';
+import { i18n } from '../libs/translations';
 
 export default function Schedule() {
   const [schedule, setSchedule] = useState([]);
@@ -79,17 +80,17 @@ export default function Schedule() {
       <>
         <Sidebar />
         <div className="page">
-          <h2>Schedule</h2>
+          <h2>{i18n("Schedule")}</h2>
           <table className="table col-table">
             <thead>
               <tr>
-                <th>Monday</th>
-                <th>Tuesday</th>
-                <th>Wednesday</th>
-                <th>Thursday</th>
-                <th>Friday</th>
-                <th>Saturday</th>
-                <th>Sunday</th>
+                <th>{i18n("Monday")}</th>
+                <th>{i18n("Tuesday")}</th>
+                <th>{i18n("Wednesday")}</th>
+                <th>{i18n("Thursday")}</th>
+                <th>{i18n("Friday")}</th>
+                <th>{i18n("Saturday")}</th>
+                <th>{i18n("Sunday")}</th>
               </tr>
             </thead>
             <tbody>

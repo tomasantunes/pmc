@@ -11,6 +11,7 @@ import timeGridPlugin from '@fullcalendar/timegrid';
 import listPlugin from '@fullcalendar/list';
 import interactionPlugin from '@fullcalendar/interaction';
 import {toLocaleISOString} from '../libs/utils';
+import { i18n } from '../libs/translations';
 
 export default function Home() {
   const calendarRef = useRef(null);
@@ -130,7 +131,7 @@ export default function Home() {
 
     var db_event = events.find(ev => ev.id === event.id);
     if (!db_event) {
-      alert("Error: Event not found.");
+      alert(i18n("Error: Event not found."));
       return;
     }
     axios.post(config.BASE_URL + "/api/edit-event", {
@@ -236,14 +237,14 @@ export default function Home() {
       <>
         <Sidebar />
         <div className="page">
-          <h2>Calendar</h2>
+          <h2>{i18n("Calendar")}</h2>
           <div className="row mb-2">
             <div className="col-md-6">
-              <button className="btn btn-primary me-2" onClick={() => handleChangeView("timeGridWeek")}>Week View</button>
-              <button className="btn btn-primary" onClick={() => handleChangeView("listWeek")}>List View</button>
+              <button className="btn btn-primary me-2" onClick={() => handleChangeView("timeGridWeek")}>{i18n("Week View")}</button>
+              <button className="btn btn-primary" onClick={() => handleChangeView("listWeek")}>{i18n("List View")}</button>
             </div>
             <div className="col-md-6 text-end">
-              <button className="btn btn-primary" onClick={newEvent}>New Event</button>
+              <button className="btn btn-primary" onClick={newEvent}>{i18n("New Event")}</button>
             </div>
           </div>
           <FullCalendar
@@ -267,26 +268,26 @@ export default function Home() {
               <div class="modal-body">
                 <form onSubmit={submitAddEvent}>
                   <div className="form-group py-2">
-                    <label className="control-label">Title</label>
+                    <label className="control-label">{i18n("Title")}</label>
                     <div>
                         <input type="text" className="form-control input-lg" name="description" value={newEventTitle} onChange={(e) => setNewEventTitle(e.target.value)}/>
                     </div>
                   </div>
                   <div className="form-group py-2">
-                    <label className="control-label">Start</label>
+                    <label className="control-label">{i18n("Start")}</label>
                     <div>
                       <DateTimePicker value={selectedNewStartTime} defaultValue={selectedNewStartTime} onChange={handleChangeNewStartTime} />
                     </div>
                   </div>
                   <div className="form-group py-2">
-                    <label className="control-label">End</label>
+                    <label className="control-label">{i18n("End")}</label>
                     <div>
                       <DateTimePicker value={selectedNewEndTime} defaultValue={selectedNewEndTime} onChange={handleChangeNewEndTime} />
                     </div>
                   </div>
                   <div className="form-group">
                       <div style={{textAlign: "right"}}>
-                        <button type="submit" className="btn btn-primary">Add</button>
+                        <button type="submit" className="btn btn-primary">{i18n("Add")}</button>
                       </div>
                   </div>
                 </form>
@@ -298,33 +299,33 @@ export default function Home() {
           <div class="modal-dialog">
             <div class="modal-content">
               <div class="modal-header">
-                <h5 class="modal-title">Edit Event</h5>
+                <h5 class="modal-title">{i18n("Edit Event")}</h5>
                 <button type="button" class="btn-close" onClick={closeEditEvent} aria-label="Close"></button>
               </div>
               <div class="modal-body">
                 <form onSubmit={submitEditEvent}>
                   <div className="form-group py-2">
-                    <label className="control-label">Title</label>
+                    <label className="control-label">{i18n("Title")}</label>
                     <div>
                         <input type="text" className="form-control input-lg" name="description" value={editEventTitle} onChange={(e) => setEditEventTitle(e.target.value)}/>
                     </div>
                   </div>
                   <div className="form-group py-2">
-                    <label className="control-label">Start</label>
+                    <label className="control-label">{i18n("Start")}</label>
                     <div>
                       <DateTimePicker value={selectedEditStartTime} defaultValue={selectedEditStartTime} onChange={handleChangeEditStartTime} />
                     </div>
                   </div>
                   <div className="form-group py-2">
-                    <label className="control-label">End</label>
+                    <label className="control-label">{i18n("End")}</label>
                     <div>
                       <DateTimePicker value={selectedEditEndTime} defaultValue={selectedEditEndTime} onChange={handleChangeEditEndTime} />
                     </div>
                   </div>
                   <div className="form-group">
                       <div style={{textAlign: "right"}}>
-                        <button className="btn btn-danger me-2" onClick={deleteEvent}>Delete</button>
-                        <button type="submit" className="btn btn-primary">Edit</button>
+                        <button className="btn btn-danger me-2" onClick={deleteEvent}>{i18n("Delete")}</button>
+                        <button type="submit" className="btn btn-primary">{i18n("Edit")}</button>
                       </div>
                   </div>
                 </form>

@@ -3,6 +3,7 @@ import {useNavigate} from 'react-router-dom';
 import Sidebar from './Sidebar';
 import axios from 'axios';
 import config from '../config';
+import {i18n} from '../libs/translations';
 
 export default function Home() {
   const [githubRepos, setGithubRepos] = useState({});
@@ -19,7 +20,7 @@ export default function Home() {
         setGithubRepos(response.data.data);
       }
       else {
-        alert("Error loading Github Tasks");
+        alert(i18n("Error loading Github Tasks"));
       }
     })
     .catch(function(err) {
@@ -53,16 +54,16 @@ export default function Home() {
       <>
         <Sidebar />
         <div className="page">
-          <h2>Github Tasks</h2>
+          <h2>{i18n("Github Tasks")}</h2>
           {isLoading &&
             <div style={{textAlign: "center"}}>
-              <div class="spinner-border" role="status">
-                <span class="visually-hidden">Loading...</span>
+              <div className="spinner-border" role="status">
+                <span className="visually-hidden">{i18n("Loading...")}</span>
               </div>
             </div>
           }
           {Object.keys(githubRepos).length === 0 && !isLoading &&
-            <div>No tasks found in your repositories.</div>
+            <div>{i18n("No tasks found in your repositories.")}</div>
           }
           {Object.keys(githubRepos).map((repoName) => (
             <div key={repoName} style={{marginBottom: "20px"}}>

@@ -1,8 +1,12 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
+import {i18n, getLanguages, setLanguage} from '../libs/translations';
+
+var languages_arr = getLanguages();
 
 export default function LandingPage() {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
+  const [languages, setLanguages] = useState(languages_arr);
 
   return (
     <>
@@ -10,18 +14,17 @@ export default function LandingPage() {
       <section className="bg-dark text-light py-5">
         <div className="container text-center">
           <h1 className="display-4 fw-bold mb-3">
-            PMC – Productivity Management Center
+            {i18n("PMC – Productivity Management Center")}
           </h1>
           <p className="lead mb-4">
-            One centralized system to organize your tasks, time, and schedule —
-            designed for clarity, consistency, and long-term productivity.
+            {i18n("One centralized system to organize your tasks, time, and schedule — designed for clarity, consistency, and long-term productivity.")}
           </p>
 
           <button
             className="btn btn-primary btn-lg px-4"
             onClick={() => window.location.href = 'mailto:general@paken.xyz'}
           >
-            Get Access – 50€ / Year
+            {i18n("Get Access – 50€ / Year")}
           </button>
         </div>
       </section>
@@ -30,41 +33,41 @@ export default function LandingPage() {
       <section className="py-5">
         <div className="container">
           <div className="text-center mb-5">
-            <h2 className="fw-bold">Everything you need to stay productive</h2>
+            <h2 className="fw-bold">{i18n("Everything you need to stay productive")}</h2>
             <p className="text-muted">
-              PMC adapts to your workflow instead of forcing you into one.
+              {i18n("PMC adapts to your workflow instead of forcing you into one.")}
             </p>
           </div>
 
           <div className="row g-4">
             {[
               {
-                title: 'Tasks',
-                text: 'Create, organize, and track tasks with clarity and focus.'
+                title: i18n("Tasks"),
+                text: i18n("Create, organize, and track tasks with clarity and focus.")
               },
               {
-                title: 'Recurrent Tasks',
-                text: 'Manage repeating work without mental overhead.'
+                title: i18n("Recurrent Tasks"),
+                text: i18n("Manage repeating work without mental overhead.")
               },
               {
-                title: 'Monthly Tasks',
-                text: 'Plan higher-level objectives and long-term commitments.'
+                title: i18n("Monthly Tasks"),
+                text: i18n("Plan higher-level objectives and long-term commitments.")
               },
               {
-                title: 'Daily To-Dos',
-                text: 'Stay grounded with a clear daily execution list.'
+                title: i18n("Daily To-Dos"),
+                text: i18n("Stay grounded with a clear daily execution list.")
               },
               {
-                title: 'Schedule',
-                text: 'Structure your time intentionally and avoid chaos.'
+                title: i18n("Schedule"),
+                text: i18n("Structure your time intentionally and avoid chaos.")
               },
               {
-                title: 'Time Tracker',
-                text: 'Understand where your time really goes.'
+                title: i18n("Time Tracker"),
+                text: i18n("Understand where your time really goes.")
               },
               {
-                title: 'Calendar',
-                text: 'Visualize tasks, events, and workload in one place.'
+                title: i18n("Calendar"),
+                text: i18n("Visualize tasks, events, and workload in one place.")
               }
             ].map((feature, index) => (
               <div className="col-md-6 col-lg-4" key={index}>
@@ -88,26 +91,26 @@ export default function LandingPage() {
       <section className="bg-light py-5">
         <div className="container text-center">
           <div className="d-inline-block bg-white p-4 rounded shadow-sm">
-            <h3 className="fw-bold">50€ / Year</h3>
+            <h3 className="fw-bold">{i18n("50€ / Year")}</h3>
             <p className="text-muted mb-3">
-              Full access to all current and future features.
+              {i18n("Full access to all current and future features.")}
             </p>
             <button
               className="btn btn-success btn-lg mb-5"
               onClick={() => window.location.href = 'mailto:general@paken.xyz'}
               style={{width: "350px"}}
             >
-              Contact to Subscribe
+              {i18n("Contact to Subscribe")}
             </button>
             <p className="text-muted mb-3">
-              Already have an account?
+              {i18n("Already have an account?")}
             </p>
             <button
               className="btn btn-primary btn-lg"
               onClick={() => navigate('/login')}
               style={{width: "350px"}}
             >
-              Login
+              {i18n("Login")}
             </button>
           </div>
         </div>
@@ -119,8 +122,18 @@ export default function LandingPage() {
           <small style={{color: "white"}}>
             © {new Date().getFullYear()} Paken
             <br />
-            Contact: general@paken.xyz
+            {i18n("Contact")}: general@paken.xyz
           </small>
+          <div class="dropdown">
+            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                {i18n("Language")}
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                {languages.map((l) => (
+                    <li><div class="set-language-btn" onClick={() => setLanguage(l.languageCode)}>{l.languageName}</div></li>
+                ))}
+            </ul>
+        </div>
         </div>
       </footer>
     </>

@@ -9,6 +9,7 @@ import SimpleToDoTable from "./SimpleToDoTable";
 import { toLocaleISOString } from "../libs/utils";
 import DateTimePicker from "../libs/bs5-datetime/DateTimePicker";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
+import {i18n} from "../libs/translations";
 
 export default function DailyToDos({ folder_id, folder }) {
   const navigate = useNavigate();
@@ -41,19 +42,20 @@ export default function DailyToDos({ folder_id, folder }) {
         }
       })
       .catch(function () {
-        MySwal.fire("Connection Error");
+        MySwal.fire(i18n("Connection Error"));
       });
   }
 
   function deleteFolder() {
     MySwal.fire({
-      title: "Are you sure?",
-      text: "Are you sure you want to delete this folder?",
+      title: i18n("Are you sure?"),
+      text: i18n("Are you sure you want to delete this folder?"),
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#3085d6",
       cancelButtonColor: "#d33",
-      confirmButtonText: "Yes"
+      cancelButtonText: i18n("No"),
+      confirmButtonText: i18n("Yes"),
     }).then((result) => {
       if (result.isConfirmed) {
         axios.post(config.BASE_URL + "/api/delete-folder", {folder_id: folder_id})
@@ -77,10 +79,10 @@ export default function DailyToDos({ folder_id, folder }) {
   }, []);
 
   const categories = [
-    { key: "Urgent and Important", label: "Urgent & Important" },
-    { key: "Not Urgent and Important", label: "Not Urgent & Important" },
-    { key: "Urgent and Not Important", label: "Urgent & Not Important" },
-    { key: "Not Urgent and Not Important", label: "Not Urgent & Not Important" },
+    { key: "Urgent and Important", label: i18n("Urgent & Important") },
+    { key: "Not Urgent and Important", label: i18n("Not Urgent & Important") },
+    { key: "Urgent and Not Important", label: i18n("Urgent & Not Important") },
+    { key: "Not Urgent and Not Important", label: i18n("Not Urgent & Not Important") },
   ];
 
   function handleDragEnd(result) {
@@ -126,14 +128,14 @@ export default function DailyToDos({ folder_id, folder }) {
             className="btn btn-outline-primary me-2 d-inline-block"
             onClick={() => setEisenhowerMode((p) => !p)}
           >
-            {eisenhowerMode ? "Normal View" : "Eisenhower View"}
+            {eisenhowerMode ? i18n("Normal View") : i18n("Eisenhower View")}
           </button>
           <div class="dropdown d-inline-block">
             <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
-              Options
+              {i18n("Options")}
             </button>
             <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-              <li><a class="dropdown-item" href="#" onClick={deleteFolder}>Delete folder</a></li>
+              <li><a class="dropdown-item" href="#" onClick={deleteFolder}>{i18n("Delete folder")}</a></li>
             </ul>
           </div>
         </div>

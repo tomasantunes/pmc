@@ -3,6 +3,7 @@ import {useNavigate} from 'react-router-dom';
 import axios from "axios";
 import config from "../config";
 import Sidebar from './Sidebar';
+import { i18n } from '../libs/translations';
 
 export default function Alerts() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -54,9 +55,9 @@ export default function Alerts() {
                 <tr>
                   <th>IDX</th>
                   <th>ID</th>
-                  <th>Next Run</th>
-                  <th>Cron Expression</th>
-                  <th>Text</th>
+                  <th>{i18n("Next Run")}</th>
+                  <th>{i18n("Cron Expression")}</th>
+                  <th>{i18n("Text")}</th>
                 </tr>
               </thead>
               <tbody>

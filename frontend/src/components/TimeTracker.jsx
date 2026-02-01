@@ -4,6 +4,7 @@ import Sidebar from "./Sidebar";
 import AutoComplete from "./AutoComplete";
 import axios from "axios";
 import config from "../config";
+import { i18n } from "../libs/translations";
 
 export default function TimeTracker() {
   const [description, setDescription] = useState("");
@@ -182,7 +183,7 @@ export default function TimeTracker() {
         <div className="page">
           <div className="container py-5">
             <h2 className="mb-4 text-center">
-              <i className="fas fa-clock me-2"></i>Time Tracker
+              <i className="fas fa-clock me-2"></i>{i18n("Time Tracker")}
             </h2>
 
             <div className="row mb-4">
@@ -199,11 +200,11 @@ export default function TimeTracker() {
                     className="btn btn-primary ms-1 me-2"
                     onClick={startSession}
                   >
-                    <i className="fas fa-play me-1"></i> Start
+                    <i className="fas fa-play me-1"></i> {i18n("Start")}
                   </button>
                   <button className="btn bg-black text-white" onClick={shareToX}>
                     <i class="fa-brands fa-x-twitter me-1"></i>
-                    Share
+                    {i18n("Share")}
                   </button>
                 </div>
               </div>
@@ -211,10 +212,10 @@ export default function TimeTracker() {
 
             <ul class="nav nav-tabs">
               <li class="nav-item">
-                <a class="nav-link" href="#" onClick={tabCurrentSessions}>Current</a>
+                <a class="nav-link" href="#" onClick={tabCurrentSessions}>{i18n("Current")}</a>
               </li>
               <li class="nav-item">
-                <a class="nav-link" href="#" onClick={tabClosedSessions}>Closed</a>
+                <a class="nav-link" href="#" onClick={tabClosedSessions}>{i18n("Closed")}</a>
               </li>
             </ul>
 
@@ -286,7 +287,7 @@ export default function TimeTracker() {
 
                 {sessions.length === 0 && (
                   <div className="text-center text-muted py-3">
-                    No sessions yet.
+                    {i18n("No sessions yet.")}
                   </div>
                 )}
               </div>
@@ -360,7 +361,7 @@ export default function TimeTracker() {
 
                 {sessions.length === 0 && (
                   <div className="text-center text-muted py-3">
-                    No sessions yet.
+                    {i18n("No closed sessions yet.")}
                   </div>
                 )}
               </div>

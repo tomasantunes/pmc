@@ -3,6 +3,9 @@ import axios from 'axios';
 import config from '../config';
 import Select from 'react-select';
 import {Link, useNavigate} from 'react-router-dom';
+import {i18n, getLanguages, setLanguage} from '../libs/translations';
+
+var languages_arr = getLanguages();
 
 export default function Sidebar() {
   const sidebarRef = useRef(null);
@@ -14,6 +17,7 @@ export default function Sidebar() {
   const [selectedFolderType, setSelectedFolderType] = useState();
   const [collapseSidebarMobile, setCollapseSidebarMobile] = useState(true);
   const [showGithubPage, setShowGithubPage] = useState(false);
+  const [languages, setLanguages] = useState(languages_arr);
   const [documentHeight, setDocumentHeight] = useState(
     document.documentElement.scrollHeight
   );
@@ -149,47 +153,57 @@ export default function Sidebar() {
         style={{ height: documentHeight }}
       >
         <h1><b>PMC</b></h1>
+        <div class="dropdown">
+            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                {i18n("Language")}
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                {languages.map((l) => (
+                    <li><div class="set-language-btn" onClick={() => setLanguage(l.languageCode)}>{l.languageName}</div></li>
+                ))}
+            </ul>
+        </div>
         <ul className="menu">
-            <li><Link to="/home">Home</Link></li>
-            <li><a href="/static/pmc-user-manual.pdf" target="_blank" rel="noopener noreferrer">User Manual</a></li>
-            <li><Link to="/calendar">Calendar</Link></li>
-            <li><Link to="/schedule">Schedule</Link></li>
-            <li><Link to="/alerts">Alerts</Link></li>
-            <li><Link to="/time-tracker">Time Tracker</Link></li>
-            <li><Link to="/random-task">Random Task</Link></li>
-            {showGithubPage && <li><Link to="/github-tasks">Github Tasks</Link></li>}
-            {/*<li><Link to="/motivation">Motivation</Link></li>*/}
-            <li><a href="#" onClick={openAddFolder}>Add Folder</a></li>
+            <li><Link to="/home">{i18n("Home")}</Link></li>
+            <li><a href="/static/pmc-user-manual.pdf" target="_blank" rel="noopener noreferrer">{i18n("User Manual")}</a></li>
+            <li><Link to="/calendar">{i18n("Calendar")}</Link></li>
+            <li><Link to="/schedule">{i18n("Schedule")}</Link></li>
+            <li><Link to="/alerts">{i18n("Alerts")}</Link></li>
+            <li><Link to="/time-tracker">{i18n("Time Tracker")}</Link></li>
+            <li><Link to="/random-task">{i18n("Random Task")}</Link></li>
+            {showGithubPage && <li><Link to="/github-tasks">{i18n("Github Tasks")}</Link></li>}
+            {/*<li><Link to="/motivation">{i18n("Motivation")}</Link></li>*/}
+            <li><a href="#" onClick={openAddFolder}>{i18n("Add Folder")}</a></li>
             {folders.map((folder) => {
               return (
                 <li key={folder.id}><a href="#" onClick={() => goToLink("/folder/" + folder.id)}>{folder.name}</a></li>
               )
             })}
-            <li><a href="/api/logout">Logout</a></li>
+            <li><a href="/api/logout">{i18n("Logout")}</a></li>
         </ul>
       </div>
       <div class="modal addFolderModal" tabindex="-1">
         <div class="modal-dialog">
           <div class="modal-content">
             <div class="modal-header">
-              <h5 class="modal-title">Add Folder</h5>
+              <h5 class="modal-title">{i18n("Add Folder")}</h5>
               <button type="button" class="btn-close" onClick={closeAddFolder} aria-label="Close"></button>
             </div>
             <div class="modal-body">
               <form onSubmit={submitAddFolder}>
                 <div className="form-group py-2">
-                  <label className="control-label">Name</label>
+                  <label className="control-label">{i18n("Name")}</label>
                   <div>
                       <input type="text" className="form-control input-lg" name="name" value={newFolder.name} onChange={changeNewFolderName}/>
                   </div>
                 </div>
                 <div className="form-group py-2">
-                  <label className="control-label">Type</label>
+                  <label className="control-label">{i18n("Type")}</label>
                   <Select value={selectedFolderType} options={folderTypes} onChange={changeNewFolderType} />
                 </div>
                 <div className="form-group">
                     <div style={{textAlign: "right"}}>
-                        <button type="submit" className="btn btn-primary">Add</button>
+                        <button type="submit" className="btn btn-primary">{i18n("Add")}</button>
                     </div>
                 </div>
               </form>

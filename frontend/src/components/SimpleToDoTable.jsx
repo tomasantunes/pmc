@@ -3,6 +3,7 @@ import axios from 'axios';
 import config from '../config';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
+import {i18n} from '../libs/translations';
 const MySwal = withReactContent(Swal);
 
 export default function SimpleToDoTable({title, tasks, setTasks, folder_id, selectedDate, loadTasks}) {
@@ -40,7 +41,7 @@ export default function SimpleToDoTable({title, tasks, setTasks, folder_id, sele
       }
     })
     .catch(function(err) {
-      MySwal.fire("Connection Error");
+      MySwal.fire(i18n("Connection Error"));
     });
   }
 
@@ -57,12 +58,12 @@ export default function SimpleToDoTable({title, tasks, setTasks, folder_id, sele
         loadTasks(selectedDate);
       }
       else {
-        MySwal.fire("Error updating task.");
+        MySwal.fire(i18n("Error updating task."));
       }
     })
     .catch(function(err) {
       console.log(err);
-      MySwal.fire("Error updating task.");
+      MySwal.fire(i18n("Error updating task."));
     })
   }
 
@@ -78,7 +79,7 @@ export default function SimpleToDoTable({title, tasks, setTasks, folder_id, sele
 
   function saveTaskDescription(task_id) {
     if (!editingDescription.trim()) {
-      MySwal.fire("Task description cannot be empty");
+      MySwal.fire(i18n("Task description cannot be empty"));
       return;
     }
 
@@ -110,13 +111,14 @@ export default function SimpleToDoTable({title, tasks, setTasks, folder_id, sele
 
   function deleteTask(task_id) {
     MySwal.fire({
-      title: 'Are you sure?',
-      text: "You won't be able to revert this!",
+      title: i18n('Are you sure?'),
+      text: i18n("You won't be able to revert this!"),
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonColor: '#3085d6',
-      cancelButtonColor: '#d33',
-      confirmButtonText: 'Yes, delete it!'
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: i18n('Yes'),
+      cancelButtonText: i18n('No')
     }).then((result) => {
       if (result.isConfirmed) {
         const data = {
@@ -129,8 +131,8 @@ export default function SimpleToDoTable({title, tasks, setTasks, folder_id, sele
             // Remove the task from the local state
             setTasks(tasks.filter(task => task.id !== task_id));
             MySwal.fire(
-              'Deleted!',
-              'Your task has been deleted.',
+              i18n('Deleted!'),
+              i18n('Your task has been deleted.'),
               'success'
             );
           }
@@ -139,7 +141,7 @@ export default function SimpleToDoTable({title, tasks, setTasks, folder_id, sele
           }
         })
         .catch(function(err) {
-          MySwal.fire("Connection Error");
+          MySwal.fire(i18n("Connection Error"));
         });
       }
     });
@@ -152,8 +154,8 @@ export default function SimpleToDoTable({title, tasks, setTasks, folder_id, sele
         <thead className="table-dark">
           <tr>
             <th></th>
-            <th>Task</th>
-            <th>Actions</th>
+            <th>{i18n("Task")}</th>
+            <th>{i18n("Actions")}</th>
           </tr>
         </thead>
         <tbody>
@@ -221,7 +223,7 @@ export default function SimpleToDoTable({title, tasks, setTasks, folder_id, sele
           <tr>
             <td></td>
             <td>
-              <textarea className="form-control mt-2" rows="2" placeholder="Enter task description..." value={newTaskDescription} onChange={changeNewTaskDescription}></textarea>
+              <textarea className="form-control mt-2" rows="2" placeholder={i18n("Enter task description...")} value={newTaskDescription} onChange={changeNewTaskDescription}></textarea>
             </td>
             <td><button className="btn btn-success" onClick={addTask}><i className="fas fa-plus" /></button></td>
           </tr>

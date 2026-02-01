@@ -4,6 +4,7 @@ import config from '../config';
 import {useNavigate} from 'react-router-dom';
 import Swal from 'sweetalert2'
 import withReactContent from 'sweetalert2-react-content'
+import {i18n} from '../libs/translations';
 const MySwal = withReactContent(Swal)
 
 function TRow(props) {
@@ -13,11 +14,11 @@ function TRow(props) {
       <td>
       <div class="dropdown">
         <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
-          Actions
+          {i18n("Actions")}
         </button>
         <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-          <li><a class="dropdown-item" href="#" onClick={() => { props.openEditTask(props.task_id) }}>Edit</a></li>
-          <li><a class="dropdown-item" href="#" onClick={() => { props.deleteTask(props.task_id) }}>Delete</a></li>
+          <li><a class="dropdown-item" href="#" onClick={() => { props.openEditTask(props.task_id) }}>{i18n("Edit")}</a></li>
+          <li><a class="dropdown-item" href="#" onClick={() => { props.deleteTask(props.task_id) }}>{i18n("Delete")}</a></li>
         </ul>
       </div>
       </td>
@@ -198,13 +199,14 @@ export default function Tasks({folder_id, folder}) {
 
   function deleteTask(task_id) {
     MySwal.fire({
-      title: "Are you sure?",
-      text: "Are you sure you want to delete this task?",
+      title: i18n("Are you sure?"),
+      text: i18n("Are you sure you want to delete this task?"),
       icon: "warning",
       showCancelButton: true,
-      confirmButtonColor: "#3085d6",
-      cancelButtonColor: "#d33",
-      confirmButtonText: "Yes"
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: i18n("Yes"),
+      cancelButtonText: i18n("No")
     }).then((result) => {
       if (result.isConfirmed) {
         axios.post(config.BASE_URL + "/api/delete-task", {task_id: task_id})
@@ -225,13 +227,14 @@ export default function Tasks({folder_id, folder}) {
 
   function deleteFolder() {
     MySwal.fire({
-      title: "Are you sure?",
-      text: "Are you sure you want to delete this folder?",
+      title: i18n("Are you sure?"),
+      text: i18n("Are you sure you want to delete this folder?"),
       icon: "warning",
       showCancelButton: true,
-      confirmButtonColor: "#3085d6",
-      cancelButtonColor: "#d33",
-      confirmButtonText: "Yes"
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: i18n("Yes"),
+      cancelButtonText: i18n("No")
     }).then((result) => {
       if (result.isConfirmed) {
         axios.post(config.BASE_URL + "/api/delete-folder", {folder_id: folder_id})
@@ -271,17 +274,17 @@ export default function Tasks({folder_id, folder}) {
     <>
       <div className="row">
         <div className="col-md-6">
-          <p><b>Total Tasks:</b> {totalTasks}</p>
+          <p><b>{i18n("Total Tasks:")}</b> {totalTasks}</p>
         </div>
         <div className="col-md-6">
           <div className="buttons-menu my-3">
             <button className="btn btn-success" onClick={openAddTask}>Add Task</button>
             <div class="dropdown">
               <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
-                Options
+                {i18n("Options")}
               </button>
               <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-                <li><a class="dropdown-item" href="#" onClick={deleteFolder}>Delete folder</a></li>
+                <li><a class="dropdown-item" href="#" onClick={deleteFolder}>{i18n("Delete folder")}</a></li>
               </ul>
             </div>
           </div>
@@ -290,8 +293,8 @@ export default function Tasks({folder_id, folder}) {
       <table className="table table-striped table-bordered align-middle tasks">
           <thead class="table-dark">
               <tr>
-                  <th style={{width: "75%"}}>Task</th>
-                  <th style={{width: "25%"}}>Actions</th>
+                  <th style={{width: "75%"}}>{i18n("Task")}</th>
+                  <th style={{width: "25%"}}>{i18n("Actions")}</th>
               </tr>
           </thead>
           <TBodyPlain data={tasks} openEditTask={openEditTask} deleteTask={deleteTask} />
@@ -300,20 +303,20 @@ export default function Tasks({folder_id, folder}) {
         <div class="modal-dialog">
           <div class="modal-content">
             <div class="modal-header">
-              <h5 class="modal-title">Add Task</h5>
+              <h5 class="modal-title">{i18n("Add Task")}</h5>
               <button type="button" class="btn-close" onClick={closeAddTask} aria-label="Close"></button>
             </div>
             <div class="modal-body">
               <form onSubmit={submitAddTask}>
                 <div className="form-group py-2">
-                  <label className="control-label">Description</label>
+                  <label className="control-label">{i18n("Description")}</label>
                   <div>
                       <textarea className="form-control input-lg" rows="3" name="description" value={newTask.description} onChange={changeNewTaskDescription}></textarea>
                   </div>
                 </div>
                 <div className="form-group">
                     <div style={{textAlign: "right"}}>
-                        <button type="submit" className="btn btn-primary">Add</button>
+                        <button type="submit" className="btn btn-primary">{i18n("Add")}</button>
                     </div>
                 </div>
               </form>
@@ -325,20 +328,20 @@ export default function Tasks({folder_id, folder}) {
         <div class="modal-dialog">
           <div class="modal-content">
             <div class="modal-header">
-              <h5 class="modal-title">Edit Task</h5>
+              <h5 class="modal-title">{i18n("Edit Task")}</h5>
               <button type="button" class="btn-close" onClick={closeEditTask} aria-label="Close"></button>
             </div>
             <div class="modal-body">
               <form onSubmit={submitEditTask}>
                 <div className="form-group py-2">
-                  <label className="control-label">Description</label>
+                  <label className="control-label">{i18n("Description")}</label>
                   <div>
                       <textarea className="form-control input-lg" rows="3" name="description" value={editTask.description} onChange={changeEditTaskDescription}></textarea>
                   </div>
                 </div>
                 <div className="form-group">
                     <div style={{textAlign: "right"}}>
-                        <button type="submit" className="btn btn-primary">Save</button>
+                        <button type="submit" className="btn btn-primary">{i18n("Save")}</button>
                     </div>
                 </div>
               </form>

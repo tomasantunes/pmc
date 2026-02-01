@@ -2,7 +2,7 @@ import React, {useState} from 'react';
 import axios from 'axios';
 import config from '../config.json';
 import {useNavigate, useSearchParams} from 'react-router-dom';
-
+import {i18n} from '../libs/translations';
 
 import Swal from 'sweetalert2'
 import withReactContent from 'sweetalert2-react-content'
@@ -49,7 +49,7 @@ export default function SetNewPassword() {
         style={{ maxWidth: "420px" }}
       >
         <div className="text-center mb-4">
-          <h4 className="fw-bold mb-0">Set New Password</h4>
+          <h4 className="fw-bold mb-0">{i18n("Set New Password")}</h4>
         </div>
 
         <div className="form-floating mb-3">
@@ -63,7 +63,7 @@ export default function SetNewPassword() {
             className="form-control"
             required
           />
-          <label htmlFor="password">Password</label>
+          <label htmlFor="password">{i18n("Password")}</label>
         </div>
 
         <div className="form-floating mb-3">
@@ -77,11 +77,11 @@ export default function SetNewPassword() {
             className="form-control"
             required
           />
-          <label htmlFor="password">Confirm Password</label>
+          <label htmlFor="password">{i18n("Confirm Password")}</label>
         </div>
 
         <button className="btn btn-primary w-100 py-2" type="submit">
-          Set New Password
+          {i18n("Set New Password")}
         </button>
       </form>
     </>
