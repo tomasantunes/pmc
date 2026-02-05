@@ -8,8 +8,10 @@ import DateTimePicker from '../libs/bs5-datetime/DateTimePicker';
 import Select from "react-select";
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
-import {i18n} from '../libs/translations';
+import {i18n, getCurrentLanguage} from '../libs/translations';
 const MySwal = withReactContent(Swal);
+
+var lang = getCurrentLanguage();
 
 function TRow(props) {
   return (
@@ -529,13 +531,13 @@ export default function Tasks({folder_id, folder}) {
                 <div className="form-group py-2">
                   <label className="control-label">{i18n("Start")}</label>
                     <div>
-                      <DateTimePicker defaultValue={selectedNewStartTime} onChange={handleChangeNewStartTime} />
+                      <DateTimePicker defaultValue={selectedNewStartTime} onChange={handleChangeNewStartTime} locale={lang} />
                     </div>
                 </div>
                 <div className="form-group py-2">
                   <label className="control-label">{i18n("End")}</label>
                   <div>
-                    <DateTimePicker defaultValue={selectedNewEndTime} onChange={handleChangeNewEndTime} />
+                    <DateTimePicker defaultValue={selectedNewEndTime} onChange={handleChangeNewEndTime} locale={lang} />
                   </div>
                 </div>
                 <div className="form-group">
@@ -566,13 +568,13 @@ export default function Tasks({folder_id, folder}) {
                 <div className="form-group py-2">
                   <label className="control-label">{i18n("Start")}</label>
                   <div>
-                    <DateTimePicker defaultValue={selectedEditStartTime} onChange={setSelectedEditStartTime} />
+                    <DateTimePicker defaultValue={selectedEditStartTime} onChange={setSelectedEditStartTime} locale={lang} />
                   </div>
                 </div>
                 <div className="form-group py-2">
                   <label className="control-label">{i18n("End")}</label>
                   <div>
-                    <DateTimePicker defaultValue={selectedEditEndTime} onChange={setSelectedEditEndTime} />
+                    <DateTimePicker defaultValue={selectedEditEndTime} onChange={setSelectedEditEndTime} locale={lang} />
                   </div>
                 </div>
                 <div className="form-group">

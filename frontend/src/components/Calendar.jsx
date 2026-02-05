@@ -11,7 +11,9 @@ import timeGridPlugin from '@fullcalendar/timegrid';
 import listPlugin from '@fullcalendar/list';
 import interactionPlugin from '@fullcalendar/interaction';
 import {toLocaleISOString} from '../libs/utils';
-import { i18n } from '../libs/translations';
+import { i18n, getCurrentLanguage } from '../libs/translations';
+
+var lang = getCurrentLanguage();
 
 export default function Home() {
   const calendarRef = useRef(null);
@@ -276,13 +278,13 @@ export default function Home() {
                   <div className="form-group py-2">
                     <label className="control-label">{i18n("Start")}</label>
                     <div>
-                      <DateTimePicker value={selectedNewStartTime} defaultValue={selectedNewStartTime} onChange={handleChangeNewStartTime} />
+                      <DateTimePicker value={selectedNewStartTime} defaultValue={selectedNewStartTime} onChange={handleChangeNewStartTime} locale={lang} />
                     </div>
                   </div>
                   <div className="form-group py-2">
                     <label className="control-label">{i18n("End")}</label>
                     <div>
-                      <DateTimePicker value={selectedNewEndTime} defaultValue={selectedNewEndTime} onChange={handleChangeNewEndTime} />
+                      <DateTimePicker value={selectedNewEndTime} defaultValue={selectedNewEndTime} onChange={handleChangeNewEndTime} locale={lang} />
                     </div>
                   </div>
                   <div className="form-group">
@@ -313,13 +315,13 @@ export default function Home() {
                   <div className="form-group py-2">
                     <label className="control-label">{i18n("Start")}</label>
                     <div>
-                      <DateTimePicker value={selectedEditStartTime} defaultValue={selectedEditStartTime} onChange={handleChangeEditStartTime} />
+                      <DateTimePicker value={selectedEditStartTime} defaultValue={selectedEditStartTime} onChange={handleChangeEditStartTime} locale={lang} />
                     </div>
                   </div>
                   <div className="form-group py-2">
                     <label className="control-label">{i18n("End")}</label>
                     <div>
-                      <DateTimePicker value={selectedEditEndTime} defaultValue={selectedEditEndTime} onChange={handleChangeEditEndTime} />
+                      <DateTimePicker value={selectedEditEndTime} defaultValue={selectedEditEndTime} onChange={handleChangeEditEndTime} locale={lang} />
                     </div>
                   </div>
                   <div className="form-group">

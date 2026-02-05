@@ -9,7 +9,9 @@ import SimpleToDoTable from "./SimpleToDoTable";
 import { toLocaleISOString } from "../libs/utils";
 import DateTimePicker from "../libs/bs5-datetime/DateTimePicker";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
-import {i18n} from "../libs/translations";
+import {i18n, getCurrentLanguage} from "../libs/translations";
+
+var lang = getCurrentLanguage();
 
 export default function DailyToDos({ folder_id, folder }) {
   const navigate = useNavigate();
@@ -120,6 +122,7 @@ export default function DailyToDos({ folder_id, folder }) {
             value={selectedDate}
             defaultValue={defaultDate}
             onChange={handleDateChange}
+            locale={lang}
             options={datePickerOptions}
           />
         </div>
