@@ -59,7 +59,6 @@ var translations = {
     "Manage repeating work without mental overhead.": {"en-us": "Manage repeating work without mental overhead.", "pt-pt": "Gerencie trabalho repetitivo sem sobrecarga mental."},
     "Monthly Tasks": {"en-us": "Monthly Tasks", "pt-pt": "Tarefas Mensais"},
     "Plan higher-level objectives and long-term commitments.": {"en-us": "Plan higher-level objectives and long-term commitments.", "pt-pt": "Planeje objetivos de alto nível e compromissos a longo prazo."},
-    "Daily To-Dos": {"en-us": "Daily To-Dos", "pt-pt": "Tarefas Diárias"},
     "Stay grounded with a clear daily execution list.": {"en-us": "Stay grounded with a clear daily execution list.", "pt-pt": "Mantenha-se focado com uma lista clara de execução diária."},
     "Structure your time intentionally and avoid chaos.": {"en-us": "Structure your time intentionally and avoid chaos.", "pt-pt": "Estruture seu tempo intencionalmente e evite o caos."},
     "Understand where your time really goes.": {"en-us": "Understand where your time really goes.", "pt-pt": "Entenda para onde seu tempo realmente vai."},
@@ -171,9 +170,12 @@ var translations = {
     "Starred": {"en-us": "Starred", "pt-pt": "Favorita"},
     "Select folder...": {"en-us": "Select folder...", "pt-pt": "Selecionar pasta..."},
     "Edit Task": {"en-us": "Edit Task", "pt-pt": "Editar Tarefa"},
-    "Move Task": {"en-us": "Move Task", "pt-pt": "Mover Tarefa"}
-
-
+    "Move Task": {"en-us": "Move Task", "pt-pt": "Mover Tarefa"},
+    "Simple": {"en-us": "Simple", "pt-pt": "Simples"},
+    "Recurrent": {"en-us": "Recurrent", "pt-pt": "Recorrente"},
+    "Monthly": {"en-us": "Monthly", "pt-pt": "Mensal"},
+    "List": {"en-us": "List", "pt-pt": "Lista"},
+    "Daily To-Dos": {"en-us": "Daily To-Dos", "pt-pt": "To-Dos Diários"},
 }
 
 export function i18n(text) {

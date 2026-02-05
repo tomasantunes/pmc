@@ -24,11 +24,11 @@ export default function Sidebar() {
   var navigate = useNavigate();
 
   const folderTypes = [
-    { value: 'simple', label: 'Simple' },
-    { value: 'recurrent', label: 'Recurrent' },
-    { value: 'monthly', label: 'Monthly' },
-    { value: 'list', label: 'List' },
-    { value: 'daily-todos', label: 'Daily To-Dos' },
+    { value: 'simple', label: i18n('Simple') },
+    { value: 'recurrent', label: i18n('Recurrent') },
+    { value: 'monthly', label: i18n('Monthly') },
+    { value: 'list', label: i18n('List') },
+    { value: 'daily-todos', label: i18n('Daily To-Dos') },
   ]
 
   function loadFolders() {
