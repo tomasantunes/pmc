@@ -2,11 +2,13 @@ import React, {useState} from 'react';
 import axios from 'axios';
 import config from '../config.json';
 import {useNavigate} from 'react-router-dom';
-import {i18n} from '../libs/translations'
+import {i18n, getCurrentLanguage} from '../libs/translations'
 
 import Swal from 'sweetalert2'
 import withReactContent from 'sweetalert2-react-content'
 const MySwal = withReactContent(Swal)
+
+var user_manual_link = getCurrentLanguage() == "en-us" ? "/static/pmc-user-manual.pdf" : "/static/pmc-user-manual-pt.pdf";
 
 export default function Login() {
   const [user, setUser] = useState("");
@@ -116,7 +118,7 @@ export default function Login() {
           <a href="/forgot-password" className="text-muted d-block mb-1">
             {i18n("Forgot your password?")}
           </a>
-          <a href="/static/pmc-user-manual.pdf" className="text-muted d-block mb-1" target="_blank" rel="noopener noreferrer">
+          <a href={user_manual_link} className="text-muted d-block mb-1" target="_blank" rel="noopener noreferrer">
             {i18n("User Manual")}
           </a>
         </div>

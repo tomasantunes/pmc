@@ -214,6 +214,10 @@ export function getLanguages() {
     ];
 }
 
+export function getCurrentLanguage() {
+    return localStorage.getItem("language");
+}
+
 export function init() {
     if (!localStorage.getItem("language")) {
         localStorage.setItem("language", "en-us");
@@ -224,5 +228,6 @@ export default {
   i18n,
   setLanguage,
   getLanguages,
-  init
+  init,
+  getCurrentLanguage
 };

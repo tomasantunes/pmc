@@ -3,9 +3,10 @@ import axios from 'axios';
 import config from '../config';
 import Select from 'react-select';
 import {Link, useNavigate} from 'react-router-dom';
-import {i18n, getLanguages, setLanguage} from '../libs/translations';
+import {i18n, getLanguages, setLanguage, getCurrentLanguage} from '../libs/translations';
 
 var languages_arr = getLanguages();
+var user_manual_link = getCurrentLanguage() == "en-us" ? "/static/pmc-user-manual.pdf" : "/static/pmc-user-manual-pt.pdf";
 
 export default function Sidebar() {
   const sidebarRef = useRef(null);
@@ -165,7 +166,7 @@ export default function Sidebar() {
         </div>
         <ul className="menu">
             <li><Link to="/home">{i18n("Home")}</Link></li>
-            <li><a href="/static/pmc-user-manual.pdf" target="_blank" rel="noopener noreferrer">{i18n("User Manual")}</a></li>
+            <li><a href={user_manual_link} target="_blank" rel="noopener noreferrer">{i18n("User Manual")}</a></li>
             <li><Link to="/calendar">{i18n("Calendar")}</Link></li>
             <li><Link to="/schedule">{i18n("Schedule")}</Link></li>
             <li><Link to="/alerts">{i18n("Alerts")}</Link></li>
