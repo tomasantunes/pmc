@@ -1,10 +1,11 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import "./bs5-datetime.min.css";
 
 export default function DateTimePicker({ value, onChange, defaultValue, locale, options }) {
   const inputRef = useRef(null);
   const toggleRef = useRef(null);
   const pickerRef = useRef(null);
+  const [placeholder, setPlaceholder] = useState("");
 
   useEffect(() => {
     (async () => {
@@ -25,6 +26,8 @@ export default function DateTimePicker({ value, onChange, defaultValue, locale, 
           },
           options || {}
         );
+
+        setPlaceholder(window.placeholder);
 
         // set initial value
         if (value || defaultValue) {
@@ -47,7 +50,7 @@ export default function DateTimePicker({ value, onChange, defaultValue, locale, 
         ref={inputRef}
         type="text"
         className="form-control"
-        placeholder="Select date and time"
+        placeholder={placeholder}
         defaultValue={defaultValue || ""}
         onChange={(e) => {
           onChange && onChange(e.target.value);
