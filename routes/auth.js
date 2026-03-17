@@ -259,6 +259,16 @@ router.get("/api/get-user-info", async (req, res) => {
     return;
   }
 
+  if (req.session.userId === 0) {
+    res.json({status: "OK", data: {
+      username: secretConfig.USER,
+      email: "",
+      registration_date: "",
+      license_expiration_date: ""
+    }});
+    return;
+  }
+
   var sql1 = "SELECT username, email, created_at, license_expires FROM users WHERE id = ? LIMIT 1";
 
   var [rows, fields] = await con2.execute(sql1, [req.session.userId]);
