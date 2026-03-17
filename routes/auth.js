@@ -185,8 +185,9 @@ router.post("/api/reset-password", async (req, res) => {
   try {
     await con2.execute(sql2, [resetPasswordToken, toLocaleISOString(new Date(resetPasswordExpires)), user_id]);
     var resetLink = `${secretConfig.BASE_URL}/set-new-password?token=${resetPasswordToken}&id=${user_id}`;
+    var subject = "PMC Password Reset";
     var emailText = `Click the following link to reset your password: <a href="${resetLink}">${resetLink}</a>`;
-    sendEmail(emailText);
+    sendEmail(subject, emailText, rows[0].email);
   } catch (err) {
     console.log(err);
     res.json({status: "NOK", error: "Error setting reset token."});
