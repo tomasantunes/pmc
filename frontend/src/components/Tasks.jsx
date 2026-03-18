@@ -498,6 +498,7 @@ export default function Tasks({folder_id, folder}) {
         <div className="text-center">
           <h3>Tasks</h3>
         </div>
+        {tasks.filter(task => task.starred == false).length == 0 && <p className="text-center">{i18n("No tasks found.")}</p>}
         <table className="table table-striped table-bordered align-middle tasks">
             <thead class="table-dark">
                 <tr>

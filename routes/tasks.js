@@ -111,6 +111,7 @@ router.post("/api/add-task", (req, res) => {
   var end_time = req.body.end_time;
   var sort_index = req.body.sort_index;
   var type = req.body.type;
+  var createEvent = true;
 
   if (
     typeof start_time == "undefined" ||
@@ -128,6 +129,7 @@ router.post("/api/add-task", (req, res) => {
       .toLocaleISOString(new Date("1970-01-01Z00:00:00:000"))
       .slice(0, 19)
       .replace("T", " ");
+    createEvent = false;
   }
 
   var sql =
@@ -141,15 +143,17 @@ router.post("/api/add-task", (req, res) => {
         res.json({ status: "NOK", error: err.message });
       }
 
-      var sql2 =
-        "INSERT INTO events (task_id, start_date, end_date, description, user_id) VALUES (?, ?, ?, ?, ?)";
-      await con2.query(sql2, [
-        result.insertId,
-        start_time,
-        end_time,
-        description,
-        req.session.userId,
-      ]);
+      if (createEvent) {
+        var sql2 =
+          "INSERT INTO events (task_id, start_date, end_date, description, user_id) VALUES (?, ?, ?, ?, ?)";
+        await con2.query(sql2, [
+          result.insertId,
+          start_time,
+          end_time,
+          description,
+          req.session.userId,
+        ]);
+      }
 
       res.json({ status: "OK", data: "Task has been added successfully." });
     },
@@ -198,6 +202,7 @@ router.post("/api/edit-task", (req, res) => {
   var description = req.body.description;
   var start_time = req.body.start_time;
   var end_time = req.body.end_time;
+  var createEvent = true;
 
   console.log(description);
 
@@ -215,6 +220,7 @@ router.post("/api/edit-task", (req, res) => {
       .toISOString()
       .slice(0, 19)
       .replace("T", " ");
+    createEvent = false;
   }
 
   var sql =
@@ -228,9 +234,11 @@ router.post("/api/edit-task", (req, res) => {
         res.json({ status: "NOK", error: err.message });
       }
 
-      var sql2 =
-        "UPDATE events SET start_date = ?, end_date = ?, description = ? WHERE task_id = ? AND user_id = ?";
-      await con2.query(sql2, [start_time, end_time, description, task_id, req.session.userId]);
+      if (createEvent) {
+        var sql2 =
+          "UPDATE events SET start_date = ?, end_date = ?, description = ? WHERE task_id = ? AND user_id = ?";
+        await con2.query(sql2, [start_time, end_time, description, task_id, req.session.userId]);
+      }
 
       res.json({ status: "OK", data: "Task has been updated successfully." });
     },
