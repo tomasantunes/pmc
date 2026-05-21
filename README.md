@@ -20,6 +20,9 @@ Productivity Management Center - Made with Express and React
 
 ```
 Import database/create-tables.sql to MySQL
+sudo apt install redis-server
+sudo systemctl enable redis-server
+sudo systemctl start redis-server
 Copy and edit secret-config-base.json and rename it to secret-config.json
 Copy and edit frontend/src/config-base.json and rename it to config.json
 npm install
@@ -28,56 +31,29 @@ npm install
 npm run build
 cd ..
 npm start
-Go to localhost:4002
+Go to localhost:PORT
+
 ```
 
 ## User Manual
 
 ### Configuration
 
-On the file "secret-config.json" you will have to write the database credentials, generate a session key, set your username and password to enter the app.
+On the file "secret-config.json" you will have to write the database credentials, redis URL and password, generate a session key, set your root username and password and define a port.
+
+If you want email, you'll have to enter SMTP credentials and admin recipient email.
 
 For the "ENVIRONMENT" variable you will have to choose between "UBUNTU", "MACOS" or "WINDOWS".
 
 You can generate a Github token on your Github account's settings and an OpenAI API key on https://platform.openai.com
 
-### Creating folders
+### Create new user
 
-On the sidebar press "Add Folder", type the name of the folder and select between "Simple", "Recurrent" or "List".
+Run the command "node generate-license.js". The license will be printed on the console. You give this license to the user and then he can sign up to the app.
 
-Simple folders will have a To-Do List where you can create tasks and check them as you do them. You can also star tasks so they go to the top. For each task you can define a description, a start date and time and an end date and time. You can also move a simple task to another simple folder.
+If you need to activate license for a certain user (for renewal):
 
-Recurrent folders will have a weekly grid of checkboxes that you can check every day. You can set a start time and an end time for each task. You can also define the specific days of the week when you will do those tasks.
-
-There is an option to cancel today's task and to restart the counter for a task.
-
-You can setup the tasks and when the time comes you check if it's necessary to do the task and if it isn't you place the checkmark anyway.
-
-List folders will just display a list of items.
-
-Daily To-Dos are another type of folder where you can define tasks for a specific date, mark them as done and if you switch to Eisenhower mode you can organize your daily tasks according to the eisenhower categories by dragging and dropping them.
-
-On Monthly folders you can set tasks to be done on a monthly basis. To create a new monthly task write the description and choose on which months it needs to be done.
-
-### Github tasks
-
-On this page will be displayed the tasks from any TODO.md files that you have on the root of your repos and any open issues on your repos.
-
-### Motivation
-
-CURRENTLY UNAVAILABLE
-
-### Random Task
-
-This page will display a random task from any folder that isn't done.
-
-### Schedule
-
-CURRENTLY NOT WORKING CORRECTLY
-
-## Calendar
-
-On this page you can see events weekly in a timetable or a list and you can create new events. If you set a start datetime and end datetime on a simple task it will automatically generate an event.
+node activate-license.js <user_id> <license_key>
 
 ## Note
 
