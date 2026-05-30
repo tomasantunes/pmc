@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import axios from 'axios';
 import config from '../config';
 import {useNavigate} from 'react-router-dom';
@@ -440,27 +440,30 @@ export default function Tasks({folder_id, folder}) {
     setHideStrikethrough(!hideStrikethrough);
   }
 
+  function playVoiceOverview() {
+    axios.get("/get-folder-tts", {
+      params: {
+        folder_id: folder_id
+      }
+    })
+    .then(function(response) {          
+      if (response.data.status == "OK") {
+        var ttsFile = response.data.ttsFile;
+        updateAudio(config.BASE_URL + "/api/get-audio/?filename=" + ttsFile);
+      }
+      else {
+        console.log(response.data.error);
+      }
+    })
+    .catch(function(err) {
+      console.log(err);
+    });
+  }
+
   function toggleVoiceOverview() {
     if (!voiceOverview) {
       var timer = setInterval(function() {
-        axios.get("/get-folder-tts", {
-          params: {
-            user_id: user_id,
-            folder_id: folder_id
-          }
-        })
-        .then(function(response) {          
-          if (response.data.status == "OK") {
-            var ttsFile = response.data.ttsFile;
-            updateAudio(config.BASE_URL + "/api/get-audio/?filename=" + ttsFile);
-          }
-          else {
-            console.log(response.data.error);
-          }
-        })
-        .catch(function(err) {
-          console.log(err);
-        });
+        playVoiceOverview();
       }, 1800000);
     }
     else {
@@ -518,6 +521,7 @@ export default function Tasks({folder_id, folder}) {
                   <li><a class="dropdown-item" href="#" onClick={toggleHideDone}>{hideDone ? i18n("Show Done") : i18n("Hide Done")}</a></li>
                   <li><a class="dropdown-item" href="#" onClick={toggleHideStrikethrough}>{hideStrikethrough ? i18n("Show Strikethrough") : i18n("Hide Strikethrough")}</a></li>
                   <li><a class="dropdown-item" href="#" onClick={toggleVoiceOverview}>{voiceOverview ? i18n("Deactivate Voice Overview") : i18n("Activate Voice Overview")}</a></li>
+                  <li><a class="dropdown-item" href="#" onClick={playVoiceOverview}>{i18n("Play Voice Overview")}</a></li>
                 </ul>
               </div>
             </div>

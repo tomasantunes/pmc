@@ -3,6 +3,7 @@ const {getTaskList} = require('./tasks');
 const secretConfig = require('../secret-config');
 const path = require('path');
 const fs = require('fs');
+const crypto = require('crypto');
 
 function getOpenAIInstance() {
     const configuration = {
@@ -27,8 +28,8 @@ async function getMotivationalText(openai, messages) {
 }
 
 async function tts(openai, text) {
-  const filepath = crypto.getRandomBytes(16).toString("hex") + ".mp3";
-  const speechFile = path.resolve("./speech/" + filepath);
+  const filepath = crypto.randomBytes(16).toString("hex") + ".mp3";
+  const speechFile = path.resolve(__dirname, "../speech/" + filepath);
   const mp3 = await openai.audio.speech.create({
     model: "gpt-4o-mini-tts",
     voice: "coral",

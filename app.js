@@ -23,6 +23,7 @@ var monthlyTasksRouter = require("./routes/monthly-tasks");
 var timetrackerRouter = require("./routes/timetracker");
 var alertsRouter = require("./routes/alerts");
 var staticFilesRouter = require("./routes/static-files");
+var voiceOverviewRouter = require("./routes/voice-overview");
 
 var app = express();
 
@@ -79,6 +80,7 @@ app.use("/", dailyTodosRouter);
 app.use("/", monthlyTasksRouter);
 app.use("/", timetrackerRouter);
 app.use("/", alertsRouter);
+app.use("/", voiceOverviewRouter);
 
 app.use("/static", staticFilesRouter);
 app.use(express.static(path.join(__dirname, "public")));
