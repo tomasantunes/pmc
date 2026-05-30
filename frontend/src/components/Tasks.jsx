@@ -73,6 +73,10 @@ export default function Tasks({folder_id, folder}) {
   const [simpleFolders, setSimpleFolders] = useState([]);
   const [selectedSimpleFolder, setSelectedSimpleFolder] = useState(null);
   const [taskToMoveId, setTaskToMoveId] = useState(null);
+  const [voiceOverview, setVoiceOverview] = useState(false);
+  const [voiceOverviewTimer, setVoiceOverviewTimer] = useState(null);
+  const [audioSource, setAudioSource] = useState("");
+  const audioRef = useRef();
   var navigate = useNavigate();
 
   /*
@@ -436,6 +440,51 @@ export default function Tasks({folder_id, folder}) {
     setHideStrikethrough(!hideStrikethrough);
   }
 
+  function toggleVoiceOverview() {
+    if (!voiceOverview) {
+      var timer = setInterval(function() {
+        axios.get("/get-folder-tts", {
+          params: {
+            user_id: user_id,
+            folder_id: folder_id
+          }
+        })
+        .then(function(response) {          
+          if (response.data.status == "OK") {
+            var ttsFile = response.data.ttsFile;
+            updateAudio(config.BASE_URL + "/api/get-audio/?filename=" + ttsFile);
+          }
+          else {
+            console.log(response.data.error);
+          }
+        })
+        .catch(function(err) {
+          console.log(err);
+        });
+      }, 1800000);
+    }
+    else {
+      setAudioSource("");
+      if (voiceOverviewTimer) {
+        clearInterval(voiceOverviewTimer);
+        setVoiceOverviewTimer(null);
+      }
+    }
+  }
+
+  const updateAudio = (source) => {
+    console.log(source);
+    setAudioSource(source);
+  }
+
+  useEffect(() => {
+    if(audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.load();
+      audioRef.current.play();
+    } 
+  }, [audioSource]);
+
   useEffect(() => {
     loadTasks();
     const handleResize = () => {
@@ -468,6 +517,7 @@ export default function Tasks({folder_id, folder}) {
                   <li><a class="dropdown-item" href="#" onClick={deleteFolder}>{i18n("Delete folder")}</a></li>
                   <li><a class="dropdown-item" href="#" onClick={toggleHideDone}>{hideDone ? i18n("Show Done") : i18n("Hide Done")}</a></li>
                   <li><a class="dropdown-item" href="#" onClick={toggleHideStrikethrough}>{hideStrikethrough ? i18n("Show Strikethrough") : i18n("Hide Strikethrough")}</a></li>
+                  <li><a class="dropdown-item" href="#" onClick={toggleVoiceOverview}>{voiceOverview ? i18n("Deactivate Voice Overview") : i18n("Activate Voice Overview")}</a></li>
                 </ul>
               </div>
             </div>
@@ -614,6 +664,10 @@ export default function Tasks({folder_id, folder}) {
           </div>
         </div>
       </div>
+      <audio controls="controls" style={{visibility: "hidden"}} ref={audioRef}>
+        <source src={audioSource} type="audio/mp3"></source>
+        Your browser does not support the audio format.
+      </audio>
     </>
   )
 }
