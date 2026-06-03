@@ -734,6 +734,7 @@ export default function Tasks({ folder_id, folder }) {
 
   function openEditTask(task_id) {
     clearWeekDayChecks();
+    clearTaskTime();
     axios
       .get(config.BASE_URL + "/api/get-recurrent-task", {
         params: { task_id: task_id },
@@ -817,6 +818,17 @@ export default function Tasks({ folder_id, folder }) {
     setSundayChecked(false);
   }
 
+  function clearTaskTime() {
+    setEnableNewStartTime(false);
+    setEnableNewEndTime(false);
+    setEnableEditStartTime(false);
+    setEnableEditEndTime(false);
+    setSelectedNewStartTime("00:00");
+    setSelectedNewEndTime("00:00");
+    setSelectedEditStartTime("00:00");
+    setSelectedEditEndTime("00:00");
+  }
+
   function changeNewTaskDescription(e) {
     setNewTaskDescription(e.target.value);
   }
@@ -882,6 +894,7 @@ export default function Tasks({ folder_id, folder }) {
             time: "",
             days: "",
           });
+          clearTaskTime();
           setSelectedWeekDays([]);
           clearWeekDayChecks();
         } else {
