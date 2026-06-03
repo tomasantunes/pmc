@@ -230,16 +230,18 @@ router.post("/api/update-recurrent-task-done", (req, res) => {
         if (err) {
           console.log(err);
           res.json({ status: "NOK", error: err.message });
+          return;
         }
         res.json({ status: "OK", data: "Task has been updated successfully." });
       });
     } else {
       var sql2 =
-        "INSERT INTO recurrent_checks (task_id, date, is_done, user_id) VALUES (?, ?, ?, ?, ?)";
+        "INSERT INTO recurrent_checks (task_id, date, is_done, user_id) VALUES (?, ?, ?, ?)";
       con.query(sql2, [task_id, date, is_done, req.session.userId], function (err, result) {
         if (err) {
           console.log(err);
           res.json({ status: "NOK", error: err.message });
+          return;
         }
         res.json({ status: "OK", data: "Task has been updated successfully." });
       });
