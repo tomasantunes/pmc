@@ -15,6 +15,56 @@ router.get("/api/get-task-list", async (req, res) => {
   res.json({ status: "OK", data: task_list });
 });
 
+router.get("/api/get-mindmap-overview", async (req, res) => {
+  if (!req.session.isLoggedIn) {
+    res.json({ status: "NOK", error: "Invalid Authorization." });
+    return;
+  }
+
+  try {
+    const folderTypes = ["simple", "recurrent", "monthly", "list"];
+    const typeLabels = {
+      simple: "Simple Tasks",
+      recurrent: "Recurrent Tasks",
+      monthly: "Monthly Tasks",
+      list: "Lists",
+    };
+    const [folders] = await con2.query(
+      "SELECT id, name, type FROM folders WHERE user_id = ? AND type IN (?, ?, ?, ?) ORDER BY type, created_at, id",
+      [req.session.userId, ...folderTypes],
+    );
+    const [taskRows] = await con2.query(
+      "SELECT id, folder_id, description FROM tasks WHERE user_id = ? ORDER BY sort_index ASC, id ASC",
+      [req.session.userId],
+    );
+    const tasksByFolder = taskRows.reduce((map, task) => {
+      if (!map[task.folder_id]) map[task.folder_id] = [];
+      map[task.folder_id].push(task);
+      return map;
+    }, {});
+
+    const root = {
+      name: "PMC Overview",
+      children: folderTypes.map((type) => ({
+        name: typeLabels[type],
+        children: folders
+          .filter((folder) => folder.type === type)
+          .map((folder) => ({
+            name: folder.name,
+            children: (tasksByFolder[folder.id] || []).map((task) => ({
+              name: task.description,
+            })),
+          })),
+      })).filter((typeNode) => typeNode.children.length > 0),
+    };
+
+    res.json({ status: "OK", data: root });
+  } catch (err) {
+    console.log(err);
+    res.json({ status: "NOK", error: err.message });
+  }
+});
+
 router.get("/api/get-tasks-from-folder", (req, res) => {
   if (!req.session.isLoggedIn) {
     res.json({ status: "NOK", error: "Invalid Authorization." });

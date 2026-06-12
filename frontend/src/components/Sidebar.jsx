@@ -4,6 +4,7 @@ import config from '../config';
 import Select from 'react-select';
 import {Link, useNavigate} from 'react-router-dom';
 import {i18n, getLanguages, setLanguage, getCurrentLanguage} from '../libs/translations';
+import {exportMindmapPng} from '../libs/mindmapExport';
 
 var languages_arr = getLanguages();
 var user_manual_link = getCurrentLanguage() == "en-us" ? "/static/pmc-user-manual.pdf" : "/static/pmc-user-manual-pt.pdf";
@@ -19,6 +20,7 @@ export default function Sidebar() {
   const [collapseSidebarMobile, setCollapseSidebarMobile] = useState(true);
   const [showGithubPage, setShowGithubPage] = useState(false);
   const [languages, setLanguages] = useState(languages_arr);
+  const [isExportingMindmap, setIsExportingMindmap] = useState(false);
   const [documentHeight, setDocumentHeight] = useState(
     document.documentElement.scrollHeight
   );
@@ -118,6 +120,27 @@ export default function Sidebar() {
     });
   }
 
+  async function downloadMindmap(e) {
+    e.preventDefault();
+    if (isExportingMindmap) return;
+
+    setIsExportingMindmap(true);
+    try {
+      const response = await axios.get(config.BASE_URL + "/api/get-mindmap-overview");
+      if (response.data.status !== "OK") {
+        alert(response.data.error);
+        return;
+      }
+
+      await exportMindmapPng(response.data.data);
+    } catch (err) {
+      console.log(err);
+      alert(err.message);
+    } finally {
+      setIsExportingMindmap(false);
+    }
+  }
+
   const updateHeight = () => {
       const docHeight = document.documentElement.scrollHeight;
       const sidebarHeight = sidebarRef.current?.scrollHeight || 0;
@@ -172,6 +195,7 @@ export default function Sidebar() {
             <li><Link to="/alerts">{i18n("Alerts")}</Link></li>
             <li><Link to="/time-tracker">{i18n("Time Tracker")}</Link></li>
             <li><Link to="/random-task">{i18n("Random Task")}</Link></li>
+            <li><a href="#" onClick={downloadMindmap}>{isExportingMindmap ? i18n("Exporting Mindmap...") : i18n("Export Mindmap")}</a></li>
             {showGithubPage && <li><Link to="/github-tasks">{i18n("Github Tasks")}</Link></li>}
             {/*<li><Link to="/motivation">{i18n("Motivation")}</Link></li>*/}
             <li><a href="#" onClick={openAddFolder}>{i18n("Add Folder")}</a></li>

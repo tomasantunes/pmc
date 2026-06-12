@@ -10,6 +10,8 @@ var translations = {
     "Alerts": {"en-us": "Alerts", "pt-pt": "Alertas"},
     "Time Tracker": {"en-us": "Time Tracker", "pt-pt": "Rastreio de Tempo"},
     "Random Task": {"en-us": "Random Task", "pt-pt": "Tarefa Aleatória"},
+    "Export Mindmap": {"en-us": "Export Mindmap", "pt-pt": "Exportar Mapa Mental"},
+    "Exporting Mindmap...": {"en-us": "Exporting Mindmap...", "pt-pt": "A exportar Mapa Mental..."},
     "Github Tasks": {"en-us": "Github Tasks", "pt-pt": "Tarefas do Github"},
     "Add Folder": {"en-us": "Add Folder", "pt-pt": "Adicionar Pasta"},
     "Name": {"en-us": "Name", "pt-pt": "Nome"},
