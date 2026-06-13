@@ -36,6 +36,7 @@ function wrapLabel(label) {
       }
       return chunks;
     });
+
   const lines = [];
   let currentLine = '';
 
@@ -43,6 +44,7 @@ function wrapLabel(label) {
     if (lines.length >= MAX_LABEL_LINES) return;
 
     const candidate = currentLine ? `${currentLine} ${word}` : word;
+
     if (candidate.length <= MAX_LABEL_CHARS) {
       currentLine = candidate;
       return;
@@ -52,7 +54,10 @@ function wrapLabel(label) {
     currentLine = word;
   });
 
-  if (currentLine && lines.length < MAX_LABEL_LINES) lines.push(currentLine);
+  if (currentLine && lines.length < MAX_LABEL_LINES) {
+    lines.push(currentLine);
+  }
+
   if (words.join(' ').length > lines.join(' ').length && lines.length > 0) {
     lines[lines.length - 1] = `${lines[lines.length - 1].slice(0, MAX_LABEL_CHARS - 3)}...`;
   }
@@ -100,6 +105,7 @@ function appendNode(svg, node, point, width = NODE_WIDTH) {
 
   const text = createSvgElement('text');
   const startY = -(lines.length - 1) * LINE_HEIGHT / 2;
+
   text.setAttribute('fill', textFill(node.depth));
   text.setAttribute('font-family', 'Arial, sans-serif');
   text.setAttribute('font-size', node.depth === 0 ? '20' : '13');
@@ -160,9 +166,11 @@ function buildMindmapSvg(data) {
   const columnCount = Math.max(1, folders.length);
   const contentWidth = columnCount * COLUMN_WIDTH + Math.max(0, columnCount - 1) * COLUMN_GAP;
   const width = Math.min(MAX_CANVAS_SIZE, Math.max(MIN_WIDTH, contentWidth + PAGE_PADDING * 2));
+
   const calculatedHeight = folders.length > 0
     ? Math.max(...folders.map(({ folder }) => calculateColumnHeight(folder)))
     : MIN_HEIGHT;
+
   const height = Math.min(MAX_CANVAS_SIZE, Math.max(MIN_HEIGHT, calculatedHeight));
   const rootPoint = { x: width / 2, y: ROOT_TOP + labelHeight(root.data.name) / 2 };
   const firstColumnX = width / 2 - contentWidth / 2 + COLUMN_WIDTH / 2;
@@ -179,32 +187,47 @@ function buildMindmapSvg(data) {
   background.setAttribute('fill', BACKGROUND);
   svg.appendChild(background);
 
+  const linksLayer = createSvgElement('g');
+  const nodesLayer = createSvgElement('g');
+
+  svg.appendChild(linksLayer);
+  svg.appendChild(nodesLayer);
+
   folders.forEach(({ folder, label }, index) => {
     const folderPoint = {
       x: firstColumnX + index * (COLUMN_WIDTH + COLUMN_GAP),
       y: FOLDER_TOP,
     };
+
     const folderData = { ...folder.data, name: label };
     const folderNode = { ...folder, data: folderData, depth: 1 };
 
-    appendLink(svg, rootPoint, folderPoint);
-    const folderHeight = appendNode(svg, folderNode, folderPoint, NODE_WIDTH);
+    appendLink(linksLayer, rootPoint, folderPoint);
+
+    const folderHeight = appendNode(nodesLayer, folderNode, folderPoint, NODE_WIDTH);
     let taskY = TASK_TOP + Math.max(0, folderHeight - 48) / 2;
 
     (folder.children || []).forEach((task) => {
       const taskHeight = labelHeight(task.data.name);
+
       const taskPoint = {
         x: folderPoint.x,
         y: taskY + taskHeight / 2,
       };
 
-      appendLink(svg, { x: folderPoint.x, y: folderPoint.y + folderHeight / 2 }, taskPoint);
-      appendNode(svg, task, taskPoint, NODE_WIDTH);
+      appendLink(
+        linksLayer,
+        { x: folderPoint.x, y: folderPoint.y + folderHeight / 2 },
+        { x: taskPoint.x, y: taskPoint.y - taskHeight / 2 },
+      );
+
+      appendNode(nodesLayer, task, taskPoint, NODE_WIDTH);
       taskY += taskHeight + TASK_GAP;
     });
   });
 
-  appendNode(svg, root, rootPoint, ROOT_WIDTH);
+  appendNode(nodesLayer, root, rootPoint, ROOT_WIDTH);
+
   return svg;
 }
 
@@ -237,11 +260,14 @@ function svgToPngDataUrl(svg) {
       context.drawImage(image, 0, 0, canvas.width, canvas.height);
 
       URL.revokeObjectURL(url);
+
       const dataUrl = canvas.toDataURL('image/png');
+
       if (dataUrl === 'data:,') {
         reject(new Error('Could not export mindmap because it is too large for this browser.'));
         return;
       }
+
       resolve(dataUrl);
     };
 
