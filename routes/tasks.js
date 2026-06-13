@@ -34,7 +34,7 @@ router.get("/api/get-mindmap-overview", async (req, res) => {
       [req.session.userId, ...folderTypes],
     );
     const [taskRows] = await con2.query(
-      "SELECT id, folder_id, description FROM tasks WHERE user_id = ? ORDER BY sort_index ASC, id ASC",
+      "SELECT id, folder_id, description FROM tasks WHERE user_id = ? AND is_done = 0 ORDER BY sort_index ASC, id ASC",
       [req.session.userId],
     );
     const tasksByFolder = taskRows.reduce((map, task) => {
