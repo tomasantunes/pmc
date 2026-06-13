@@ -12,13 +12,10 @@ export default function Alerts() {
 
   async function loadAlerts() {
     try {
-      let res1 = await axios.get("/list-cron-jobs");
-      let res2 = await axios.get("/list-alerts");
-      for (let i in res1.data.data) {
-        res1.data.data[i].cron_string = res2.data.data[i].cron_string;
-        res1.data.data[i].text = res2.data.data[i].text;
+      let res = await axios.get("/list-alerts");
+      if (res.data.status === "OK") {
+        setAlerts(res.data.data);
       }
-      setAlerts(res1.data.data);
     } catch(e) {
       console.log(e);
     }
@@ -61,11 +58,11 @@ export default function Alerts() {
                 </tr>
               </thead>
               <tbody>
-                {alerts.map((a) => (
-                  <tr key={a.idx}>
-                    <td>{a.idx}</td>
+                {alerts.map((a, idx) => (
+                  <tr key={a.id}>
+                    <td>{idx}</td>
                     <td>{a.id}</td>
-                    <td>{a.nextRun}</td>
+                    <td>{a.nextRun || ""}</td>
                     <td>{a.cron_string}</td>
                     <td>{a.text}</td>
                   </tr>

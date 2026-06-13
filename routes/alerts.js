@@ -28,7 +28,7 @@ router.get("/list-alerts", async (req, res) => {
     return res.json({ status: "NOK", error: "Invalid Authorization." });
   }
 
-  var alerts = await listAlerts();
+  var alerts = await listAlerts(req.session.userId);
   res.json({ status: "OK", data: alerts });
 });
 

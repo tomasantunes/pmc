@@ -201,7 +201,7 @@ router.post("/api/add-recurrent-task", (req, res) => {
       }
 
       if (alert_active && has_time) {
-        insertRecurrentAlert(start_time, days, result.insertId, alert_text, req.session.userId);
+        await insertRecurrentAlert(start_time, days, result.insertId, alert_text, req.session.userId);
       }
       res.json({ status: "OK", data: "Task has been added successfully." });
     },
@@ -320,17 +320,17 @@ router.post("/api/edit-recurrent-task", (req, res) => {
           end_date.setHours(et[0], et[1], 0);
           end_date = end_date.toISOString().slice(0, 19).replace("T", " ");
           var sql3 =
-            "INSERT INTO events (task_id, start_date, end_date, description, user_id) VALUES (?, ?, ?, ?, ?) AND user_id = ?";
+            "INSERT INTO events (task_id, start_date, end_date, description, user_id) VALUES (?, ?, ?, ?, ?)";
           await con2.query(sql3, [task_id, start_date, end_date, description, req.session.userId]);
         }
       }
 
       if (alert_active && has_time) {
-        upsertRecurrentAlert(start_time, days, task_id, alert_text);
+        await upsertRecurrentAlert(start_time, days, task_id, alert_text, req.session.userId);
       }
 
       if (!alert_active) {
-        deleteRecurrentAlert(task_id);
+        await deleteRecurrentAlert(task_id, req.session.userId);
       }
 
       res.json({ status: "OK", data: "Task has been updated successfully." });
