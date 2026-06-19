@@ -131,3 +131,4 @@ ALTER TABLE users ADD COLUMN reset_password_token VARCHAR(512) DEFAULT NULL AFTE
 ALTER TABLE users ADD COLUMN reset_password_expires DATETIME DEFAULT NULL AFTER reset_password_token;
 ALTER TABLE users ADD COLUMN license_key CHAR(64) DEFAULT NULL AFTER reset_password_expires;
 ALTER TABLE users ADD COLUMN license_expires DATETIME DEFAULT NULL AFTER license_key;
+ALTER TABLE tasks ADD COLUMN expiration_date DATETIME DEFAULT NULL AFTER end_time;

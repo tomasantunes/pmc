@@ -159,9 +159,19 @@ router.post("/api/add-task", (req, res) => {
   var description = req.body.description;
   var start_time = req.body.start_time;
   var end_time = req.body.end_time;
+  var expiration_date = req.body.expiration_date;
   var sort_index = req.body.sort_index;
   var type = req.body.type;
   var createEvent = true;
+
+  if (
+    typeof expiration_date == "undefined" ||
+    expiration_date == "" ||
+    expiration_date == null ||
+    expiration_date == "Invalid date"
+  ) {
+    expiration_date = null;
+  }
 
   if (
     typeof start_time == "undefined" ||
@@ -183,10 +193,10 @@ router.post("/api/add-task", (req, res) => {
   }
 
   var sql =
-    "INSERT INTO tasks (folder_id, description, start_time, end_time, is_done, sort_index, type, user_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+    "INSERT INTO tasks (folder_id, description, start_time, end_time, expiration_date, is_done, sort_index, type, user_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
   con.query(
     sql,
-    [folder_id, description, start_time, end_time, 0, sort_index, type, req.session.userId],
+    [folder_id, description, start_time, end_time, expiration_date, 0, sort_index, type, req.session.userId],
     async function (err, result) {
       if (err) {
         console.log(err);
@@ -252,9 +262,19 @@ router.post("/api/edit-task", (req, res) => {
   var description = req.body.description;
   var start_time = req.body.start_time;
   var end_time = req.body.end_time;
+  var expiration_date = req.body.expiration_date;
   var createEvent = true;
 
   console.log(description);
+
+  if (
+    typeof expiration_date == "undefined" ||
+    expiration_date == "" ||
+    expiration_date == null ||
+    expiration_date == "Invalid date"
+  ) {
+    expiration_date = null;
+  }
 
   if (
     typeof start_time == "undefined" ||
@@ -274,10 +294,10 @@ router.post("/api/edit-task", (req, res) => {
   }
 
   var sql =
-    "UPDATE tasks SET description = ?, start_time = ?, end_time = ? WHERE id = ? AND user_id = ?";
+    "UPDATE tasks SET description = ?, start_time = ?, end_time = ?, expiration_date = ? WHERE id = ? AND user_id = ?";
   con.query(
     sql,
-    [description, start_time, end_time, task_id, req.session.userId],
+    [description, start_time, end_time, expiration_date, task_id, req.session.userId],
     async function (err, result) {
       if (err) {
         console.log(err);

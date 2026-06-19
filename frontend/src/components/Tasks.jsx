@@ -57,8 +57,10 @@ export default function Tasks({folder_id, folder}) {
   const [tasks, setTasks] = useState([]);
   const [selectedNewStartTime, setSelectedNewStartTime] = useState(null);
   const [selectedNewEndTime, setSelectedNewEndTime] = useState(null);
+  const [selectedNewExpirationDate, setSelectedNewExpirationDate] = useState(null);
   const [selectedEditStartTime, setSelectedEditStartTime] = useState(null);
   const [selectedEditEndTime, setSelectedEditEndTime] = useState(null);
+  const [selectedEditExpirationDate, setSelectedEditExpirationDate] = useState(null);
   const [newTaskDescription, setNewTaskDescription] = useState("");
   const [editTaskDescription, setEditTaskDescription] = useState("");
   const [editTaskId, setEditTaskId] = useState(null);
@@ -210,7 +212,7 @@ export default function Tasks({folder_id, folder}) {
       st = "";
       et = "";
     }
-    axios.post(config.BASE_URL + "/api/add-task", {folder_id: folder_id, description: newTaskDescription, start_time: st, end_time: et, sort_index: totalTasks, type: "single"})
+    axios.post(config.BASE_URL + "/api/add-task", {folder_id: folder_id, description: newTaskDescription, start_time: st, end_time: et, expiration_date: selectedNewExpirationDate || "", sort_index: totalTasks, type: "single"})
     .then(function(response) {
       if (response.data.status == "OK") {
         loadTasks();
@@ -218,6 +220,7 @@ export default function Tasks({folder_id, folder}) {
         setNewTaskDescription("");
         setSelectedNewStartTime(null);
         setSelectedNewEndTime(null);
+        setSelectedNewExpirationDate(null);
         closeAddTask();
       }
       else {
@@ -237,7 +240,7 @@ export default function Tasks({folder_id, folder}) {
       st = "";
       et = "";
     }
-    axios.post(config.BASE_URL + "/api/edit-task", {task_id: editTaskId, description: editTaskDescription, start_time: st, end_time: et})
+    axios.post(config.BASE_URL + "/api/edit-task", {task_id: editTaskId, description: editTaskDescription, start_time: st, end_time: et, expiration_date: selectedEditExpirationDate || ""})
     .then(function(response) {
       if (response.data.status == "OK") {
         loadTasks();
@@ -245,6 +248,7 @@ export default function Tasks({folder_id, folder}) {
         setEditTaskDescription("");
         setSelectedEditStartTime(null);
         setSelectedEditEndTime(null);
+        setSelectedEditExpirationDate(null);
         closeEditTask();
       }
       else {
@@ -269,6 +273,7 @@ export default function Tasks({folder_id, folder}) {
     setNewTaskDescription("");
     setSelectedNewStartTime(null);
     setSelectedNewEndTime(null);
+    setSelectedNewExpirationDate(null);
   }
 
   function openEditTask(task_id) {
@@ -280,6 +285,7 @@ export default function Tasks({folder_id, folder}) {
         setEditTaskDescription(task.description);
         setSelectedEditStartTime(moment(task.start_time).format('YYYY-MM-DD HH:mm'));
         setSelectedEditEndTime(moment(task.end_time).format('YYYY-MM-DD HH:mm'));
+        setSelectedEditExpirationDate(task.expiration_date ? moment(task.expiration_date).format('YYYY-MM-DD HH:mm') : null);
         var modal = bootstrap.Modal.getOrCreateInstance(document.querySelector('.editTaskModal'))
         modal.show();
         setShowEdit(true);
@@ -343,6 +349,7 @@ export default function Tasks({folder_id, folder}) {
     setEditTaskDescription("");
     setSelectedEditStartTime(null);
     setSelectedEditEndTime(null);
+    setSelectedEditExpirationDate(null);
   }
 
   function deleteTask(task_id) {
@@ -592,7 +599,13 @@ export default function Tasks({folder_id, folder}) {
                 <div className="form-group py-2">
                   <label className="control-label">{i18n("End")}</label>
                   <div>
-                    <DateTimePicker defaultValue={selectedNewEndTime} onChange={handleChangeNewEndTime} locale={lang} />
+                    <DateTimePicker value={selectedNewEndTime} defaultValue={selectedNewEndTime} onChange={handleChangeNewEndTime} locale={lang} />
+                  </div>
+                </div>
+                <div className="form-group py-2">
+                  <label className="control-label">{i18n("Expiration Date")}</label>
+                  <div>
+                    <DateTimePicker key={showNew ? "new-expiration-open" : "new-expiration-closed"} value={selectedNewExpirationDate} defaultValue={selectedNewExpirationDate} onChange={setSelectedNewExpirationDate} locale={lang} />
                   </div>
                 </div>
                 <div className="form-group">
@@ -629,7 +642,13 @@ export default function Tasks({folder_id, folder}) {
                 <div className="form-group py-2">
                   <label className="control-label">{i18n("End")}</label>
                   <div>
-                    <DateTimePicker defaultValue={selectedEditEndTime} onChange={setSelectedEditEndTime} locale={lang} />
+                    <DateTimePicker value={selectedEditEndTime} defaultValue={selectedEditEndTime} onChange={setSelectedEditEndTime} locale={lang} />
+                  </div>
+                </div>
+                <div className="form-group py-2">
+                  <label className="control-label">{i18n("Expiration Date")}</label>
+                  <div>
+                    <DateTimePicker key={editTaskId || "edit-expiration-empty"} value={selectedEditExpirationDate} defaultValue={selectedEditExpirationDate} onChange={setSelectedEditExpirationDate} locale={lang} />
                   </div>
                 </div>
                 <div className="form-group">

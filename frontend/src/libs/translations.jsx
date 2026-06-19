@@ -138,6 +138,7 @@ var translations = {
     "User Info": {"en-us": "User Info", "pt-pt": "Informações do Utilizador"},
     "Registration Date": {"en-us": "Registration Date", "pt-pt": "Data de Registo"},
     "License Expiration Date": {"en-us": "License Expiration Date", "pt-pt": "Data de Expiração da Licença"},
+    "Expiration Date": {"en-us": "Expiration Date", "pt-pt": "Data de Expiracao"},
     "Error updating task.": {"en-us": "Error updating task.", "pt-pt": "Erro ao atualizar a tarefa."},
     "Task description cannot be empty": {"en-us": "Task description cannot be empty", "pt-pt": "A descrição da tarefa não pode estar vazia"},
     "Deleted!": {"en-us": "Deleted!", "pt-pt": "Eliminado!"},
