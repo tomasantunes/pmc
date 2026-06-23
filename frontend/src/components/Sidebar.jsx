@@ -193,6 +193,7 @@ export default function Sidebar() {
             <li><Link to="/calendar">{i18n("Calendar")}</Link></li>
             <li><Link to="/schedule">{i18n("Schedule")}</Link></li>
             <li><Link to="/alerts">{i18n("Alerts")}</Link></li>
+            <li><Link to="/workflows">{i18n("Workflows")}</Link></li>
             <li><Link to="/time-tracker">{i18n("Time Tracker")}</Link></li>
             <li><Link to="/random-task">{i18n("Random Task")}</Link></li>
             <li><a href="#" onClick={downloadMindmap}>{isExportingMindmap ? i18n("Exporting Mindmap...") : i18n("Export Mindmap")}</a></li>

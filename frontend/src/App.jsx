@@ -11,6 +11,7 @@ import RandomTask from './components/RandomTask';
 import Schedule from './components/Schedule';
 import TimeTracker from './components/TimeTracker';
 import Alerts from './components/Alerts';
+import Workflows from './components/Workflows';
 import SignUp from './components/SignUp';
 import ForgotPassword from './components/ForgotPassword';
 import SetNewPassword from './components/SetNewPassword';
@@ -34,6 +35,7 @@ function App() {
         <Route path="/schedule" element={<Schedule />} />
         <Route path="/time-tracker" element={<TimeTracker />} />
         <Route path="/alerts" element={<Alerts />} />
+        <Route path="/workflows" element={<Workflows />} />
         <Route path="/sign-up" element={<SignUp />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/set-new-password" element={<SetNewPassword />} />
