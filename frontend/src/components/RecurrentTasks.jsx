@@ -1231,53 +1231,55 @@ export default function Tasks({ folder_id, folder }) {
           </div>
         </div>
       </div>
-      <table className="table table-striped table-bordered align-middle recurrent-tasks">
-        <thead class="table-dark">
-          <tr>
-            <th style={{ width: "45%" }}>{i18n("Task")}</th>
-            <th style={{ width: "10%" }}>{i18n("Time")}</th>
-            <th style={{ width: "5%" }}>
-              {i18n("Mon")} <br />
-              {days[0]}
-            </th>
-            <th style={{ width: "5%" }}>
-              {i18n("Tue")} <br />
-              {days[1]}
-            </th>
-            <th style={{ width: "5%" }}>
-              {i18n("Wed")} <br />
-              {days[2]}
-            </th>
-            <th style={{ width: "5%" }}>
-              {i18n("Thu")} <br />
-              {days[3]}
-            </th>
-            <th style={{ width: "5%" }}>
-              {i18n("Fri")} <br />
-              {days[4]}
-            </th>
-            <th style={{ width: "5%" }}>
-              {i18n("Sat")} <br />
-              {days[5]}
-            </th>
-            <th style={{ width: "5%" }}>
-              {i18n("Sun")} <br />
-              {days[6]}
-            </th>
-            <th style={{ width: "10%" }}>{i18n("Actions")}</th>
-          </tr>
-        </thead>
-        <TBodyPlain
-          key={Math.random()}
-          data={tasks}
-          updateTaskDone={updateTaskDone}
-          openEditTask={openEditTask}
-          deleteTask={deleteTask}
-          cancelTask={cancelTask}
-          uncancelTask={uncancelTask}
-          restartTask={restartTask}
-        />
-      </table>
+      <div className="recurrent-tasks-scroll">
+        <table className="table table-striped table-bordered align-middle recurrent-tasks">
+          <thead class="table-dark">
+            <tr>
+              <th>{i18n("Task")}</th>
+              <th>{i18n("Time")}</th>
+              <th>
+                {i18n("Mon")} <br />
+                {days[0]}
+              </th>
+              <th>
+                {i18n("Tue")} <br />
+                {days[1]}
+              </th>
+              <th>
+                {i18n("Wed")} <br />
+                {days[2]}
+              </th>
+              <th>
+                {i18n("Thu")} <br />
+                {days[3]}
+              </th>
+              <th>
+                {i18n("Fri")} <br />
+                {days[4]}
+              </th>
+              <th>
+                {i18n("Sat")} <br />
+                {days[5]}
+              </th>
+              <th>
+                {i18n("Sun")} <br />
+                {days[6]}
+              </th>
+              <th>{i18n("Actions")}</th>
+            </tr>
+          </thead>
+          <TBodyPlain
+            key={Math.random()}
+            data={tasks}
+            updateTaskDone={updateTaskDone}
+            openEditTask={openEditTask}
+            deleteTask={deleteTask}
+            cancelTask={cancelTask}
+            uncancelTask={uncancelTask}
+            restartTask={restartTask}
+          />
+        </table>
+      </div>
       <div class="modal addTaskModal" tabindex="-1">
         <div class="modal-dialog">
           <div class="modal-content">

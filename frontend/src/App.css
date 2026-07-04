@@ -59,13 +59,47 @@
     margin: 0 auto;
 }
 
+.tasks td, .tasks th {
+    overflow-wrap: anywhere;
+}
+
+.tasks .dropdown-toggle {
+    white-space: nowrap;
+}
+
+.recurrent-tasks-scroll {
+    margin: 0 12px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
 .recurrent-tasks {
-    max-width: 1000px;
-    margin: 0 auto;
+    margin: 0;
+    max-width: none;
+    min-width: 1180px;
+    table-layout: fixed;
+    width: 1180px;
 }
 
 .recurrent-tasks td, .recurrent-tasks th {
     text-align: center;
+}
+
+.recurrent-tasks td:first-child, .recurrent-tasks th:first-child {
+    text-align: left;
+    width: 470px;
+}
+
+.recurrent-tasks td:nth-child(2), .recurrent-tasks th:nth-child(2) {
+    width: 110px;
+}
+
+.recurrent-tasks td:nth-child(n+3):nth-child(-n+9), .recurrent-tasks th:nth-child(n+3):nth-child(-n+9) {
+    width: 70px;
+}
+
+.recurrent-tasks td:nth-child(10), .recurrent-tasks th:nth-child(10) {
+    width: 110px;
 }
 
 .page {
@@ -144,6 +178,12 @@ tbody {
     display: inline-block;
 }
 
+.time-tracker-task-actions {
+    display: flex;
+    flex-shrink: 0;
+    flex-wrap: nowrap;
+}
+
 .small-table {
     table-layout: fixed;
     width: 500px;
@@ -211,12 +251,56 @@ tbody {
 
   .page {
     margin-left: 0;
-    padding: 0;
+    padding: 0 12px 12px;
     margin-top: 75px; /* space for mobile navbar */
   }
 
   .tasks {
+    table-layout: fixed;
     width: 100%;
+  }
+
+  .tasks th, .tasks td {
+    padding: 6px;
+  }
+
+  .tasks input[type=checkbox] {
+    height: 28px;
+    width: 28px;
+  }
+
+  .tasks th:first-child, .tasks td:first-child {
+    width: 42px !important;
+  }
+
+  .tasks th:nth-child(2), .tasks td:nth-child(2) {
+    width: auto !important;
+  }
+
+  .tasks th:nth-child(3), .tasks td:nth-child(3),
+  .tasks th:nth-child(4), .tasks td:nth-child(4) {
+    width: 56px !important;
+  }
+
+  .tasks th:nth-child(5), .tasks td:nth-child(5) {
+    width: 56px !important;
+  }
+
+  .tasks .btn {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+
+  .simple-tasks-header {
+    margin: 0;
+  }
+
+  .recurrent-tasks-scroll {
+    margin: 0;
+  }
+
+  .time-tracker-task-actions .btn {
+    margin-right: 8px !important;
   }
 
   .small-table {

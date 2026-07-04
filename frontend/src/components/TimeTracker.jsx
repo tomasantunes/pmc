@@ -232,7 +232,7 @@ export default function TimeTracker() {
                         {formatDuration(s.total_seconds)}
                       </small>
                     </div>
-                    <div>
+                    <div className="time-tracker-task-actions">
                       {s.end_time ? (
                         <button
                           key={Math.random()}
@@ -306,7 +306,7 @@ export default function TimeTracker() {
                         {formatDuration(s.total_seconds)}
                       </small>
                     </div>
-                    <div>
+                    <div className="time-tracker-task-actions">
                       {s.end_time ? (
                         <button
                           key={Math.random()}

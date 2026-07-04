@@ -27,7 +27,7 @@ function TRow(props) {
       <td>
       <div class="dropdown">
         <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
-          {i18n("Actions")}
+          &nbsp;
         </button>
         <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
           <li><a class="dropdown-item" href="javascript:void(0)" onClick={() => { props.openEditTask(props.task_id) }}>{i18n("Edit")}</a></li>
@@ -543,12 +543,12 @@ export default function Tasks({folder_id, folder}) {
       <table className="table table-striped table-bordered align-middle tasks">
               <thead class="table-dark">
                   <tr>
-                      <th style={{width: "10%"}}>
+                      <th style={{width: "10%", height: "35px"}}>
                       </th>
-                      <th style={{width: "50%"}}>{i18n("Task")}</th>
-                      <th style={{width: "15%"}}>{i18n("Time")}</th>
-                      <th style={{width: "10%"}}>{i18n("Starred")}</th>
-                      <th style={{width: "15%"}}>{i18n("Actions")}</th>
+                      <th style={{width: "50%", height: "35px"}}></th>
+                      <th style={{width: "25%", height: "35px"}}></th>
+                      <th style={{width: "10%", height: "35px"}}></th>
+                      <th style={{width: "5%", height: "35px"}}></th>
                   </tr>
               </thead>
               <TBodyPlain data={tasks.filter(task => task.starred == true).sort((a, b) => (a.id || 0) - (b.id || 0))} updateTaskDone={updateTaskDone} updateTaskStarred={updateTaskStarred} openEditTask={openEditTask} openMoveModal={openMoveModal} deleteTask={deleteTask} hideStrikethrough={hideStrikethrough} />
