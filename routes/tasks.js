@@ -6,6 +6,11 @@ var router = express.Router();
 
 var { con, con2 } = database.getMySQLConnections();
 
+function parsePriority(value) {
+  var priority = Number(value);
+  return Number.isFinite(priority) ? Math.trunc(priority) : 0;
+}
+
 router.get("/api/get-task-list", async (req, res) => {
   if (!req.session.isLoggedIn) {
     res.json({ status: "NOK", error: "Invalid Authorization." });
@@ -72,7 +77,7 @@ router.get("/api/get-tasks-from-folder", (req, res) => {
   }
   var folder_id = req.query.folder_id;
   var sql =
-    "SELECT *, CONCAT(start_time, ' - ', end_time) AS time FROM tasks WHERE folder_id = ? AND user_id = ? ORDER BY sort_index ASC";
+    "SELECT *, CONCAT(start_time, ' - ', end_time) AS time FROM tasks WHERE folder_id = ? AND user_id = ? ORDER BY COALESCE(priority, 0) DESC, sort_index ASC, id ASC";
   con.query(sql, [folder_id, req.session.userId], function (err, result) {
     if (err) {
       console.log(err);
@@ -160,6 +165,7 @@ router.post("/api/add-task", (req, res) => {
   var start_time = req.body.start_time;
   var end_time = req.body.end_time;
   var expiration_date = req.body.expiration_date;
+  var priority = parsePriority(req.body.priority);
   var sort_index = req.body.sort_index;
   var type = req.body.type;
   var createEvent = true;
@@ -193,10 +199,10 @@ router.post("/api/add-task", (req, res) => {
   }
 
   var sql =
-    "INSERT INTO tasks (folder_id, description, start_time, end_time, expiration_date, is_done, sort_index, type, user_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    "INSERT INTO tasks (folder_id, description, start_time, end_time, expiration_date, priority, is_done, sort_index, type, user_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
   con.query(
     sql,
-    [folder_id, description, start_time, end_time, expiration_date, 0, sort_index, type, req.session.userId],
+    [folder_id, description, start_time, end_time, expiration_date, priority, 0, sort_index, type, req.session.userId],
     async function (err, result) {
       if (err) {
         console.log(err);
@@ -263,6 +269,8 @@ router.post("/api/edit-task", (req, res) => {
   var start_time = req.body.start_time;
   var end_time = req.body.end_time;
   var expiration_date = req.body.expiration_date;
+  var hasPriority = Object.prototype.hasOwnProperty.call(req.body, "priority");
+  var priority = hasPriority ? parsePriority(req.body.priority) : null;
   var createEvent = true;
 
   console.log(description);
@@ -293,11 +301,15 @@ router.post("/api/edit-task", (req, res) => {
     createEvent = false;
   }
 
-  var sql =
-    "UPDATE tasks SET description = ?, start_time = ?, end_time = ?, expiration_date = ? WHERE id = ? AND user_id = ?";
+  var sql = hasPriority
+    ? "UPDATE tasks SET description = ?, start_time = ?, end_time = ?, expiration_date = ?, priority = ? WHERE id = ? AND user_id = ?"
+    : "UPDATE tasks SET description = ?, start_time = ?, end_time = ?, expiration_date = ? WHERE id = ? AND user_id = ?";
+  var params = hasPriority
+    ? [description, start_time, end_time, expiration_date, priority, task_id, req.session.userId]
+    : [description, start_time, end_time, expiration_date, task_id, req.session.userId];
   con.query(
     sql,
-    [description, start_time, end_time, expiration_date, task_id, req.session.userId],
+    params,
     async function (err, result) {
       if (err) {
         console.log(err);

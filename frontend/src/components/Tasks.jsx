@@ -18,6 +18,7 @@ function TRow(props) {
     <tr {...props}>
       <td><input type="checkbox" checked={props.is_done} onChange={(e) => { props.updateTaskDone(e, props.task_id); }} /></td>
       <td className={props.is_done && !props.hideStrikethrough ? "strikethrough" : ""}>{props.description}</td>
+      <td>{props.priority ?? 0}</td>
       <td>{props.time}</td>
       <td>
         <button className="btn btn-secondary" onClick={() => { props.updateTaskStarred(props.task_id); }} key={Math.random()}>
@@ -45,11 +46,24 @@ function TBodyPlain(props) {
     <tbody {...props} className="table-group-divider">
       {props.data.map((task, i) => {
         return (
-          <TRow key={task.id} index={i} task_id={task.id} description={task.description} time={task.time} is_done={task.is_done} starred={task.starred} updateTaskDone={props.updateTaskDone} openEditTask={props.openEditTask} openMoveModal={props.openMoveModal} deleteTask={props.deleteTask} updateTaskStarred={props.updateTaskStarred} hideStrikethrough={props.hideStrikethrough} />
+          <TRow key={task.id} index={i} task_id={task.id} description={task.description} priority={task.priority} time={task.time} is_done={task.is_done} starred={task.starred} updateTaskDone={props.updateTaskDone} openEditTask={props.openEditTask} openMoveModal={props.openMoveModal} deleteTask={props.deleteTask} updateTaskStarred={props.updateTaskStarred} hideStrikethrough={props.hideStrikethrough} />
         )
       })}
     </tbody>
   )
+}
+
+function parsePriority(value) {
+  const priority = Number(value);
+  return Number.isFinite(priority) ? Math.trunc(priority) : 0;
+}
+
+function sortByPriority(tasks) {
+  return [...tasks].sort((a, b) => {
+    const priorityDiff = parsePriority(b.priority) - parsePriority(a.priority);
+    if (priorityDiff !== 0) return priorityDiff;
+    return (a.id || 0) - (b.id || 0);
+  });
 }
 
 export default function Tasks({folder_id, folder}) {
@@ -62,7 +76,9 @@ export default function Tasks({folder_id, folder}) {
   const [selectedEditEndTime, setSelectedEditEndTime] = useState(null);
   const [selectedEditExpirationDate, setSelectedEditExpirationDate] = useState(null);
   const [newTaskDescription, setNewTaskDescription] = useState("");
+  const [newTaskPriority, setNewTaskPriority] = useState("0");
   const [editTaskDescription, setEditTaskDescription] = useState("");
+  const [editTaskPriority, setEditTaskPriority] = useState("0");
   const [editTaskId, setEditTaskId] = useState(null);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [showNew, setShowNew] = useState(false);
@@ -212,12 +228,13 @@ export default function Tasks({folder_id, folder}) {
       st = "";
       et = "";
     }
-    axios.post(config.BASE_URL + "/api/add-task", {folder_id: folder_id, description: newTaskDescription, start_time: st, end_time: et, expiration_date: selectedNewExpirationDate || "", sort_index: totalTasks, type: "single"})
+    axios.post(config.BASE_URL + "/api/add-task", {folder_id: folder_id, description: newTaskDescription, start_time: st, end_time: et, expiration_date: selectedNewExpirationDate || "", priority: parsePriority(newTaskPriority), sort_index: totalTasks, type: "single"})
     .then(function(response) {
       if (response.data.status == "OK") {
         loadTasks();
         dt = new Date();
         setNewTaskDescription("");
+        setNewTaskPriority("0");
         setSelectedNewStartTime(null);
         setSelectedNewEndTime(null);
         setSelectedNewExpirationDate(null);
@@ -240,12 +257,13 @@ export default function Tasks({folder_id, folder}) {
       st = "";
       et = "";
     }
-    axios.post(config.BASE_URL + "/api/edit-task", {task_id: editTaskId, description: editTaskDescription, start_time: st, end_time: et, expiration_date: selectedEditExpirationDate || ""})
+    axios.post(config.BASE_URL + "/api/edit-task", {task_id: editTaskId, description: editTaskDescription, start_time: st, end_time: et, expiration_date: selectedEditExpirationDate || "", priority: parsePriority(editTaskPriority)})
     .then(function(response) {
       if (response.data.status == "OK") {
         loadTasks();
         setEditTaskId(null);
         setEditTaskDescription("");
+        setEditTaskPriority("0");
         setSelectedEditStartTime(null);
         setSelectedEditEndTime(null);
         setSelectedEditExpirationDate(null);
@@ -271,6 +289,7 @@ export default function Tasks({folder_id, folder}) {
     modal.hide();
     setShowNew(false);
     setNewTaskDescription("");
+    setNewTaskPriority("0");
     setSelectedNewStartTime(null);
     setSelectedNewEndTime(null);
     setSelectedNewExpirationDate(null);
@@ -283,6 +302,7 @@ export default function Tasks({folder_id, folder}) {
         var task = response.data.data;
         setEditTaskId(task_id);
         setEditTaskDescription(task.description);
+        setEditTaskPriority(String(task.priority ?? 0));
         setSelectedEditStartTime(moment(task.start_time).format('YYYY-MM-DD HH:mm'));
         setSelectedEditEndTime(moment(task.end_time).format('YYYY-MM-DD HH:mm'));
         setSelectedEditExpirationDate(task.expiration_date ? moment(task.expiration_date).format('YYYY-MM-DD HH:mm') : null);
@@ -347,6 +367,7 @@ export default function Tasks({folder_id, folder}) {
     setShowEdit(false);
     setEditTaskId(null);
     setEditTaskDescription("");
+    setEditTaskPriority("0");
     setSelectedEditStartTime(null);
     setSelectedEditEndTime(null);
     setSelectedEditExpirationDate(null);
@@ -412,8 +433,16 @@ export default function Tasks({folder_id, folder}) {
     setNewTaskDescription(e.target.value);
   }
 
+  function changeNewTaskPriority(e) {
+    setNewTaskPriority(e.target.value);
+  }
+
   function changeEditTaskDescription(e) {
     setEditTaskDescription(e.target.value);
+  }
+
+  function changeEditTaskPriority(e) {
+    setEditTaskPriority(e.target.value);
   }
 
   function handleChangeNewStartTime(value) {
@@ -453,7 +482,7 @@ export default function Tasks({folder_id, folder}) {
         folder_id: folder_id
       }
     })
-    .then(function(response) {          
+    .then(function(response) {
       if (response.data.status == "OK") {
         var ttsFile = response.data.ttsFile;
         updateAudio(config.BASE_URL + "/api/get-audio/?filename=" + ttsFile);
@@ -492,7 +521,7 @@ export default function Tasks({folder_id, folder}) {
       audioRef.current.pause();
       audioRef.current.load();
       audioRef.current.play();
-    } 
+    }
   }, [audioSource]);
 
   useEffect(() => {
@@ -535,7 +564,7 @@ export default function Tasks({folder_id, folder}) {
           </div>
         </div>
       </div>
-      {tasks.filter(task => task.starred == true).length > 0 && 
+      {tasks.filter(task => task.starred == true).length > 0 &&
         <div className="mb-4">
           <div className="text-center">
             <h3>{i18n("Starred Tasks")}</h3>
@@ -545,13 +574,14 @@ export default function Tasks({folder_id, folder}) {
                   <tr>
                       <th style={{width: "10%", height: "35px"}}>
                       </th>
-                      <th style={{width: "50%", height: "35px"}}></th>
-                      <th style={{width: "25%", height: "35px"}}></th>
+                      <th style={{width: "45%", height: "35px"}}></th>
+                      <th style={{width: "10%", height: "35px"}}></th>
+                      <th style={{width: "20%", height: "35px"}}></th>
                       <th style={{width: "10%", height: "35px"}}></th>
                       <th style={{width: "5%", height: "35px"}}></th>
                   </tr>
               </thead>
-              <TBodyPlain data={tasks.filter(task => task.starred == true).sort((a, b) => (a.id || 0) - (b.id || 0))} updateTaskDone={updateTaskDone} updateTaskStarred={updateTaskStarred} openEditTask={openEditTask} openMoveModal={openMoveModal} deleteTask={deleteTask} hideStrikethrough={hideStrikethrough} />
+              <TBodyPlain data={sortByPriority(tasks.filter(task => task.starred == true))} updateTaskDone={updateTaskDone} updateTaskStarred={updateTaskStarred} openEditTask={openEditTask} openMoveModal={openMoveModal} deleteTask={deleteTask} hideStrikethrough={hideStrikethrough} />
           </table>
         </div>
       }
@@ -566,13 +596,14 @@ export default function Tasks({folder_id, folder}) {
                     <th style={{width: "10%"}}>
                       <input type="checkbox" checked={tasks.filter(task => task.is_done == true && task.starred == false).length > 0 && tasks.length > 0} onChange={(e) => { e.target.checked ? setAllTasksDone() : setAllTasksNotDone() }} />
                     </th>
-                    <th style={{width: "50%"}}>{i18n("Task")}</th>
-                    <th style={{width: "15%"}}>{i18n("Time")}</th>
+                    <th style={{width: "45%"}}>{i18n("Task")}</th>
+                    <th style={{width: "10%"}}>{i18n("Priority")}</th>
+                    <th style={{width: "10%"}}>{i18n("Time")}</th>
                     <th style={{width: "10%"}}>{i18n("Starred")}</th>
                     <th style={{width: "15%"}}>{i18n("Actions")}</th>
                 </tr>
             </thead>
-            <TBodyPlain data={tasks.filter(task => task.starred == false).sort((a, b) => (a.id || 0) - (b.id || 0))} updateTaskDone={updateTaskDone} updateTaskStarred={updateTaskStarred} openEditTask={openEditTask} openMoveModal={openMoveModal} deleteTask={deleteTask} hideStrikethrough={hideStrikethrough} />
+            <TBodyPlain data={sortByPriority(tasks.filter(task => task.starred == false))} updateTaskDone={updateTaskDone} updateTaskStarred={updateTaskStarred} openEditTask={openEditTask} openMoveModal={openMoveModal} deleteTask={deleteTask} hideStrikethrough={hideStrikethrough} />
         </table>
       </div>
       <div class="modal addTaskModal" tabindex="-1">
@@ -588,6 +619,12 @@ export default function Tasks({folder_id, folder}) {
                   <label className="control-label">{i18n("Description")}</label>
                   <div>
                       <textarea className="form-control input-lg mt-2" rows="3" name="description" value={newTaskDescription} onChange={changeNewTaskDescription}></textarea>
+                  </div>
+                </div>
+                <div className="form-group py-2">
+                  <label className="control-label">{i18n("Priority")}</label>
+                  <div>
+                    <input type="text" className="form-control input-lg mt-2" name="priority" value={newTaskPriority} onChange={changeNewTaskPriority} />
                   </div>
                 </div>
                 <div className="form-group py-2">
@@ -631,6 +668,12 @@ export default function Tasks({folder_id, folder}) {
                   <label className="control-label">{i18n("Description")}</label>
                   <div>
                       <textarea className="form-control input-lg mt-2" rows="3" name="description" value={editTaskDescription} onChange={changeEditTaskDescription}></textarea>
+                  </div>
+                </div>
+                <div className="form-group py-2">
+                  <label className="control-label">{i18n("Priority")}</label>
+                  <div>
+                    <input type="text" className="form-control input-lg mt-2" name="priority" value={editTaskPriority} onChange={changeEditTaskPriority} />
                   </div>
                 </div>
                 <div className="form-group py-2">
