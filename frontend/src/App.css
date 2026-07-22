@@ -76,9 +76,9 @@
 .recurrent-tasks {
     margin: 0;
     max-width: none;
-    min-width: 1180px;
+    min-width: 1000px;
     table-layout: fixed;
-    width: 1180px;
+    width: 100%;
 }
 
 .recurrent-tasks td, .recurrent-tasks th {
@@ -87,19 +87,19 @@
 
 .recurrent-tasks td:first-child, .recurrent-tasks th:first-child {
     text-align: left;
-    width: 470px;
+    width: 40%;
 }
 
 .recurrent-tasks td:nth-child(2), .recurrent-tasks th:nth-child(2) {
-    width: 110px;
+    width: 9%;
 }
 
 .recurrent-tasks td:nth-child(n+3):nth-child(-n+9), .recurrent-tasks th:nth-child(n+3):nth-child(-n+9) {
-    width: 70px;
+    width: 6%;
 }
 
 .recurrent-tasks td:nth-child(10), .recurrent-tasks th:nth-child(10) {
-    width: 110px;
+    width: 9%;
 }
 
 .page {

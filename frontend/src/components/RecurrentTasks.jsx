@@ -316,264 +316,31 @@ export default function Tasks({ folder_id, folder }) {
     setEnableEditEndTime(e.target.checked);
   }
 
-  function toggleMonday(e) {
-    setMondayChecked(e.target.checked);
-    if (e.target.checked) {
-      if (showNew) {
-        console.log("add monday");
-        setNewTaskDays((prev) => {
-          var new_arr = prev;
-          new_arr.push(weekDays[0]);
-          return new_arr;
-        });
-      } else if (showEdit) {
-        setEditTaskDays((prev) => {
-          var new_arr = prev;
-          new_arr.push(weekDays[0]);
-          return new_arr;
-        });
-      }
-    } else {
-      if (showNew) {
-        setNewTaskDays((prev) => {
-          var new_arr = prev;
-          new_arr = new_arr.filter((item) => {
-            return item.value != 1;
-          });
-          return new_arr;
-        });
-      } else if (showEdit) {
-        setEditTaskDays((prev) => {
-          var new_arr = prev;
-          new_arr = new_arr.filter((item) => {
-            return item.value != 1;
-          });
-          return new_arr;
-        });
-      }
-    }
-  }
+  function toggleWeekday(day) {
+    return (e) => {
+      const checked = e.target.checked;
+      const checkedSetters = {
+        0: setSundayChecked,
+        1: setMondayChecked,
+        2: setTuesdayChecked,
+        3: setWednesdayChecked,
+        4: setThursdayChecked,
+        5: setFridayChecked,
+        6: setSaturdayChecked,
+      };
+      const updateDays = (prev) =>
+        checked
+          ? [...prev, day]
+          : prev.filter((item) => item.value != day.value);
 
-  function toggleTuesday(e) {
-    setTuesdayChecked(e.target.checked);
-    if (e.target.checked) {
-      if (showNew) {
-        setNewTaskDays((prev) => {
-          var new_arr = prev;
-          new_arr.push(weekDays[1]);
-          return new_arr;
-        });
-      } else if (showEdit) {
-        setEditTaskDays((prev) => {
-          var new_arr = prev;
-          new_arr.push(weekDays[1]);
-          return new_arr;
-        });
-      }
-    } else {
-      if (showNew) {
-        setNewTaskDays((prev) => {
-          var new_arr = prev;
-          new_arr = new_arr.filter((item) => {
-            return item.value != 2;
-          });
-          return new_arr;
-        });
-      } else if (showEdit) {
-        setEditTaskDays((prev) => {
-          var new_arr = prev;
-          new_arr = new_arr.filter((item) => {
-            return item.value != 2;
-          });
-          return new_arr;
-        });
-      }
-    }
-  }
+      checkedSetters[day.value](checked);
 
-  function toggleWednesday(e) {
-    setWednesdayChecked(e.target.checked);
-    if (e.target.checked) {
       if (showNew) {
-        setNewTaskDays((prev) => {
-          var new_arr = prev;
-          new_arr.push(weekDays[2]);
-          return new_arr;
-        });
+        setNewTaskDays(updateDays);
       } else if (showEdit) {
-        setEditTaskDays((prev) => {
-          var new_arr = prev;
-          new_arr.push(weekDays[2]);
-          return new_arr;
-        });
+        setEditTaskDays(updateDays);
       }
-    } else {
-      if (showNew) {
-        setNewTaskDays((prev) => {
-          var new_arr = prev;
-          new_arr = new_arr.filter((item) => {
-            return item.value != 3;
-          });
-          return new_arr;
-        });
-      } else if (showEdit) {
-        setEditTaskDays((prev) => {
-          var new_arr = prev;
-          new_arr = new_arr.filter((item) => {
-            return item.value != 3;
-          });
-          return new_arr;
-        });
-      }
-    }
-  }
-
-  function toggleThursday(e) {
-    setThursdayChecked(e.target.checked);
-    if (e.target.checked) {
-      if (showNew) {
-        setNewTaskDays((prev) => {
-          var new_arr = prev;
-          new_arr.push(weekDays[3]);
-          return new_arr;
-        });
-      } else if (showEdit) {
-        setEditTaskDays((prev) => {
-          var new_arr = prev;
-          new_arr.push(weekDays[3]);
-          return new_arr;
-        });
-      }
-    } else {
-      if (showNew) {
-        setNewTaskDays((prev) => {
-          var new_arr = prev;
-          new_arr = new_arr.filter((item) => {
-            return item.value != 4;
-          });
-          return new_arr;
-        });
-      } else if (showEdit) {
-        setEditTaskDays((prev) => {
-          var new_arr = prev;
-          new_arr = new_arr.filter((item) => {
-            return item.value != 4;
-          });
-          return new_arr;
-        });
-      }
-    }
-  }
-
-  function toggleFriday(e) {
-    setFridayChecked(e.target.checked);
-    if (e.target.checked) {
-      if (showNew) {
-        setNewTaskDays((prev) => {
-          var new_arr = prev;
-          new_arr.push(weekDays[4]);
-          return new_arr;
-        });
-      } else if (showEdit) {
-        setEditTaskDays((prev) => {
-          var new_arr = prev;
-          new_arr.push(weekDays[4]);
-          return new_arr;
-        });
-      }
-    } else {
-      if (showNew) {
-        setNewTaskDays((prev) => {
-          var new_arr = prev;
-          new_arr = new_arr.filter((item) => {
-            return item.value != 5;
-          });
-          return new_arr;
-        });
-      } else if (showEdit) {
-        setEditTaskDays((prev) => {
-          var new_arr = prev;
-          new_arr = new_arr.filter((item) => {
-            return item.value != 5;
-          });
-          return new_arr;
-        });
-      }
-    }
-  }
-
-  function toggleSaturday(e) {
-    setSaturdayChecked(e.target.checked);
-    if (e.target.checked) {
-      if (showNew) {
-        setNewTaskDays((prev) => {
-          var new_arr = prev;
-          new_arr.push(weekDays[5]);
-          return new_arr;
-        });
-      } else if (showEdit) {
-        setEditTaskDays((prev) => {
-          var new_arr = prev;
-          new_arr.push(weekDays[5]);
-          return new_arr;
-        });
-      }
-    } else {
-      if (showNew) {
-        setNewTaskDays((prev) => {
-          var new_arr = prev;
-          new_arr = new_arr.filter((item) => {
-            return item.value != 6;
-          });
-          return new_arr;
-        });
-      } else if (showEdit) {
-        setEditTaskDays((prev) => {
-          var new_arr = prev;
-          new_arr = new_arr.filter((item) => {
-            return item.value != 6;
-          });
-          return new_arr;
-        });
-      }
-    }
-  }
-
-  function toggleSunday(e) {
-    setSundayChecked(e.target.checked);
-    if (e.target.checked) {
-      if (showNew) {
-        setNewTaskDays((prev) => {
-          var new_arr = prev;
-          new_arr.push(weekDays[6]);
-          return new_arr;
-        });
-      } else if (showEdit) {
-        setEditTaskDays((prev) => {
-          var new_arr = prev;
-          new_arr.push(weekDays[6]);
-          return new_arr;
-        });
-      }
-    } else {
-      if (showNew) {
-        setNewTaskDays((prev) => {
-          var new_arr = prev;
-          new_arr = new_arr.filter((item) => {
-            return item.value != 0;
-          });
-          return new_arr;
-        });
-      } else if (showEdit) {
-        setEditTaskDays((prev) => {
-          var new_arr = prev;
-          new_arr = new_arr.filter((item) => {
-            return item.value != 0;
-          });
-          return new_arr;
-        });
-      }
-    }
+    };
   }
 
   function toggleNewAlertActive(e) {
@@ -1353,7 +1120,7 @@ export default function Tasks({ folder_id, folder }) {
                     <input
                       type="checkbox"
                       checked={mondayChecked}
-                      onChange={toggleMonday}
+                      onChange={toggleWeekday(weekDays[0])}
                     />{" "}
                     {i18n("Monday")}
                   </div>
@@ -1361,7 +1128,7 @@ export default function Tasks({ folder_id, folder }) {
                     <input
                       type="checkbox"
                       checked={tuesdayChecked}
-                      onChange={toggleTuesday}
+                      onChange={toggleWeekday(weekDays[1])}
                     />{" "}
                     {i18n("Tuesday")}
                   </div>
@@ -1369,7 +1136,7 @@ export default function Tasks({ folder_id, folder }) {
                     <input
                       type="checkbox"
                       checked={wednesdayChecked}
-                      onChange={toggleWednesday}
+                      onChange={toggleWeekday(weekDays[2])}
                     />{" "}
                     {i18n("Wednesday")}
                   </div>
@@ -1377,7 +1144,7 @@ export default function Tasks({ folder_id, folder }) {
                     <input
                       type="checkbox"
                       checked={thursdayChecked}
-                      onChange={toggleThursday}
+                      onChange={toggleWeekday(weekDays[3])}
                     />{" "}
                     {i18n("Thursday")}
                   </div>
@@ -1385,7 +1152,7 @@ export default function Tasks({ folder_id, folder }) {
                     <input
                       type="checkbox"
                       checked={fridayChecked}
-                      onChange={toggleFriday}
+                      onChange={toggleWeekday(weekDays[4])}
                     />{" "}
                     {i18n("Friday")}  
                   </div>
@@ -1393,7 +1160,7 @@ export default function Tasks({ folder_id, folder }) {
                     <input
                       type="checkbox"
                       checked={saturdayChecked}
-                      onChange={toggleSaturday}
+                      onChange={toggleWeekday(weekDays[5])}
                     />{" "}
                     {i18n("Saturday")}
                     <br />
@@ -1402,7 +1169,7 @@ export default function Tasks({ folder_id, folder }) {
                     <input
                       type="checkbox"
                       checked={sundayChecked}
-                      onChange={toggleSunday}
+                      onChange={toggleWeekday(weekDays[6])}
                     />{" "}
                     {i18n("Sunday")}
                   </div>
@@ -1510,7 +1277,7 @@ export default function Tasks({ folder_id, folder }) {
                     <input
                       type="checkbox"
                       checked={mondayChecked}
-                      onChange={toggleMonday}
+                      onChange={toggleWeekday(weekDays[0])}
                     />{" "}
                     {i18n("Monday")}
                   </div>
@@ -1518,7 +1285,7 @@ export default function Tasks({ folder_id, folder }) {
                     <input
                       type="checkbox"
                       checked={tuesdayChecked}
-                      onChange={toggleTuesday}
+                      onChange={toggleWeekday(weekDays[1])}
                     />{" "}
                     {i18n("Tuesday")}
                   </div>
@@ -1526,7 +1293,7 @@ export default function Tasks({ folder_id, folder }) {
                     <input
                       type="checkbox"
                       checked={wednesdayChecked}
-                      onChange={toggleWednesday}
+                      onChange={toggleWeekday(weekDays[2])}
                     />{" "}
                     {i18n("Wednesday")}
                   </div>
@@ -1534,7 +1301,7 @@ export default function Tasks({ folder_id, folder }) {
                     <input
                       type="checkbox"
                       checked={thursdayChecked}
-                      onChange={toggleThursday}
+                      onChange={toggleWeekday(weekDays[3])}
                     />{" "}
                     {i18n("Thursday")}
                   </div>
@@ -1542,7 +1309,7 @@ export default function Tasks({ folder_id, folder }) {
                     <input
                       type="checkbox"
                       checked={fridayChecked}
-                      onChange={toggleFriday}
+                      onChange={toggleWeekday(weekDays[4])}
                     />{" "}
                     {i18n("Friday")}
                   </div>
@@ -1550,7 +1317,7 @@ export default function Tasks({ folder_id, folder }) {
                     <input
                       type="checkbox"
                       checked={saturdayChecked}
-                      onChange={toggleSaturday}
+                      onChange={toggleWeekday(weekDays[5])}
                     />{" "}
                     {i18n("Saturday")}
                     <br />
@@ -1559,7 +1326,7 @@ export default function Tasks({ folder_id, folder }) {
                     <input
                       type="checkbox"
                       checked={sundayChecked}
-                      onChange={toggleSunday}
+                      onChange={toggleWeekday(weekDays[6])}
                     />{" "}
                     {i18n("Sunday")}
                   </div>
