@@ -2,6 +2,7 @@ var express = require("express");
 var database = require("../libs/database");
 var utils = require("../libs/utils");
 var tasks = require("../libs/tasks");
+var { upsertSimpleAlert, deleteSimpleAlert } = require("../libs/alerts");
 var router = express.Router();
 
 var { con, con2 } = database.getMySQLConnections();
@@ -168,6 +169,8 @@ router.post("/api/add-task", (req, res) => {
   var priority = parsePriority(req.body.priority);
   var sort_index = req.body.sort_index;
   var type = req.body.type;
+  var alert_active = req.body.alert_active === true;
+  var alert_text = req.body.alert_text || "";
   var createEvent = true;
 
   if (
@@ -207,21 +210,36 @@ router.post("/api/add-task", (req, res) => {
       if (err) {
         console.log(err);
         res.json({ status: "NOK", error: err.message });
+        return;
       }
 
-      if (createEvent) {
-        var sql2 =
-          "INSERT INTO events (task_id, start_date, end_date, description, user_id) VALUES (?, ?, ?, ?, ?)";
-        await con2.query(sql2, [
-          result.insertId,
-          start_time,
-          end_time,
-          description,
-          req.session.userId,
-        ]);
-      }
+      try {
+        if (createEvent) {
+          var sql2 =
+            "INSERT INTO events (task_id, start_date, end_date, description, user_id) VALUES (?, ?, ?, ?, ?)";
+          await con2.query(sql2, [
+            result.insertId,
+            start_time,
+            end_time,
+            description,
+            req.session.userId,
+          ]);
+        }
 
-      res.json({ status: "OK", data: "Task has been added successfully." });
+        if (alert_active && createEvent) {
+          await upsertSimpleAlert(
+            start_time,
+            result.insertId,
+            alert_text,
+            req.session.userId,
+          );
+        }
+
+        res.json({ status: "OK", data: "Task has been added successfully." });
+      } catch (relatedErr) {
+        console.log(relatedErr);
+        res.json({ status: "NOK", error: relatedErr.message });
+      }
     },
   );
 });
@@ -249,11 +267,27 @@ router.get("/api/get-task", (req, res) => {
     return;
   }
   var task_id = req.query.task_id;
-  var sql = "SELECT * FROM tasks WHERE id = ? AND user_id = ?";
+  var sql =
+    "SELECT tasks.*, alerts.id IS NOT NULL AS alert_active, " +
+    "COALESCE(alerts.text, '') AS alert_text " +
+    "FROM tasks LEFT JOIN alerts ON alerts.task_id = tasks.id " +
+    "AND alerts.user_id = tasks.user_id WHERE tasks.id = ? AND tasks.user_id = ?";
   con.query(sql, [task_id, req.session.userId], function (err, result) {
     if (err) {
       console.log(err);
       res.json({ status: "NOK", error: err.message });
+      return;
+    }
+    if (result.length < 1) {
+      res.json({ status: "NOK", error: "Task not found." });
+      return;
+    }
+    if (
+      result[0].start_time &&
+      new Date(result[0].start_time).getFullYear() === 1970
+    ) {
+      result[0].start_time = "";
+      result[0].end_time = "";
     }
     res.json({ status: "OK", data: result[0] });
   });
@@ -271,6 +305,8 @@ router.post("/api/edit-task", (req, res) => {
   var expiration_date = req.body.expiration_date;
   var hasPriority = Object.prototype.hasOwnProperty.call(req.body, "priority");
   var priority = hasPriority ? parsePriority(req.body.priority) : null;
+  var alert_active = req.body.alert_active === true;
+  var alert_text = req.body.alert_text || "";
   var createEvent = true;
 
   console.log(description);
@@ -314,15 +350,49 @@ router.post("/api/edit-task", (req, res) => {
       if (err) {
         console.log(err);
         res.json({ status: "NOK", error: err.message });
+        return;
       }
 
+      try {
       if (createEvent) {
         var sql2 =
           "UPDATE events SET start_date = ?, end_date = ?, description = ? WHERE task_id = ? AND user_id = ?";
-        await con2.query(sql2, [start_time, end_time, description, task_id, req.session.userId]);
+        var [eventResult] = await con2.query(sql2, [
+          start_time,
+          end_time,
+          description,
+          task_id,
+          req.session.userId,
+        ]);
+        if (eventResult.affectedRows < 1) {
+          await con2.query(
+            "INSERT INTO events (task_id, start_date, end_date, description, user_id) VALUES (?, ?, ?, ?, ?)",
+            [task_id, start_time, end_time, description, req.session.userId],
+          );
+        }
+      } else {
+        await con2.query(
+          "DELETE FROM events WHERE task_id = ? AND user_id = ?",
+          [task_id, req.session.userId],
+        );
+      }
+
+      if (alert_active && createEvent) {
+        await upsertSimpleAlert(
+          start_time,
+          task_id,
+          alert_text,
+          req.session.userId,
+        );
+      } else {
+        await deleteSimpleAlert(task_id, req.session.userId);
       }
 
       res.json({ status: "OK", data: "Task has been updated successfully." });
+      } catch (relatedErr) {
+        console.log(relatedErr);
+        res.json({ status: "NOK", error: relatedErr.message });
+      }
     },
   );
 });
@@ -353,17 +423,17 @@ router.post("/api/delete-task", (req, res) => {
           res.json({ status: "NOK", error: err3.message });
         }
 
-        var sql4 = "DELETE FROM alerts WHERE task_id = ? AND user_id = ?";
-        con.query(sql4, [task_id, req.session.userId], function (err4, result4) {
-          if (err4) {
-            console.log(err4);
-            res.json({ status: "NOK", error: err4.message });
-          }
+        deleteSimpleAlert(task_id, req.session.userId)
+          .then(function () {
           res.json({
             status: "OK",
             data: "Task has been deleted successfully.",
           });
-        });
+          })
+          .catch(function (err4) {
+            console.log(err4);
+            res.json({ status: "NOK", error: err4.message });
+          });
       });
     });
   });

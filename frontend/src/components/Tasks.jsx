@@ -77,8 +77,12 @@ export default function Tasks({folder_id, folder}) {
   const [selectedEditExpirationDate, setSelectedEditExpirationDate] = useState(null);
   const [newTaskDescription, setNewTaskDescription] = useState("");
   const [newTaskPriority, setNewTaskPriority] = useState("0");
+  const [newAlertActive, setNewAlertActive] = useState(false);
+  const [newAlertText, setNewAlertText] = useState("");
   const [editTaskDescription, setEditTaskDescription] = useState("");
   const [editTaskPriority, setEditTaskPriority] = useState("0");
+  const [editAlertActive, setEditAlertActive] = useState(false);
+  const [editAlertText, setEditAlertText] = useState("");
   const [editTaskId, setEditTaskId] = useState(null);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [showNew, setShowNew] = useState(false);
@@ -228,7 +232,7 @@ export default function Tasks({folder_id, folder}) {
       st = "";
       et = "";
     }
-    axios.post(config.BASE_URL + "/api/add-task", {folder_id: folder_id, description: newTaskDescription, start_time: st, end_time: et, expiration_date: selectedNewExpirationDate || "", priority: parsePriority(newTaskPriority), sort_index: totalTasks, type: "single"})
+    axios.post(config.BASE_URL + "/api/add-task", {folder_id: folder_id, description: newTaskDescription, start_time: st, end_time: et, expiration_date: selectedNewExpirationDate || "", priority: parsePriority(newTaskPriority), sort_index: totalTasks, type: "single", alert_active: newAlertActive, alert_text: newAlertText})
     .then(function(response) {
       if (response.data.status == "OK") {
         loadTasks();
@@ -238,6 +242,8 @@ export default function Tasks({folder_id, folder}) {
         setSelectedNewStartTime(null);
         setSelectedNewEndTime(null);
         setSelectedNewExpirationDate(null);
+        setNewAlertActive(false);
+        setNewAlertText("");
         closeAddTask();
       }
       else {
@@ -257,7 +263,7 @@ export default function Tasks({folder_id, folder}) {
       st = "";
       et = "";
     }
-    axios.post(config.BASE_URL + "/api/edit-task", {task_id: editTaskId, description: editTaskDescription, start_time: st, end_time: et, expiration_date: selectedEditExpirationDate || "", priority: parsePriority(editTaskPriority)})
+    axios.post(config.BASE_URL + "/api/edit-task", {task_id: editTaskId, description: editTaskDescription, start_time: st, end_time: et, expiration_date: selectedEditExpirationDate || "", priority: parsePriority(editTaskPriority), alert_active: editAlertActive, alert_text: editAlertText})
     .then(function(response) {
       if (response.data.status == "OK") {
         loadTasks();
@@ -267,6 +273,8 @@ export default function Tasks({folder_id, folder}) {
         setSelectedEditStartTime(null);
         setSelectedEditEndTime(null);
         setSelectedEditExpirationDate(null);
+        setEditAlertActive(false);
+        setEditAlertText("");
         closeEditTask();
       }
       else {
@@ -293,6 +301,8 @@ export default function Tasks({folder_id, folder}) {
     setSelectedNewStartTime(null);
     setSelectedNewEndTime(null);
     setSelectedNewExpirationDate(null);
+    setNewAlertActive(false);
+    setNewAlertText("");
   }
 
   function openEditTask(task_id) {
@@ -303,9 +313,11 @@ export default function Tasks({folder_id, folder}) {
         setEditTaskId(task_id);
         setEditTaskDescription(task.description);
         setEditTaskPriority(String(task.priority ?? 0));
-        setSelectedEditStartTime(moment(task.start_time).format('YYYY-MM-DD HH:mm'));
-        setSelectedEditEndTime(moment(task.end_time).format('YYYY-MM-DD HH:mm'));
+        setSelectedEditStartTime(task.start_time ? moment(task.start_time).format('YYYY-MM-DD HH:mm') : null);
+        setSelectedEditEndTime(task.end_time ? moment(task.end_time).format('YYYY-MM-DD HH:mm') : null);
         setSelectedEditExpirationDate(task.expiration_date ? moment(task.expiration_date).format('YYYY-MM-DD HH:mm') : null);
+        setEditAlertActive(Boolean(task.alert_active));
+        setEditAlertText(task.alert_text || "");
         var modal = bootstrap.Modal.getOrCreateInstance(document.querySelector('.editTaskModal'))
         modal.show();
         setShowEdit(true);
@@ -371,6 +383,8 @@ export default function Tasks({folder_id, folder}) {
     setSelectedEditStartTime(null);
     setSelectedEditEndTime(null);
     setSelectedEditExpirationDate(null);
+    setEditAlertActive(false);
+    setEditAlertText("");
   }
 
   function deleteTask(task_id) {
@@ -645,6 +659,16 @@ export default function Tasks({folder_id, folder}) {
                     <DateTimePicker key={showNew ? "new-expiration-open" : "new-expiration-closed"} value={selectedNewExpirationDate} defaultValue={selectedNewExpirationDate} onChange={setSelectedNewExpirationDate} locale={lang} />
                   </div>
                 </div>
+                <div className="form-group py-2">
+                  <input type="checkbox" checked={newAlertActive} onChange={(e) => setNewAlertActive(e.target.checked)} />{" "}
+                  <label>{i18n("Alert")}</label>
+                </div>
+                {newAlertActive && (
+                  <div className="form-group py-2">
+                    <label>{i18n("Alert Text")}</label>
+                    <textarea className="form-control" value={newAlertText} onChange={(e) => setNewAlertText(e.target.value)}></textarea>
+                  </div>
+                )}
                 <div className="form-group">
                     <div style={{textAlign: "right"}}>
                       <button type="submit" className="btn btn-primary">{i18n("Add")}</button>
@@ -694,6 +718,16 @@ export default function Tasks({folder_id, folder}) {
                     <DateTimePicker key={editTaskId || "edit-expiration-empty"} value={selectedEditExpirationDate} defaultValue={selectedEditExpirationDate} onChange={setSelectedEditExpirationDate} locale={lang} />
                   </div>
                 </div>
+                <div className="form-group py-2">
+                  <input type="checkbox" checked={editAlertActive} onChange={(e) => setEditAlertActive(e.target.checked)} />{" "}
+                  <label>{i18n("Alert")}</label>
+                </div>
+                {editAlertActive && (
+                  <div className="form-group py-2">
+                    <label>{i18n("Alert Text")}</label>
+                    <textarea className="form-control" value={editAlertText} onChange={(e) => setEditAlertText(e.target.value)}></textarea>
+                  </div>
+                )}
                 <div className="form-group">
                     <div style={{textAlign: "right"}}>
                         <button type="submit" className="btn btn-primary">{i18n("Save")}</button>

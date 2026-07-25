@@ -35,6 +35,41 @@ async function deleteRecurrentAlert(task_id, user_id) {
   await loadCron();
 }
 
+function toSimpleTaskCron(dt) {
+  var match = String(dt).match(
+    /^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2})/,
+  );
+  if (!match) {
+    throw new Error("Invalid simple task start time.");
+  }
+
+  var month = Number(match[2]);
+  var day = Number(match[3]);
+  var hour = Number(match[4]);
+  var minute = Number(match[5]);
+  return `${minute} ${hour} ${day} ${month} *`;
+}
+
+async function upsertSimpleAlert(dt, task_id, text, user_id) {
+  var cron_string = toSimpleTaskCron(dt);
+
+  // Older databases may not have a unique task/user index, so update first.
+  var updateSql =
+    "UPDATE alerts SET cron_string = ?, text = ? WHERE task_id = ? AND user_id = ?";
+  var [result] = await con2.query(updateSql, [cron_string, text, task_id, user_id]);
+  if (result.affectedRows < 1) {
+    await con2.query(
+      "INSERT INTO alerts (task_id, cron_string, text, user_id) VALUES (?, ?, ?, ?)",
+      [task_id, cron_string, text, user_id],
+    );
+  }
+  await loadCron();
+}
+
+async function deleteSimpleAlert(task_id, user_id) {
+  await deleteRecurrentAlert(task_id, user_id);
+}
+
 async function listAlerts(user_id) {
   var sql = "SELECT * FROM alerts WHERE user_id = ?";
   var [rows, fields] = await con2.query(sql, [user_id]);
@@ -45,11 +80,15 @@ module.exports = {
   upsertRecurrentAlert,
   insertRecurrentAlert,
   deleteRecurrentAlert,
+  upsertSimpleAlert,
+  deleteSimpleAlert,
   listAlerts,
   default: {
     upsertRecurrentAlert,
     insertRecurrentAlert,
     deleteRecurrentAlert,
+    upsertSimpleAlert,
+    deleteSimpleAlert,
     listAlerts
   },
 };
