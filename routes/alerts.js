@@ -12,7 +12,13 @@ router.get("/list-cron-jobs", (req, res) => {
   var result = [];
 
   for (var i in cronjobs) {
-    result.push({idx: i, id: cronjobs[i].id, nextRun: cronjobs[i].getNextRun()})
+    if (cronjobs[i].userId === req.session.userId) {
+      result.push({
+        idx: i,
+        id: cronjobs[i].alertId,
+        nextRun: cronjobs[i].task.getNextRun(),
+      });
+    }
   }
 
   try {
@@ -29,6 +35,16 @@ router.get("/list-alerts", async (req, res) => {
   }
 
   var alerts = await listAlerts(req.session.userId);
+  var cronjobs = listCronJobs();
+  var nextRuns = new Map(
+    cronjobs
+      .filter((cronjob) => cronjob.userId === req.session.userId)
+      .map((cronjob) => [cronjob.alertId, cronjob.task.getNextRun()])
+  );
+  alerts = alerts.map((alert) => ({
+    ...alert,
+    nextRun: nextRuns.get(alert.id) || null,
+  }));
   res.json({ status: "OK", data: alerts });
 });
 

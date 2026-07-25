@@ -66,7 +66,9 @@ app.use(
   }),
 );
 
-cronJobs.loadCron();
+cronJobs.loadCron().catch((err) => {
+  console.error("Unable to initialize cron email alerts:", err);
+});
 
 app.use("/", authRouter);
 app.use("/", dashboardRouter);

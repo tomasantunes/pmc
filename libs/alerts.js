@@ -17,7 +17,7 @@ async function upsertRecurrentAlert(dt, days, task_id, text, user_id) {
     var sql2 = "UPDATE alerts SET cron_string = ?, text = ? WHERE task_id = ? AND user_id = ?";
     await con2.query(sql2, [cron_string, text, task_id, user_id]);
   }
-  loadCron();
+  await loadCron();
 }
 
 async function insertRecurrentAlert(dt, days, task_id, text, user_id) {
@@ -26,13 +26,13 @@ async function insertRecurrentAlert(dt, days, task_id, text, user_id) {
 
   var sql = "INSERT INTO alerts (task_id, cron_string, text, user_id) VALUES (?, ?, ?, ?)";
   await con2.query(sql, [task_id, cron_string, text, user_id]);
-  loadCron();
+  await loadCron();
 }
 
 async function deleteRecurrentAlert(task_id, user_id) {
   var sql = "DELETE FROM alerts WHERE task_id = ? AND user_id = ?";
   await con2.query(sql, [task_id, user_id]);
-  loadCron();
+  await loadCron();
 }
 
 async function listAlerts(user_id) {
