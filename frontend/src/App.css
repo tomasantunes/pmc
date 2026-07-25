@@ -87,7 +87,7 @@
 
 .recurrent-tasks td:first-child, .recurrent-tasks th:first-child {
     text-align: left;
-    width: 40%;
+    width: 35%;
 }
 
 .recurrent-tasks td:nth-child(2), .recurrent-tasks th:nth-child(2) {
@@ -99,7 +99,7 @@
 }
 
 .recurrent-tasks td:nth-child(10), .recurrent-tasks th:nth-child(10) {
-    width: 9%;
+    width: 14%;
 }
 
 .page {
