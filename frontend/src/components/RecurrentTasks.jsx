@@ -184,31 +184,18 @@ function TRow(props) {
                 {i18n("Delete")}
               </a>
             </li>
-            {!checksCancelled[currentIdx] ? (
-              <li>
-                <a
-                  class="dropdown-item"
-                  href="#"
-                  onClick={() => {
-                    props.cancelTask(props.task_id);
-                  }}
-                >
-                  {i18n("Cancel Today's Task")}
-                </a>
-              </li>
-            ) : (
-              <li>
-                <a
-                  class="dropdown-item"
-                  href="#"
-                  onClick={() => {
-                    props.uncancelTask(props.task_id);
-                  }}
-                >
-                  {i18n("Uncancel Today's Task")}
-                </a>
-              </li>
-            )}
+            <li>
+              <a
+                class="dropdown-item"
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  props.cancelTask(props.task_id, props.task_days);
+                }}
+              >
+                {i18n("Cancel Task")}
+              </a>
+            </li>
             <li>
               <a
                 class="dropdown-item"
@@ -242,6 +229,7 @@ function TBodyPlain(props) {
             type={task.type}
             checks_visible={task.checks_visible}
             checks_cancelled={task.checks_cancelled}
+            task_days={task.days}
             updateTaskDone={props.updateTaskDone}
             openEditTask={props.openEditTask}
             deleteTask={props.deleteTask}
@@ -298,6 +286,9 @@ export default function Tasks({ folder_id, folder }) {
   const [newAlertText, setNewAlertText] = useState("");
   const [editAlertActive, setEditAlertActive] = useState(false);
   const [editAlertText, setEditAlertText] = useState("");
+  const [cancelTaskId, setCancelTaskId] = useState(null);
+  const [cancelWeekdays, setCancelWeekdays] = useState([]);
+  const [cancelAvailableWeekdays, setCancelAvailableWeekdays] = useState([]);
   var navigate = useNavigate();
 
   function changeEnableNewStartTime(e) {
@@ -351,15 +342,59 @@ export default function Tasks({ folder_id, folder }) {
     setEditAlertActive(e.target.checked);
   }
 
-  function cancelTask(task_id) {
+  function cancelTask(task_id, taskDays) {
+    setCancelTaskId(task_id);
+    setCancelWeekdays([]);
+    var scheduledDays = String(taskDays || "")
+      .split(",")
+      .filter(Boolean)
+      .map(Number);
+    setCancelAvailableWeekdays(
+      weekDays
+        .map((day, index) => (scheduledDays.includes(day.value) ? index : null))
+        .filter((index) => index !== null),
+    );
+    var modal = bootstrap.Modal.getOrCreateInstance(
+      document.querySelector(".cancelTaskModal"),
+    );
+    modal.show();
+  }
+
+  function closeCancelTask() {
+    var modal = bootstrap.Modal.getOrCreateInstance(
+      document.querySelector(".cancelTaskModal"),
+    );
+    modal.hide();
+    setCancelTaskId(null);
+    setCancelWeekdays([]);
+    setCancelAvailableWeekdays([]);
+  }
+
+  function toggleCancelWeekday(index) {
+    setCancelWeekdays((previous) =>
+      previous.includes(index)
+        ? previous.filter((item) => item !== index)
+        : [...previous, index],
+    );
+  }
+
+  function submitCancelTask(e) {
+    e.preventDefault();
+    if (cancelWeekdays.length < 1) {
+      alert(i18n("Select at least one weekday."));
+      return;
+    }
+
     axios
       .post(config.BASE_URL + "/api/cancel-task", {
-        task_id: task_id,
-        date: toLocaleISOString(new Date()).split("T")[0],
+        task_id: cancelTaskId,
+        week_start: toLocaleISOString(dates[0]).split("T")[0],
+        weekdays: cancelWeekdays,
       })
       .then(function (response) {
         if (response.data.status == "OK") {
-          window.location.reload();
+          closeCancelTask();
+          loadTasks();
         } else {
           alert(response.data.error);
         }
@@ -774,6 +809,7 @@ export default function Tasks({ folder_id, folder }) {
       var checks_visible = task.days.split(",");
       checks_visible = checks_visible.map(Number);
       var idx_arr = [1, 2, 3, 4, 5, 6, 0];
+
       for (var i in dates) {
         if (dateIsLessThan(dates[i], new Date(task.created_at.split("T")[0]))) {
           checks_visible = checks_visible.filter((item) => {
@@ -1046,6 +1082,51 @@ export default function Tasks({ folder_id, folder }) {
             restartTask={restartTask}
           />
         </table>
+      </div>
+      <div class="modal cancelTaskModal" tabindex="-1">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">{i18n("Cancel Task")}</h5>
+              <button
+                type="button"
+                class="btn-close"
+                onClick={closeCancelTask}
+                aria-label="Close"
+              ></button>
+            </div>
+            <div class="modal-body">
+              <form onSubmit={submitCancelTask}>
+                <p>{i18n("Select the weekdays to cancel for this week.")}</p>
+                {weekDays.map((day, index) => (
+                  <div className="form-check py-1" key={day.value}>
+                    <input
+                      className="form-check-input"
+                      type="checkbox"
+                      id={`cancel-weekday-${day.value}`}
+                      checked={cancelWeekdays.includes(index)}
+                      disabled={!cancelAvailableWeekdays.includes(index)}
+                      onChange={() => toggleCancelWeekday(index)}
+                    />
+                    <label
+                      className="form-check-label"
+                      htmlFor={`cancel-weekday-${day.value}`}
+                    >
+                      {day.label} ({days[index]})
+                    </label>
+                  </div>
+                ))}
+                <div className="form-group pt-3">
+                  <div style={{ textAlign: "right" }}>
+                    <button type="submit" className="btn btn-danger">
+                      {i18n("Cancel selected weekdays")}
+                    </button>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
       </div>
       <div class="modal addTaskModal" tabindex="-1">
         <div class="modal-dialog">

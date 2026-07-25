@@ -46,7 +46,9 @@ router.get("/api/get-recurrent-tasks", (req, res) => {
         if (is_cancelled) {
           var days = result[i].days.split(",");
           var idx_to_remove = days.indexOf(wd.toString());
-          days.splice(idx_to_remove, 1);
+          if (idx_to_remove >= 0) {
+            days.splice(idx_to_remove, 1);
+          }
           result[i].days = days.join(",");
         }
       }
@@ -362,57 +364,110 @@ router.post("/api/restart-recurrent-task", async (req, res) => {
   res.json({ status: "OK", data: "Recurrent task has been restarted." });
 });
 
-router.post("/api/cancel-task", (req, res) => {
+router.post("/api/cancel-task", async (req, res) => {
   if (!req.session.isLoggedIn) {
     res.json({ status: "NOK", error: "Invalid Authorization." });
     return;
   }
 
   var task_id = req.body.task_id;
-  var dt = req.body.date;
+  var week_start = req.body.week_start;
+  var weekdays = Array.isArray(req.body.weekdays)
+    ? [...new Set(req.body.weekdays.map(Number))]
+    : [];
 
-  var sql = "SELECT * FROM recurrent_checks WHERE task_id = ? AND date = ? AND user_id = ?";
-  con.query(sql, [task_id, dt, req.session.userId], function (err, result) {
-    if (err) {
-      console.log(err);
-      res.json({ status: "NOK", error: err.message });
+  if (
+    !/^\d{4}-\d{2}-\d{2}$/.test(String(week_start)) ||
+    weekdays.length < 1 ||
+    weekdays.some((day) => !Number.isInteger(day) || day < 0 || day > 6)
+  ) {
+    res.json({ status: "NOK", error: "Invalid week or weekday selection." });
+    return;
+  }
+
+  var weekStartDate = new Date(`${week_start}T00:00:00Z`);
+  if (
+    Number.isNaN(weekStartDate.getTime()) ||
+    weekStartDate.toISOString().slice(0, 10) !== week_start ||
+    weekStartDate.getUTCDay() !== 1
+  ) {
+    res.json({ status: "NOK", error: "Week start must be a Monday." });
+    return;
+  }
+
+  var selectedDates = weekdays.map((offset) => {
+    var date = new Date(weekStartDate);
+    date.setUTCDate(date.getUTCDate() + offset);
+    return date.toISOString().slice(0, 10);
+  });
+
+  var connection;
+  try {
+    var [taskRows] = await con2.query(
+      "SELECT id, days FROM tasks WHERE id = ? AND type = 'recurrent' AND user_id = ?",
+      [task_id, req.session.userId],
+    );
+    if (taskRows.length < 1) {
+      res.json({ status: "NOK", error: "Task not found." });
       return;
     }
-    if (result.length > 0) {
-      if (result[0].is_done == 1) {
-        res.json({ status: "NOK", error: "Task has already been done." });
-        return;
-      } else {
-        var sql2 =
-          "UPDATE recurrent_checks SET is_cancelled = 1 WHERE task_id = ? AND date = ? AND user_id = ?";
-        con.query(sql2, [task_id, dt, req.session.userId], function (err2, result2) {
-          if (err2) {
-            console.log(err2);
-            res.json({ status: "NOK", error: err2.message });
-          }
-          res.json({
-            status: "OK",
-            data: "Task has been cancelled successfully.",
-          });
-          return;
-        });
-      }
-    } else {
-      var sql2 =
-        "INSERT INTO recurrent_checks (task_id, date, is_cancelled, is_done, user_id) VALUES (?, ?, 1, 0, ?)";
-      con.query(sql2, [task_id, dt, req.session.userId], function (err2, result2) {
-        if (err2) {
-          console.log(err2);
-          res.json({ status: "NOK", error: err2.message });
-        }
-        res.json({
-          status: "OK",
-          data: "Task has been cancelled successfully.",
-        });
-        return;
+    var recurringDays = String(taskRows[0].days || "")
+      .split(",")
+      .filter(Boolean)
+      .map(Number);
+    var selectedDayValues = weekdays.map((offset) =>
+      offset === 6 ? 0 : offset + 1,
+    );
+    if (selectedDayValues.some((day) => !recurringDays.includes(day))) {
+      res.json({
+        status: "NOK",
+        error: "Only scheduled weekdays can be cancelled.",
       });
+      return;
     }
-  });
+
+    connection = await con2.getConnection();
+    await connection.beginTransaction();
+    var placeholders = selectedDates.map(() => "?").join(", ");
+    var params = [task_id, req.session.userId, ...selectedDates];
+
+    await connection.query(
+      `UPDATE recurrent_checks SET is_cancelled = 1 WHERE task_id = ? AND user_id = ? AND date IN (${placeholders})`,
+      params,
+    );
+
+    // Keep an explicit cancellation marker even if a generated check was
+    // previously missing. The recurrent-task table uses this marker to hide
+    // the checkbox for the selected date.
+    for (var selectedDate of selectedDates) {
+      var [checkRows] = await connection.query(
+        "SELECT id FROM recurrent_checks WHERE task_id = ? AND user_id = ? AND date = ? LIMIT 1",
+        [task_id, req.session.userId, selectedDate],
+      );
+      if (checkRows.length < 1) {
+        await connection.query(
+          "INSERT INTO recurrent_checks (task_id, date, is_cancelled, is_done, user_id) VALUES (?, ?, 1, 0, ?)",
+          [task_id, selectedDate, req.session.userId],
+        );
+      }
+    }
+    await connection.query(
+      `DELETE FROM events WHERE task_id = ? AND user_id = ? AND DATE(start_date) IN (${placeholders})`,
+      params,
+    );
+    await connection.commit();
+
+    res.json({
+      status: "OK",
+      data: "Selected recurrent checks have been cancelled and their events removed.",
+    });
+  } catch (err) {
+    if (connection) await connection.rollback();
+    console.log(err);
+    res.json({ status: "NOK", error: err.message });
+  } finally {
+    if (connection) connection.release();
+  }
 });
 
 router.post("/api/uncancel-task", (req, res) => {
