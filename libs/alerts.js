@@ -76,6 +76,14 @@ async function listAlerts(user_id) {
   return rows;
 }
 
+async function insertStandaloneAlert(cron_string, text, user_id) {
+  var sql =
+    "INSERT INTO alerts (task_id, cron_string, text, user_id) VALUES (NULL, ?, ?, ?)";
+  var [result] = await con2.query(sql, [cron_string, text, user_id]);
+  await loadCron();
+  return result.insertId;
+}
+
 async function updateAlert(id, cron_string, text, user_id) {
   var sql =
     "UPDATE alerts SET cron_string = ?, text = ? WHERE id = ? AND user_id = ?";
@@ -98,6 +106,7 @@ module.exports = {
   upsertSimpleAlert,
   deleteSimpleAlert,
   listAlerts,
+  insertStandaloneAlert,
   updateAlert,
   deleteAlert,
   default: {
@@ -107,6 +116,7 @@ module.exports = {
     upsertSimpleAlert,
     deleteSimpleAlert,
     listAlerts,
+    insertStandaloneAlert,
     updateAlert,
     deleteAlert
   },

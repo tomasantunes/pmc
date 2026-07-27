@@ -8,6 +8,9 @@ import { i18n } from '../libs/translations';
 export default function Alerts() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [alerts, setAlerts] = useState([]);
+  const [showAdd, setShowAdd] = useState(false);
+  const [newCronString, setNewCronString] = useState("");
+  const [newText, setNewText] = useState("");
   const [editingId, setEditingId] = useState(null);
   const [editCronString, setEditCronString] = useState("");
   const [editText, setEditText] = useState("");
@@ -20,6 +23,30 @@ export default function Alerts() {
         setAlerts(res.data.data);
       }
     } catch(e) {
+      console.log(e);
+    }
+  }
+
+  function closeAddAlert() {
+    setShowAdd(false);
+    setNewCronString("");
+    setNewText("");
+  }
+
+  async function addAlert(e) {
+    e.preventDefault();
+    try {
+      let res = await axios.post("/add-alert", {
+        cron_string: newCronString,
+        text: newText,
+      });
+      if (res.data.status === "OK") {
+        closeAddAlert();
+        await loadAlerts();
+      } else {
+        window.alert(res.data.error);
+      }
+    } catch (e) {
       console.log(e);
     }
   }
@@ -95,7 +122,47 @@ export default function Alerts() {
       <>
         <Sidebar />
         <div className="page">
-            <h1>Alerts</h1>
+            <div className="d-flex justify-content-between align-items-center mb-3">
+              <h1 className="mb-0">{i18n("Alerts")}</h1>
+              <button type="button" className="btn btn-primary" onClick={() => setShowAdd(true)}>
+                {i18n("Add Alert")}
+              </button>
+            </div>
+            {showAdd && (
+              <form className="card card-body mb-3" onSubmit={addAlert}>
+                <div className="row g-3 align-items-end">
+                  <div className="col-md-4">
+                    <label className="form-label">{i18n("Cron Expression")}</label>
+                    <input
+                      className="form-control"
+                      value={newCronString}
+                      onChange={(e) => setNewCronString(e.target.value)}
+                      placeholder="0 9 * * *"
+                      autoFocus
+                      required
+                    />
+                  </div>
+                  <div className="col-md-5">
+                    <label className="form-label">{i18n("Text")}</label>
+                    <textarea
+                      className="form-control"
+                      value={newText}
+                      onChange={(e) => setNewText(e.target.value)}
+                      rows="1"
+                      required
+                    />
+                  </div>
+                  <div className="col-md-3 text-nowrap">
+                    <button type="submit" className="btn btn-primary me-2">
+                      {i18n("Save")}
+                    </button>
+                    <button type="button" className="btn btn-secondary" onClick={closeAddAlert}>
+                      {i18n("Cancel")}
+                    </button>
+                  </div>
+                </div>
+              </form>
+            )}
             <table className="table table-striped">
               <thead>
                 <tr>

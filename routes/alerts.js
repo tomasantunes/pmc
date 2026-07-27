@@ -1,7 +1,12 @@
 var express = require('express');
 var cron = require("node-cron");
 var { listCronJobs } = require('../libs/cronjobs');
-var { listAlerts, updateAlert, deleteAlert } = require('../libs/alerts');
+var {
+  listAlerts,
+  insertStandaloneAlert,
+  updateAlert,
+  deleteAlert,
+} = require('../libs/alerts');
 var router = express.Router();
 
 router.get("/list-cron-jobs", (req, res) => {
@@ -47,6 +52,25 @@ router.get("/list-alerts", async (req, res) => {
     nextRun: nextRuns.get(alert.id) || null,
   }));
   res.json({ status: "OK", data: alerts });
+});
+
+router.post("/add-alert", async (req, res) => {
+  if (!req.session.isLoggedIn) {
+    return res.json({ status: "NOK", error: "Invalid Authorization." });
+  }
+
+  var cronString = String(req.body.cron_string || "").trim();
+  var text = String(req.body.text || "").trim();
+  if (!cron.validate(cronString) || !text) {
+    return res.json({ status: "NOK", error: "Invalid alert." });
+  }
+
+  var id = await insertStandaloneAlert(
+    cronString,
+    text,
+    req.session.userId,
+  );
+  res.json({ status: "OK", data: {id} });
 });
 
 router.post("/edit-alert", async (req, res) => {

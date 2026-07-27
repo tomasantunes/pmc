@@ -143,6 +143,7 @@ var translations = {
     "End Time": {"en-us": "End Time", "pt-pt": "Hora de Fim"},
     "Week Days": {"en-us": "Week Days", "pt-pt": "Dias da Semana"},
     "Alert": {"en-us": "Alert", "pt-pt": "Alerta"},
+    "Add Alert": {"en-us": "Add Alert", "pt-pt": "Adicionar Alerta"},
     "Alert Text": {"en-us": "Alert Text", "pt-pt": "Texto do Alerta"},
     "Save": {"en-us": "Save", "pt-pt": "Guardar"},
     "Set New Password": {"en-us": "Set New Password", "pt-pt": "Definir Nova Palavra-passe"},
