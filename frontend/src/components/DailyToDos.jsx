@@ -195,8 +195,7 @@ export default function DailyToDos({ folder_id, folder }) {
       
       {!eisenhowerMode ? (
         <div className="row">
-          <div className="col-md-4"></div>
-          <div className="col-md-4">
+          <div className="col-md-10 col-lg-8 mx-auto">
             <SimpleToDoTable
               title={selectedDate}
               tasks={tasks}

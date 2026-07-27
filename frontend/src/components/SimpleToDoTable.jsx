@@ -4,12 +4,25 @@ import config from '../config';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
 import {i18n} from '../libs/translations';
+import TimePicker from "../libs/bs5-timepicker/TimePicker";
 const MySwal = withReactContent(Swal);
 
 export default function SimpleToDoTable({title, tasks, setTasks, folder_id, selectedDate, loadTasks}) {
   const [newTaskDescription, setNewTaskDescription] = useState("");
+  const [newStartTimeEnabled, setNewStartTimeEnabled] = useState(false);
+  const [newEndTimeEnabled, setNewEndTimeEnabled] = useState(false);
+  const [newStartTime, setNewStartTime] = useState("00:00");
+  const [newEndTime, setNewEndTime] = useState("00:00");
   const [editingTaskId, setEditingTaskId] = useState(null);
   const [editingDescription, setEditingDescription] = useState("");
+  const [editingStartTimeEnabled, setEditingStartTimeEnabled] = useState(false);
+  const [editingEndTimeEnabled, setEditingEndTimeEnabled] = useState(false);
+  const [editingStartTime, setEditingStartTime] = useState("00:00");
+  const [editingEndTime, setEditingEndTime] = useState("00:00");
+
+  function displayTime(value) {
+    return value ? String(value).slice(0, 5) : "—";
+  }
 
   function changeNewTaskDescription(e) {
     setNewTaskDescription(e.target.value);
@@ -24,6 +37,8 @@ export default function SimpleToDoTable({title, tasks, setTasks, folder_id, sele
       is_done: false,
       sort_index: tasks.length,
       tdate: selectedDate,
+      start_time: newStartTimeEnabled ? newStartTime : null,
+      end_time: newEndTimeEnabled ? newEndTime : null,
       eisenhower_category: 'Not Urgent and Not Important'
     };
 
@@ -35,6 +50,10 @@ export default function SimpleToDoTable({title, tasks, setTasks, folder_id, sele
           ...newTask
         }]);
         setNewTaskDescription("");
+        setNewStartTimeEnabled(false);
+        setNewEndTimeEnabled(false);
+        setNewStartTime("00:00");
+        setNewEndTime("00:00");
       }
       else {
         MySwal.fire("Error: " + response.data.error);
@@ -70,11 +89,17 @@ export default function SimpleToDoTable({title, tasks, setTasks, folder_id, sele
   function startEditingTask(task) {
     setEditingTaskId(task.id);
     setEditingDescription(task.description);
+    setEditingStartTimeEnabled(Boolean(task.start_time));
+    setEditingEndTimeEnabled(Boolean(task.end_time));
+    setEditingStartTime(task.start_time ? String(task.start_time).slice(0, 5) : "00:00");
+    setEditingEndTime(task.end_time ? String(task.end_time).slice(0, 5) : "00:00");
   }
 
   function cancelEditing() {
     setEditingTaskId(null);
     setEditingDescription("");
+    setEditingStartTimeEnabled(false);
+    setEditingEndTimeEnabled(false);
   }
 
   function saveTaskDescription(task_id) {
@@ -85,7 +110,9 @@ export default function SimpleToDoTable({title, tasks, setTasks, folder_id, sele
 
     const data = {
       task_id: task_id,
-      description: editingDescription
+      description: editingDescription,
+      start_time: editingStartTimeEnabled ? editingStartTime : null,
+      end_time: editingEndTimeEnabled ? editingEndTime : null,
     };
 
     axios.post(config.BASE_URL + "/api/update-daily-todo-task-description", data)
@@ -94,7 +121,12 @@ export default function SimpleToDoTable({title, tasks, setTasks, folder_id, sele
         // Update the task in the local state
         setTasks(tasks.map(task => 
           task.id === task_id 
-            ? { ...task, description: editingDescription }
+            ? {
+                ...task,
+                description: editingDescription,
+                start_time: editingStartTimeEnabled ? editingStartTime : null,
+                end_time: editingEndTimeEnabled ? editingEndTime : null,
+              }
             : task
         ));
         setEditingTaskId(null);
@@ -155,6 +187,7 @@ export default function SimpleToDoTable({title, tasks, setTasks, folder_id, sele
           <tr>
             <th></th>
             <th>{i18n("Task")}</th>
+            <th>{i18n("Time")}</th>
             <th>{i18n("Actions")}</th>
           </tr>
         </thead>
@@ -164,23 +197,70 @@ export default function SimpleToDoTable({title, tasks, setTasks, folder_id, sele
               <td><input type="checkbox" checked={t.is_done} onChange={(e) => { updateTaskDone(e, t.id) }} /></td>
               <td>
                 {editingTaskId === t.id ? (
-                  <textarea 
-                    className="form-control" 
-                    rows="3" 
-                    value={editingDescription} 
-                    onChange={(e) => setEditingDescription(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' && !e.shiftKey) {
-                        e.preventDefault();
-                        saveTaskDescription(t.id);
-                      }
-                      if (e.key === 'Escape') {
-                        cancelEditing();
-                      }
-                    }}
-                  />
+                  <>
+                    <textarea
+                      className="form-control"
+                      rows="3"
+                      value={editingDescription}
+                      onChange={(e) => setEditingDescription(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                          e.preventDefault();
+                          saveTaskDescription(t.id);
+                        }
+                        if (e.key === 'Escape') {
+                          cancelEditing();
+                        }
+                      }}
+                    />
+                  </>
                 ) : (
                   <span onDoubleClick={() => startEditingTask(t)}>{t.description}</span>
+                )}
+              </td>
+              <td className="text-nowrap">
+                {editingTaskId === t.id ? (
+                  <>
+                    <div className="mb-2">
+                      <label className="d-block">
+                        <input
+                          type="checkbox"
+                          checked={editingStartTimeEnabled}
+                          onChange={(e) => setEditingStartTimeEnabled(e.target.checked)}
+                        />{" "}{i18n("Start")}
+                      </label>
+                      {editingStartTimeEnabled && (
+                        <TimePicker
+                          format="24"
+                          minuteStep={5}
+                          defaultValue={editingStartTime}
+                          onChange={(value) => setEditingStartTime(value)}
+                        />
+                      )}
+                    </div>
+                    <div>
+                      <label className="d-block">
+                        <input
+                          type="checkbox"
+                          checked={editingEndTimeEnabled}
+                          onChange={(e) => setEditingEndTimeEnabled(e.target.checked)}
+                        />{" "}{i18n("End")}
+                      </label>
+                      {editingEndTimeEnabled && (
+                        <TimePicker
+                          format="24"
+                          minuteStep={5}
+                          defaultValue={editingEndTime}
+                          onChange={(value) => setEditingEndTime(value)}
+                        />
+                      )}
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div><strong>{i18n("Start")}:</strong> {displayTime(t.start_time)}</div>
+                    <div><strong>{i18n("End")}:</strong> {displayTime(t.end_time)}</div>
+                  </>
                 )}
               </td>
               <td>
@@ -224,6 +304,42 @@ export default function SimpleToDoTable({title, tasks, setTasks, folder_id, sele
             <td></td>
             <td>
               <textarea className="form-control mt-2" rows="2" placeholder={i18n("Enter task description...")} value={newTaskDescription} onChange={changeNewTaskDescription}></textarea>
+            </td>
+            <td className="text-nowrap">
+              <div className="mb-2">
+                <label className="d-block">
+                  <input
+                    type="checkbox"
+                    checked={newStartTimeEnabled}
+                    onChange={(e) => setNewStartTimeEnabled(e.target.checked)}
+                  />{" "}{i18n("Start")}
+                </label>
+                {newStartTimeEnabled && (
+                  <TimePicker
+                    format="24"
+                    minuteStep={5}
+                    defaultValue={newStartTime}
+                    onChange={(value) => setNewStartTime(value)}
+                  />
+                )}
+              </div>
+              <div>
+                <label className="d-block">
+                  <input
+                    type="checkbox"
+                    checked={newEndTimeEnabled}
+                    onChange={(e) => setNewEndTimeEnabled(e.target.checked)}
+                  />{" "}{i18n("End")}
+                </label>
+                {newEndTimeEnabled && (
+                  <TimePicker
+                    format="24"
+                    minuteStep={5}
+                    defaultValue={newEndTime}
+                    onChange={(value) => setNewEndTime(value)}
+                  />
+                )}
+              </div>
             </td>
             <td><button className="btn btn-success" onClick={addTask}><i className="fas fa-plus" /></button></td>
           </tr>

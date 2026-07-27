@@ -56,6 +56,8 @@ CREATE TABLE daily_todos_tasks (
     is_done BOOLEAN NOT NULL,
     sort_index INT(11) NOT NULL DEFAULT 0,
     tdate DATE NOT NULL,
+    start_time TIME DEFAULT NULL,
+    end_time TIME DEFAULT NULL,
     eisenhower_category VARCHAR(50) DEFAULT 'Not Urgent and Not Important',
     starred BOOLEAN NOT NULL DEFAULT 0,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -143,3 +145,5 @@ ALTER TABLE users ADD COLUMN license_expires DATETIME DEFAULT NULL AFTER license
 ALTER TABLE tasks ADD COLUMN expiration_date DATETIME DEFAULT NULL AFTER end_time;
 ALTER TABLE tasks ADD COLUMN priority INT(11) DEFAULT NULL AFTER expiration_date;
 ALTER TABLE alerts MODIFY COLUMN task_id INT(11) NULL;
+ALTER TABLE daily_todos_tasks ADD COLUMN start_time TIME DEFAULT NULL AFTER tdate;
+ALTER TABLE daily_todos_tasks ADD COLUMN end_time TIME DEFAULT NULL AFTER start_time;

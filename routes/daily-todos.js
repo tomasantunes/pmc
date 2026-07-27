@@ -39,9 +39,11 @@ router.post("/api/add-daily-todo-task", (req, res) => {
   var tdate = req.body.tdate;
   var sort_index = req.body.sort_index;
   var is_done = req.body.is_done;
+  var start_time = req.body.start_time || null;
+  var end_time = req.body.end_time || null;
 
-  var sql = "INSERT INTO daily_todos_tasks (folder_id, description, tdate, sort_index, is_done, user_id) VALUES (?, ?, ?, ?, ?, ?)";
-  con.query(sql, [folder_id, description, tdate, sort_index, is_done, req.session.userId], function (err, result) {
+  var sql = "INSERT INTO daily_todos_tasks (folder_id, description, tdate, start_time, end_time, sort_index, is_done, user_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+  con.query(sql, [folder_id, description, tdate, start_time, end_time, sort_index, is_done, req.session.userId], function (err, result) {
     if (err) {
       console.log(err);
       res.json({status: "NOK", error: err.message});
@@ -65,7 +67,7 @@ router.post("/api/copy-daily-todos-to-tomorrow", async (req, res) => {
     await connection.beginTransaction();
 
     var [todayTasks] = await connection.query(
-      `SELECT description, eisenhower_category, starred
+      `SELECT description, start_time, end_time, eisenhower_category, starred
        FROM daily_todos_tasks
        WHERE folder_id = ? AND tdate = CURDATE() AND user_id = ?
        ORDER BY sort_index ASC, id ASC`,
@@ -93,6 +95,8 @@ router.post("/api/copy-daily-todos-to-tomorrow", async (req, res) => {
       0,
       nextSortIndex + index,
       tomorrowSort[0].tomorrow_date,
+      task.start_time,
+      task.end_time,
       task.eisenhower_category,
       task.starred,
       req.session.userId,
@@ -100,7 +104,7 @@ router.post("/api/copy-daily-todos-to-tomorrow", async (req, res) => {
 
     await connection.query(
       `INSERT INTO daily_todos_tasks
-       (folder_id, description, is_done, sort_index, tdate, eisenhower_category, starred, user_id)
+       (folder_id, description, is_done, sort_index, tdate, start_time, end_time, eisenhower_category, starred, user_id)
        VALUES ?`,
       [values],
     );
@@ -172,15 +176,17 @@ router.post("/api/update-daily-todo-task-description", (req, res) => {
 
   var task_id = req.body.task_id;
   var description = req.body.description;
+  var start_time = req.body.start_time || null;
+  var end_time = req.body.end_time || null;
 
   console.log("Task ID:");
   console.log(task_id);
   console.log("New Description:");
   console.log(description);
 
-  var sql = "UPDATE daily_todos_tasks SET description = ? WHERE id = ? AND user_id = ?";
+  var sql = "UPDATE daily_todos_tasks SET description = ?, start_time = ?, end_time = ? WHERE id = ? AND user_id = ?";
 
-  con.query(sql, [description, task_id, req.session.userId], function(err, result) {
+  con.query(sql, [description, start_time, end_time, task_id, req.session.userId], function(err, result) {
     if (err) {
       console.log(err);
       res.json({status: "NOK", error: err.message});
