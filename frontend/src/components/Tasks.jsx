@@ -610,7 +610,6 @@ export default function Tasks({folder_id, folder}) {
         <div className="text-center">
           <h3>Tasks</h3>
         </div>
-        {tasks.filter(task => task.starred == false).length == 0 && <p className="text-center">{i18n("No tasks found.")}</p>}
         <table className="table table-striped table-bordered align-middle tasks">
             <thead class="table-dark">
                 <tr>
@@ -626,6 +625,9 @@ export default function Tasks({folder_id, folder}) {
             </thead>
             <TBodyPlain data={sortByPriority(tasks.filter(task => task.starred == false))} updateTaskDone={updateTaskDone} updateTaskStarred={updateTaskStarred} openEditTask={openEditTask} openMoveModal={openMoveModal} deleteTask={deleteTask} hideStrikethrough={hideStrikethrough} />
         </table>
+        {tasks.length === 0 && (
+          <p className="text-center text-muted">{i18n("This folder has no tasks.")}</p>
+        )}
       </div>
       <div class="modal addTaskModal" tabindex="-1">
         <div class="modal-dialog">

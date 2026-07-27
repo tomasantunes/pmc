@@ -196,6 +196,7 @@ var translations = {
     "Today's tasks were copied to tomorrow.": {"en-us": "Today's tasks were copied to tomorrow.", "pt-pt": "As tarefas de hoje foram copiadas para amanhã."},
     "There are no tasks to copy today.": {"en-us": "There are no tasks to copy today.", "pt-pt": "Não existem tarefas para copiar hoje."},
     "No tasks found.": {"en-us": "No tasks found.", "pt-pt": "Nenhuma tarefa encontrada."},
+    "This folder has no tasks.": {"en-us": "This folder has no tasks.", "pt-pt": "Esta pasta não tem tarefas."},
 }
 
 export function i18n(text) {

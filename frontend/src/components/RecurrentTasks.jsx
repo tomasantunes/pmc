@@ -1089,6 +1089,9 @@ export default function Tasks({ folder_id, folder }) {
           />
         </table>
       </div>
+      {tasks.length === 0 && (
+        <p className="text-center text-muted">{i18n("This folder has no tasks.")}</p>
+      )}
       <div class="modal cancelTaskModal" tabindex="-1">
         <div class="modal-dialog">
           <div class="modal-content">

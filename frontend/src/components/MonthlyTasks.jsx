@@ -472,6 +472,9 @@ export default function MonthlyTasks({ folder_id, folder }) {
           ))}
         </tbody>
       </table>
+      {tasks.length === 0 && (
+        <p className="text-center text-muted">{i18n("This folder has no tasks.")}</p>
+      )}
 
       {/* Add Task Modal */}
       <div

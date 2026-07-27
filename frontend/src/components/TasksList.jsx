@@ -299,6 +299,9 @@ export default function Tasks({folder_id, folder}) {
           </thead>
           <TBodyPlain data={tasks} openEditTask={openEditTask} deleteTask={deleteTask} />
       </table>
+      {tasks.length === 0 && (
+        <p className="text-center text-muted">{i18n("This folder has no tasks.")}</p>
+      )}
       <div class="modal addTaskModal" tabindex="-1">
         <div class="modal-dialog">
           <div class="modal-content">
