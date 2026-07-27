@@ -55,12 +55,48 @@
 }
 
 .tasks {
-    width: 500px;
+    table-layout: fixed;
+    width: 850px;
     margin: 0 auto;
 }
 
 .tasks td, .tasks th {
     overflow-wrap: anywhere;
+}
+
+.tasks .task-complete-column {
+    width: 7%;
+}
+
+.tasks .task-description-column {
+    width: 47%;
+}
+
+.tasks .task-priority-column {
+    width: 9%;
+}
+
+.tasks .task-time-column {
+    width: 20%;
+}
+
+.tasks .task-starred-column {
+    width: 7%;
+}
+
+.tasks .task-actions-column {
+    width: 10%;
+}
+
+.task-time {
+    display: block;
+    font-size: 11px;
+    line-height: 1.45;
+    white-space: nowrap;
+}
+
+.task-time > span {
+    display: block;
 }
 
 .tasks .dropdown-toggle {
@@ -257,7 +293,7 @@ tbody {
 
   .tasks {
     table-layout: fixed;
-    width: 100%;
+    width: 500px;
   }
 
   .tasks th, .tasks td {
@@ -269,21 +305,25 @@ tbody {
     width: 28px;
   }
 
-  .tasks th:first-child, .tasks td:first-child {
-    width: 42px !important;
+  .tasks .task-time-column {
+    display: none;
   }
 
-  .tasks th:nth-child(2), .tasks td:nth-child(2) {
-    width: auto !important;
+  .tasks .task-complete-column {
+    width: 48px;
   }
 
-  .tasks th:nth-child(3), .tasks td:nth-child(3),
-  .tasks th:nth-child(4), .tasks td:nth-child(4) {
-    width: 56px !important;
+  .tasks .task-description-column {
+    width: 260px;
   }
 
-  .tasks th:nth-child(5), .tasks td:nth-child(5) {
-    width: 56px !important;
+  .tasks .task-priority-column,
+  .tasks .task-starred-column {
+    width: 60px;
+  }
+
+  .tasks .task-actions-column {
+    width: 72px;
   }
 
   .tasks .btn {

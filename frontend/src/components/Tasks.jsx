@@ -16,16 +16,23 @@ var lang = getCurrentLanguage();
 function TRow(props) {
   return (
     <tr {...props}>
-      <td><input type="checkbox" checked={props.is_done} onChange={(e) => { props.updateTaskDone(e, props.task_id); }} /></td>
-      <td className={props.is_done && !props.hideStrikethrough ? "strikethrough" : ""}>{props.description}</td>
-      <td>{props.priority ?? 0}</td>
-      <td>{props.time}</td>
-      <td>
+      <td className="task-complete-column"><input type="checkbox" checked={props.is_done} onChange={(e) => { props.updateTaskDone(e, props.task_id); }} /></td>
+      <td className={`task-description-column ${props.is_done && !props.hideStrikethrough ? "strikethrough" : ""}`}>{props.description}</td>
+      <td className="task-priority-column">{props.priority ?? 0}</td>
+      <td className="task-time-column">
+        {props.time && (
+          <span className="task-time">
+            <span><b>{i18n("Start")}:</b> {moment(props.start_time).format("DD/MM/YYYY HH:mm")}</span>
+            <span><b>{i18n("End")}:</b> {moment(props.end_time).format("DD/MM/YYYY HH:mm")}</span>
+          </span>
+        )}
+      </td>
+      <td className="task-starred-column">
         <button className="btn btn-secondary" onClick={() => { props.updateTaskStarred(props.task_id); }} key={Math.random()}>
           {props.starred ? <i className="fa-solid fa-star"></i> : <i className="fa-regular fa-star"></i>}
         </button>
       </td>
-      <td>
+      <td className="task-actions-column">
       <div class="dropdown">
         <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
           &nbsp;
@@ -46,7 +53,7 @@ function TBodyPlain(props) {
     <tbody {...props} className="table-group-divider">
       {props.data.map((task, i) => {
         return (
-          <TRow key={task.id} index={i} task_id={task.id} description={task.description} priority={task.priority} time={task.time} is_done={task.is_done} starred={task.starred} updateTaskDone={props.updateTaskDone} openEditTask={props.openEditTask} openMoveModal={props.openMoveModal} deleteTask={props.deleteTask} updateTaskStarred={props.updateTaskStarred} hideStrikethrough={props.hideStrikethrough} />
+          <TRow key={task.id} index={i} task_id={task.id} description={task.description} priority={task.priority} time={task.time} start_time={task.start_time} end_time={task.end_time} is_done={task.is_done} starred={task.starred} updateTaskDone={props.updateTaskDone} openEditTask={props.openEditTask} openMoveModal={props.openMoveModal} deleteTask={props.deleteTask} updateTaskStarred={props.updateTaskStarred} hideStrikethrough={props.hideStrikethrough} />
         )
       })}
     </tbody>
@@ -586,13 +593,13 @@ export default function Tasks({folder_id, folder}) {
       <table className="table table-striped table-bordered align-middle tasks">
               <thead class="table-dark">
                   <tr>
-                      <th style={{width: "10%", height: "35px"}}>
+                      <th className="task-complete-column" style={{height: "35px"}}>
                       </th>
-                      <th style={{width: "45%", height: "35px"}}></th>
-                      <th style={{width: "10%", height: "35px"}}></th>
-                      <th style={{width: "20%", height: "35px"}}></th>
-                      <th style={{width: "10%", height: "35px"}}></th>
-                      <th style={{width: "5%", height: "35px"}}></th>
+                      <th className="task-description-column" style={{height: "35px"}}></th>
+                      <th className="task-priority-column" style={{height: "35px"}}></th>
+                      <th className="task-time-column" style={{height: "35px"}}></th>
+                      <th className="task-starred-column" style={{height: "35px"}}></th>
+                      <th className="task-actions-column" style={{height: "35px"}}></th>
                   </tr>
               </thead>
               <TBodyPlain data={sortByPriority(tasks.filter(task => task.starred == true))} updateTaskDone={updateTaskDone} updateTaskStarred={updateTaskStarred} openEditTask={openEditTask} openMoveModal={openMoveModal} deleteTask={deleteTask} hideStrikethrough={hideStrikethrough} />
@@ -607,14 +614,14 @@ export default function Tasks({folder_id, folder}) {
         <table className="table table-striped table-bordered align-middle tasks">
             <thead class="table-dark">
                 <tr>
-                    <th style={{width: "10%"}}>
+                    <th className="task-complete-column">
                       <input type="checkbox" checked={tasks.filter(task => task.is_done == true && task.starred == false).length > 0 && tasks.length > 0} onChange={(e) => { e.target.checked ? setAllTasksDone() : setAllTasksNotDone() }} />
                     </th>
-                    <th style={{width: "45%"}}>{i18n("Task")}</th>
-                    <th style={{width: "10%"}}>{i18n("Priority")}</th>
-                    <th style={{width: "10%"}}>{i18n("Time")}</th>
-                    <th style={{width: "10%"}}>{i18n("Starred")}</th>
-                    <th style={{width: "15%"}}>{i18n("Actions")}</th>
+                    <th className="task-description-column">{i18n("Task")}</th>
+                    <th className="task-priority-column">{i18n("Priority")}</th>
+                    <th className="task-time-column">{i18n("Time")}</th>
+                    <th className="task-starred-column">{i18n("Starred")}</th>
+                    <th className="task-actions-column">{i18n("Actions")}</th>
                 </tr>
             </thead>
             <TBodyPlain data={sortByPriority(tasks.filter(task => task.starred == false))} updateTaskDone={updateTaskDone} updateTaskStarred={updateTaskStarred} openEditTask={openEditTask} openMoveModal={openMoveModal} deleteTask={deleteTask} hideStrikethrough={hideStrikethrough} />

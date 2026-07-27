@@ -35,6 +35,7 @@ var translations = {
     "Add": {"en-us": "Add", "pt-pt": "Adicionar"},
     "Error: Event not found.": {"en-us": "Error: Event not found.", "pt-pt": "Erro: Evento não encontrado."},
     "Week View": {"en-us": "Week View", "pt-pt": "Vista Semanal"},
+    "Month View": {"en-us": "Month View", "pt-pt": "Vista Mensal"},
     "List View": {"en-us": "List View", "pt-pt": "Vista de Lista"},
     "New Event": {"en-us": "New Event", "pt-pt": "Novo Evento"},
     "Edit Event": {"en-us": "Edit Event", "pt-pt": "Editar Evento"},

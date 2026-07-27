@@ -7,6 +7,7 @@ import config from '../config.json';
 import moment from 'moment';
 import DateTimePicker from '../libs/bs5-datetime/DateTimePicker';
 import FullCalendar from '@fullcalendar/react';
+import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import listPlugin from '@fullcalendar/list';
 import interactionPlugin from '@fullcalendar/interaction';
@@ -243,6 +244,7 @@ export default function Home() {
           <div className="row mb-2">
             <div className="col-md-6">
               <button className="btn btn-primary me-2" onClick={() => handleChangeView("timeGridWeek")}>{i18n("Week View")}</button>
+              <button className="btn btn-primary me-2" onClick={() => handleChangeView("dayGridMonth")}>{i18n("Month View")}</button>
               <button className="btn btn-primary" onClick={() => handleChangeView("listWeek")}>{i18n("List View")}</button>
             </div>
             <div className="col-md-6 text-end">
@@ -251,7 +253,7 @@ export default function Home() {
           </div>
           <FullCalendar
             ref={calendarRef}
-            plugins={[timeGridPlugin, listPlugin, interactionPlugin]}
+            plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}
             initialView="timeGridWeek"
             selectable={true}
             select={handleSelect}
