@@ -6,6 +6,33 @@ var {fillMissingDays} = require('../libs/stats');
 
 var {con, con2 } = database.getMySQLConnections();
 
+function sendStatsResponse(res, userId, stats) {
+  var sql = `
+    SELECT
+      COUNT(*) AS total,
+      COALESCE(SUM(rc.is_done = 1), 0) AS done
+    FROM recurrent_checks rc
+    INNER JOIN tasks t ON t.id = rc.task_id
+    WHERE rc.user_id = ?
+      AND t.user_id = ?
+      AND t.type = 'recurrent'
+      AND rc.date <= CURDATE()
+      AND rc.is_cancelled = 0
+  `;
+
+  con.query(sql, [userId, userId], function (err, result) {
+    if (err) {
+      console.log(err);
+      res.json({status: "NOK", error: err.message});
+      return;
+    }
+
+    stats.recurrent_tasks_all_time = result[0].total;
+    stats.recurrent_tasks_done_all_time = Number(result[0].done);
+    res.json({status: "OK", data: stats});
+  });
+}
+
 router.get("/api/get-stats", (req, res) => {
   if (!req.session.isLoggedIn) {
     res.json({status: "NOK", error: "Invalid Authorization."});
@@ -47,11 +74,11 @@ router.get("/api/get-stats", (req, res) => {
                   today_tasks_done++;
                 }
               }
-              res.json({status: "OK", data: {total_tasks: total_tasks, total_tasks_done: total_tasks_done, recurrent_tasks: today_tasks, recurrent_tasks_done: today_tasks_done}});
+              sendStatsResponse(res, req.session.userId, {total_tasks: total_tasks, total_tasks_done: total_tasks_done, recurrent_tasks: today_tasks, recurrent_tasks_done: today_tasks_done});
             });
           }
           else {
-            res.json({status: "OK", data: {total_tasks: total_tasks, total_tasks_done: total_tasks_done, recurrent_tasks: 0, recurrent_tasks_done: 0}});
+            sendStatsResponse(res, req.session.userId, {total_tasks: total_tasks, total_tasks_done: total_tasks_done, recurrent_tasks: 0, recurrent_tasks_done: 0});
           }
         });
       });

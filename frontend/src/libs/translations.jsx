@@ -172,6 +172,7 @@ var translations = {
     "Recurrent Tasks Done Today": {"en-us": "Recurrent Tasks Done Today", "pt-pt": "Tarefas Recorrentes Concluídas Hoje"},
     "Total Tasks Progress": {"en-us": "Total Tasks Progress", "pt-pt": "Progresso Total de Tarefas"},
     "Recurrent Tasks Today Progress": {"en-us": "Recurrent Tasks Today Progress", "pt-pt": "Progresso de Tarefas Recorrentes Hoje"},
+    "Recurrent Tasks All-Time Progress": {"en-us": "Recurrent Tasks All-Time Progress", "pt-pt": "Progresso Total de Tarefas Recorrentes"},
     "Total Time Tracked": {"en-us": "Total Time Tracked", "pt-pt": "Tempo Total Rastreado"},
     "Move to...": {"en-us": "Move to...", "pt-pt": "Mover para..."},
     "Show Done": {"en-us": "Show Done", "pt-pt": "Mostrar Concluídas"},

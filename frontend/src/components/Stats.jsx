@@ -16,6 +16,7 @@ export default function Stats() {
   const [totalAllRecurrentTasksDone, setTotalAllRecurrentTasksDone] = useState(0);
   const [progressPercentage, setProgressPercentage] = useState(0);
   const [recurrentTasksTodayProgressPercentage, setRecurrentTasksTodayProgressPercentage] = useState(0);
+  const [recurrentTasksAllTimeProgressPercentage, setRecurrentTasksAllTimeProgressPercentage] = useState(0);
 
   const [tasksLast15Days, setTasksLast15Days] = useState({
     series: [{ name: i18n("Tasks Done"), data: [] }],
@@ -77,6 +78,12 @@ export default function Stats() {
           perc2 = 0;
         }
         setRecurrentTasksTodayProgressPercentage(perc2);
+
+        var perc3 = Math.round((response.data.data.recurrent_tasks_done_all_time / response.data.data.recurrent_tasks_all_time) * 100);
+        if (isNaN(perc3)) {
+          perc3 = 0;
+        }
+        setRecurrentTasksAllTimeProgressPercentage(perc3);
       }
       else {
         alert(response.data.error);
@@ -179,6 +186,10 @@ export default function Stats() {
             <tr>
               <th className="table-dark bg-blue">{i18n("Recurrent Tasks Today Progress")}</th>
               <td className="text-center">{recurrentTasksTodayProgressPercentage}%</td>
+            </tr>
+            <tr>
+              <th className="table-dark bg-blue">{i18n("Recurrent Tasks All-Time Progress")}</th>
+              <td className="text-center">{recurrentTasksAllTimeProgressPercentage}%</td>
             </tr>
             <tr>
               <th className="table-dark bg-blue">{i18n("Total Time Tracked")}</th>
