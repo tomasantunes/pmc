@@ -8,6 +8,9 @@ import { i18n } from '../libs/translations';
 export default function Alerts() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [alerts, setAlerts] = useState([]);
+  const [editingId, setEditingId] = useState(null);
+  const [editCronString, setEditCronString] = useState("");
+  const [editText, setEditText] = useState("");
   const navigate = useNavigate();
 
   async function loadAlerts() {
@@ -17,6 +20,52 @@ export default function Alerts() {
         setAlerts(res.data.data);
       }
     } catch(e) {
+      console.log(e);
+    }
+  }
+
+  function startEditing(alert) {
+    setEditingId(alert.id);
+    setEditCronString(alert.cron_string);
+    setEditText(alert.text);
+  }
+
+  function cancelEditing() {
+    setEditingId(null);
+    setEditCronString("");
+    setEditText("");
+  }
+
+  async function saveAlert(e) {
+    e.preventDefault();
+    try {
+      let res = await axios.post("/edit-alert", {
+        id: editingId,
+        cron_string: editCronString,
+        text: editText,
+      });
+      if (res.data.status === "OK") {
+        cancelEditing();
+        await loadAlerts();
+      } else {
+        window.alert(res.data.error);
+      }
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
+  async function removeAlert(alert) {
+    if (!window.confirm(`${i18n("Delete")} "${alert.text}"?`)) return;
+    try {
+      let res = await axios.post("/delete-alert", {id: alert.id});
+      if (res.data.status === "OK") {
+        if (editingId === alert.id) cancelEditing();
+        await loadAlerts();
+      } else {
+        window.alert(res.data.error);
+      }
+    } catch (e) {
       console.log(e);
     }
   }
@@ -55,6 +104,7 @@ export default function Alerts() {
                   <th>{i18n("Next Run")}</th>
                   <th>{i18n("Cron Expression")}</th>
                   <th>{i18n("Text")}</th>
+                  <th>{i18n("Actions")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -63,8 +113,49 @@ export default function Alerts() {
                     <td>{idx}</td>
                     <td>{a.id}</td>
                     <td>{a.nextRun || ""}</td>
-                    <td>{a.cron_string}</td>
-                    <td>{a.text}</td>
+                    <td>
+                      {editingId === a.id ? (
+                        <input
+                          className="form-control"
+                          value={editCronString}
+                          onChange={(e) => setEditCronString(e.target.value)}
+                          form={`edit-alert-${a.id}`}
+                          required
+                        />
+                      ) : a.cron_string}
+                    </td>
+                    <td>
+                      {editingId === a.id ? (
+                        <textarea
+                          className="form-control"
+                          value={editText}
+                          onChange={(e) => setEditText(e.target.value)}
+                          form={`edit-alert-${a.id}`}
+                          required
+                        />
+                      ) : a.text}
+                    </td>
+                    <td className="text-nowrap">
+                      {editingId === a.id ? (
+                        <form id={`edit-alert-${a.id}`} onSubmit={saveAlert}>
+                          <button type="submit" className="btn btn-primary btn-sm me-2">
+                            {i18n("Save")}
+                          </button>
+                          <button type="button" className="btn btn-secondary btn-sm" onClick={cancelEditing}>
+                            {i18n("Cancel")}
+                          </button>
+                        </form>
+                      ) : (
+                        <>
+                          <button type="button" className="btn btn-primary btn-sm me-2" onClick={() => startEditing(a)}>
+                            {i18n("Edit")}
+                          </button>
+                          <button type="button" className="btn btn-danger btn-sm" onClick={() => removeAlert(a)}>
+                            {i18n("Delete")}
+                          </button>
+                        </>
+                      )}
+                    </td>
                   </tr>
                 ))}
               </tbody>

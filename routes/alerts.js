@@ -1,6 +1,7 @@
 var express = require('express');
+var cron = require("node-cron");
 var { listCronJobs } = require('../libs/cronjobs');
-var { listAlerts } = require('../libs/alerts');
+var { listAlerts, updateAlert, deleteAlert } = require('../libs/alerts');
 var router = express.Router();
 
 router.get("/list-cron-jobs", (req, res) => {
@@ -46,6 +47,47 @@ router.get("/list-alerts", async (req, res) => {
     nextRun: nextRuns.get(alert.id) || null,
   }));
   res.json({ status: "OK", data: alerts });
+});
+
+router.post("/edit-alert", async (req, res) => {
+  if (!req.session.isLoggedIn) {
+    return res.json({ status: "NOK", error: "Invalid Authorization." });
+  }
+
+  var id = Number(req.body.id);
+  var cronString = String(req.body.cron_string || "").trim();
+  var text = String(req.body.text || "").trim();
+  if (!Number.isInteger(id) || id < 1 || !cron.validate(cronString) || !text) {
+    return res.json({ status: "NOK", error: "Invalid alert." });
+  }
+
+  var affectedRows = await updateAlert(
+    id,
+    cronString,
+    text,
+    req.session.userId,
+  );
+  if (affectedRows < 1) {
+    return res.json({ status: "NOK", error: "Alert not found." });
+  }
+  res.json({ status: "OK" });
+});
+
+router.post("/delete-alert", async (req, res) => {
+  if (!req.session.isLoggedIn) {
+    return res.json({ status: "NOK", error: "Invalid Authorization." });
+  }
+
+  var id = Number(req.body.id);
+  if (!Number.isInteger(id) || id < 1) {
+    return res.json({ status: "NOK", error: "Invalid alert." });
+  }
+
+  var affectedRows = await deleteAlert(id, req.session.userId);
+  if (affectedRows < 1) {
+    return res.json({ status: "NOK", error: "Alert not found." });
+  }
+  res.json({ status: "OK" });
 });
 
 module.exports = router;

@@ -76,6 +76,21 @@ async function listAlerts(user_id) {
   return rows;
 }
 
+async function updateAlert(id, cron_string, text, user_id) {
+  var sql =
+    "UPDATE alerts SET cron_string = ?, text = ? WHERE id = ? AND user_id = ?";
+  var [result] = await con2.query(sql, [cron_string, text, id, user_id]);
+  await loadCron();
+  return result.affectedRows;
+}
+
+async function deleteAlert(id, user_id) {
+  var sql = "DELETE FROM alerts WHERE id = ? AND user_id = ?";
+  var [result] = await con2.query(sql, [id, user_id]);
+  await loadCron();
+  return result.affectedRows;
+}
+
 module.exports = {
   upsertRecurrentAlert,
   insertRecurrentAlert,
@@ -83,12 +98,16 @@ module.exports = {
   upsertSimpleAlert,
   deleteSimpleAlert,
   listAlerts,
+  updateAlert,
+  deleteAlert,
   default: {
     upsertRecurrentAlert,
     insertRecurrentAlert,
     deleteRecurrentAlert,
     upsertSimpleAlert,
     deleteSimpleAlert,
-    listAlerts
+    listAlerts,
+    updateAlert,
+    deleteAlert
   },
 };
