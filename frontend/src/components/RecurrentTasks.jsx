@@ -844,19 +844,25 @@ export default function Tasks({ folder_id, folder }) {
           var count_tasks_done = 0;
           var count_tasks_pending = 0;
           var today = new Date();
+          var todayDate = toLocaleISOString(today).split("T")[0];
 
           for (var i in new_data) {
             var checks = [];
             var checks_cancelled = [];
             var checks_visible = await getChecksVisible(new_data[i]);
+            var todayCheck = new_data[i].checks.find((check) => {
+              return check.date.split("T")[0] == todayDate;
+            });
+
+            if (checks_visible.includes(today.getDay())) {
+              count_tasks++;
+              if (todayCheck && todayCheck.is_done) count_tasks_done++;
+              else count_tasks_pending++;
+            }
+
             for (var j in new_data[i].checks) {
               const check = new_data[i].checks[j];
               const checkDate = new Date(check.date.split("T")[0]);
-              if (compareDates(checkDate, today)) {
-                count_tasks++;
-                if (check.is_done) count_tasks_done++;
-                else count_tasks_pending++;
-              }
 
               for (var k in dates) {
                 if (compareDates(checkDate, dates[k]) && check.is_done) {
