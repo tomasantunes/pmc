@@ -25,6 +25,7 @@ export default function DailyToDos({ folder_id, folder }) {
     showTime: false,
   });
   const [eisenhowerMode, setEisenhowerMode] = useState(false);
+  const [copyingToTomorrow, setCopyingToTomorrow] = useState(false);
 
   function handleDateChange(newDate) {
     setSelectedDate(newDate);
@@ -73,6 +74,46 @@ export default function DailyToDos({ folder_id, folder }) {
           console.log(err);
         });
       }
+    });
+  }
+
+  function copyTodayToTomorrow() {
+    MySwal.fire({
+      title: i18n("Copy today's tasks to tomorrow?"),
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonColor: "#0d6efd",
+      cancelButtonText: i18n("No"),
+      confirmButtonText: i18n("Yes"),
+    }).then((result) => {
+      if (!result.isConfirmed) return;
+
+      setCopyingToTomorrow(true);
+      axios
+        .post(config.BASE_URL + "/api/copy-daily-todos-to-tomorrow", {
+          folder_id,
+        })
+        .then(function (response) {
+          if (response.data.status !== "OK") {
+            MySwal.fire("Error: " + response.data.error);
+            return;
+          }
+
+          if (response.data.data.copied === 0) {
+            MySwal.fire(i18n("There are no tasks to copy today."));
+          } else {
+            MySwal.fire({
+              icon: "success",
+              text: i18n("Today's tasks were copied to tomorrow."),
+            });
+          }
+        })
+        .catch(function () {
+          MySwal.fire(i18n("Connection Error"));
+        })
+        .finally(function () {
+          setCopyingToTomorrow(false);
+        });
     });
   }
 
@@ -127,6 +168,13 @@ export default function DailyToDos({ folder_id, folder }) {
           />
         </div>
         <div className="text-end d-block">
+          <button
+            className="btn btn-primary me-2 d-inline-block"
+            onClick={copyTodayToTomorrow}
+            disabled={copyingToTomorrow}
+          >
+            {i18n("Copy Today to Tomorrow")}
+          </button>
           <button
             className="btn btn-outline-primary me-2 d-inline-block"
             onClick={() => setEisenhowerMode((p) => !p)}

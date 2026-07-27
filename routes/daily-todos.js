@@ -51,6 +51,70 @@ router.post("/api/add-daily-todo-task", (req, res) => {
   });
 });
 
+router.post("/api/copy-daily-todos-to-tomorrow", async (req, res) => {
+  if (!req.session.isLoggedIn) {
+    res.json({status: "NOK", error: "Invalid Authorization."});
+    return;
+  }
+
+  var folder_id = req.body.folder_id;
+  var connection;
+
+  try {
+    connection = await con2.getConnection();
+    await connection.beginTransaction();
+
+    var [todayTasks] = await connection.query(
+      `SELECT description, eisenhower_category, starred
+       FROM daily_todos_tasks
+       WHERE folder_id = ? AND tdate = CURDATE() AND user_id = ?
+       ORDER BY sort_index ASC, id ASC`,
+      [folder_id, req.session.userId],
+    );
+
+    if (todayTasks.length === 0) {
+      await connection.commit();
+      res.json({status: "OK", data: {copied: 0}});
+      return;
+    }
+
+    var [tomorrowSort] = await connection.query(
+      `SELECT
+         COALESCE(MAX(sort_index), -1) AS max_sort_index,
+         DATE_ADD(CURDATE(), INTERVAL 1 DAY) AS tomorrow_date
+       FROM daily_todos_tasks
+       WHERE folder_id = ? AND tdate = DATE_ADD(CURDATE(), INTERVAL 1 DAY) AND user_id = ?`,
+      [folder_id, req.session.userId],
+    );
+    var nextSortIndex = Number(tomorrowSort[0].max_sort_index) + 1;
+    var values = todayTasks.map((task, index) => [
+      folder_id,
+      task.description,
+      0,
+      nextSortIndex + index,
+      tomorrowSort[0].tomorrow_date,
+      task.eisenhower_category,
+      task.starred,
+      req.session.userId,
+    ]);
+
+    await connection.query(
+      `INSERT INTO daily_todos_tasks
+       (folder_id, description, is_done, sort_index, tdate, eisenhower_category, starred, user_id)
+       VALUES ?`,
+      [values],
+    );
+    await connection.commit();
+    res.json({status: "OK", data: {copied: todayTasks.length}});
+  } catch (err) {
+    if (connection) await connection.rollback();
+    console.log(err);
+    res.json({status: "NOK", error: err.message});
+  } finally {
+    if (connection) connection.release();
+  }
+});
+
 router.post("/api/update-daily-todo-task-done", (req, res) => {
   if (!req.session.isLoggedIn) {
     res.json({status: "NOK", error: "Invalid Authorization."});

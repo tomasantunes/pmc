@@ -190,6 +190,10 @@ var translations = {
     "Monthly": {"en-us": "Monthly", "pt-pt": "Mensal"},
     "List": {"en-us": "List", "pt-pt": "Lista"},
     "Daily To-Dos": {"en-us": "Daily To-Dos", "pt-pt": "To-Dos Diários"},
+    "Copy Today to Tomorrow": {"en-us": "Copy Today to Tomorrow", "pt-pt": "Copiar Hoje para Amanhã"},
+    "Copy today's tasks to tomorrow?": {"en-us": "Copy today's tasks to tomorrow?", "pt-pt": "Copiar as tarefas de hoje para amanhã?"},
+    "Today's tasks were copied to tomorrow.": {"en-us": "Today's tasks were copied to tomorrow.", "pt-pt": "As tarefas de hoje foram copiadas para amanhã."},
+    "There are no tasks to copy today.": {"en-us": "There are no tasks to copy today.", "pt-pt": "Não existem tarefas para copiar hoje."},
     "No tasks found.": {"en-us": "No tasks found.", "pt-pt": "Nenhuma tarefa encontrada."},
 }
 
