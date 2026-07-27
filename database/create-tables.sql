@@ -84,7 +84,7 @@ CREATE TABLE time_tracking_sub_sessions (
 
 CREATE TABLE alerts (
     id INT(11) AUTO_INCREMENT PRIMARY KEY,
-    task_id INT(11) NOT NULL,
+    task_id INT(11) DEFAULT NULL,
     cron_string VARCHAR(50) NOT NULL,
     text TEXT NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -141,3 +141,5 @@ ALTER TABLE users ADD COLUMN reset_password_expires DATETIME DEFAULT NULL AFTER 
 ALTER TABLE users ADD COLUMN license_key CHAR(64) DEFAULT NULL AFTER reset_password_expires;
 ALTER TABLE users ADD COLUMN license_expires DATETIME DEFAULT NULL AFTER license_key;
 ALTER TABLE tasks ADD COLUMN expiration_date DATETIME DEFAULT NULL AFTER end_time;
+ALTER TABLE tasks ADD COLUMN priority INT(11) DEFAULT NULL AFTER expiration_date;
+ALTER TABLE alerts MODIFY COLUMN task_id INT(11) NULL;
