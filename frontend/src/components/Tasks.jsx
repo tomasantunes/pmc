@@ -525,6 +525,40 @@ export default function Tasks({folder_id, folder}) {
     });
   }
 
+  function suggestNewTask(e) {
+    e.preventDefault();
+    MySwal.fire({
+      title: i18n("Generating task suggestion..."),
+      allowOutsideClick: false,
+      didOpen: () => MySwal.showLoading(),
+    });
+
+    axios.post(config.BASE_URL + "/api/suggest-task", { folder_id })
+    .then(function(response) {
+      if (response.data.status === "OK") {
+        MySwal.fire({
+          title: i18n("Suggested Task"),
+          text: response.data.data.suggestion,
+          icon: "info",
+        });
+      }
+      else {
+        MySwal.fire({
+          title: i18n("Unable to generate suggestion"),
+          text: response.data.error,
+          icon: "error",
+        });
+      }
+    })
+    .catch(function() {
+      MySwal.fire({
+        title: i18n("Unable to generate suggestion"),
+        text: i18n("Connection Error"),
+        icon: "error",
+      });
+    });
+  }
+
   function toggleVoiceOverview() {
     if (!voiceOverview) {
       var timer = setInterval(function() {
@@ -595,6 +629,7 @@ export default function Tasks({folder_id, folder}) {
                   <li><a class="dropdown-item" href="#" onClick={toggleHideStrikethrough}>{hideStrikethrough ? i18n("Show Strikethrough") : i18n("Hide Strikethrough")}</a></li>
                   <li><a class="dropdown-item" href="#" onClick={toggleVoiceOverview}>{voiceOverview ? i18n("Deactivate Voice Overview") : i18n("Activate Voice Overview")}</a></li>
                   <li><a class="dropdown-item" href="#" onClick={playVoiceOverview}>{i18n("Play Voice Overview")}</a></li>
+                  <li><a class="dropdown-item" href="#" onClick={suggestNewTask}>{i18n("Suggest a New Task")}</a></li>
                 </ul>
               </div>
             </div>

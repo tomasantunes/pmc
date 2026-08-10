@@ -3,6 +3,7 @@ var database = require("../libs/database");
 var utils = require("../libs/utils");
 var tasks = require("../libs/tasks");
 var { upsertSimpleAlert, deleteSimpleAlert } = require("../libs/alerts");
+var { getOpenAIInstance, getTaskSuggestion } = require("../libs/openai");
 var router = express.Router();
 
 var { con, con2 } = database.getMySQLConnections();
@@ -19,6 +20,48 @@ router.get("/api/get-task-list", async (req, res) => {
   }
   var task_list = await tasks.getTaskList(req.session.userId);
   res.json({ status: "OK", data: task_list });
+});
+
+router.post("/api/suggest-task", async (req, res) => {
+  if (!req.session.isLoggedIn) {
+    res.json({ status: "NOK", error: "Invalid Authorization." });
+    return;
+  }
+
+  try {
+    var folder_id = req.body.folder_id;
+    const [folders] = await con2.query(
+      "SELECT id, name FROM folders WHERE id = ? AND user_id = ? AND type = 'simple'",
+      [folder_id, req.session.userId],
+    );
+    if (folders.length < 1) {
+      res.json({ status: "NOK", error: "Simple tasks folder not found." });
+      return;
+    }
+
+    const [unfinishedTasks] = await con2.query(
+      "SELECT description FROM tasks WHERE folder_id = ? AND user_id = ? AND is_done = 0 ORDER BY COALESCE(priority, 0) DESC, sort_index ASC, id ASC",
+      [folder_id, req.session.userId],
+    );
+    if (unfinishedTasks.length < 1) {
+      res.json({ status: "NOK", error: "This folder has no unfinished tasks." });
+      return;
+    }
+
+    var suggestion = await getTaskSuggestion(
+      getOpenAIInstance(),
+      folders[0].name,
+      unfinishedTasks.map((task) => task.description),
+    );
+    if (!suggestion) {
+      throw new Error("OpenAI returned an empty task suggestion.");
+    }
+
+    res.json({ status: "OK", data: { suggestion } });
+  } catch (err) {
+    console.log(err);
+    res.json({ status: "NOK", error: "Unable to generate a task suggestion." });
+  }
 });
 
 router.get("/api/get-mindmap-overview", async (req, res) => {
