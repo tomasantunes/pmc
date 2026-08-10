@@ -1,10 +1,11 @@
 var express = require('express');
 var database = require('../libs/database');
+var { insertEventAlert } = require('../libs/alerts');
 var router = express.Router();
 
 var {con, con2 } = database.getMySQLConnections();
 
-router.post("/api/add-event", (req, res) => {
+router.post("/api/add-event", async (req, res) => {
   if (!req.session.isLoggedIn) {
     res.json({status: "NOK", error: "Invalid Authorization."});
     return;
@@ -13,15 +14,34 @@ router.post("/api/add-event", (req, res) => {
   var start_date = req.body.start;
   var end_date = req.body.end;
   var description = req.body.value;
+  var alert_active = req.body.alert_active === true;
+  var alert_text = req.body.alert_text || "";
+  var alert_minutes_before = Number(req.body.alert_minutes_before);
+
+  if (
+    alert_active &&
+    (!Number.isInteger(alert_minutes_before) || alert_minutes_before < 0)
+  ) {
+    res.json({status: "NOK", error: "Invalid alert time."});
+    return;
+  }
 
   var sql = "INSERT INTO events (start_date, end_date, description, user_id) VALUES (?, ?, ?, ?)";
-  con.query(sql, [start_date, end_date, description, req.session.userId], function (err, result) {
-    if (err) {
-      console.log(err);
-      res.json({status: "NOK", error: err});
+  try {
+    var [result] = await con2.query(sql, [start_date, end_date, description, req.session.userId]);
+    if (alert_active) {
+      await insertEventAlert(
+        start_date,
+        alert_minutes_before,
+        alert_text,
+        req.session.userId,
+      );
     }
     res.json({status: "OK", data: {message: "Event has been added successfully.", id: result.insertId}});
-  });
+  } catch (err) {
+    console.log(err);
+    res.json({status: "NOK", error: err.message || err});
+  }
 });
 
 router.post("/api/edit-event", (req, res) => {

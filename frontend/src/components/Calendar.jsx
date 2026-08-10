@@ -19,6 +19,9 @@ var lang = getCurrentLanguage();
 export default function Home() {
   const calendarRef = useRef(null);
   const [newEventTitle, setNewEventTitle] = useState("");
+  const [newAlertActive, setNewAlertActive] = useState(false);
+  const [newAlertText, setNewAlertText] = useState("");
+  const [newAlertMinutesBefore, setNewAlertMinutesBefore] = useState(15);
   const [editEventId, setEditEventId] = useState(null);
   const [editEventTitle, setEditEventTitle] = useState("");
   const [selectedNewStartTime, setSelectedNewStartTime] = useState(null);
@@ -82,6 +85,9 @@ export default function Home() {
     setNewEventTitle("");
     setSelectedNewStartTime(null);
     setSelectedNewEndTime(null);
+    setNewAlertActive(false);
+    setNewAlertText("");
+    setNewAlertMinutesBefore(15);
   }
 
   function closeEditEvent() {
@@ -105,7 +111,10 @@ export default function Home() {
     axios.post(config.BASE_URL + "/api/add-event", {
       start: selectedNewStartTime,
       end: selectedNewEndTime,
-      value: newEventTitle
+      value: newEventTitle,
+      alert_active: newAlertActive,
+      alert_text: newAlertText,
+      alert_minutes_before: newAlertMinutesBefore
     })
     .then((response) => {
       if (response.data.status == "OK") {
@@ -289,6 +298,41 @@ export default function Home() {
                       <DateTimePicker value={selectedNewEndTime} defaultValue={selectedNewEndTime} onChange={handleChangeNewEndTime} locale={lang} />
                     </div>
                   </div>
+                  <div className="form-group py-2">
+                    <input
+                      type="checkbox"
+                      id="new-event-alert"
+                      checked={newAlertActive}
+                      onChange={(e) => setNewAlertActive(e.target.checked)}
+                    />
+                    <label htmlFor="new-event-alert">
+                      {i18n("Alert")}
+                    </label>
+                  </div>
+                  {newAlertActive && (
+                    <>
+                      <div className="form-group py-2">
+                        <label className="control-label">{i18n("Alert text")}</label>
+                        <textarea
+                          className="form-control"
+                          value={newAlertText}
+                          onChange={(e) => setNewAlertText(e.target.value)}
+                        />
+                      </div>
+                      <div className="form-group py-2">
+                        <label className="control-label">{i18n("Minutes before the event")}</label>
+                        <input
+                          type="number"
+                          className="form-control"
+                          min="0"
+                          step="1"
+                          required
+                          value={newAlertMinutesBefore}
+                          onChange={(e) => setNewAlertMinutesBefore(Number(e.target.value))}
+                        />
+                      </div>
+                    </>
+                  )}
                   <div className="form-group">
                       <div style={{textAlign: "right"}}>
                         <button type="submit" className="btn btn-primary">{i18n("Add")}</button>

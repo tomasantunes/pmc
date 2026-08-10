@@ -50,6 +50,25 @@ function toSimpleTaskCron(dt) {
   return `${minute} ${hour} ${day} ${month} *`;
 }
 
+function subtractMinutes(dt, minutes) {
+  var match = String(dt).match(
+    /^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2})/,
+  );
+  if (!match) {
+    throw new Error("Invalid event start time.");
+  }
+
+  var alertDate = new Date(
+    Number(match[1]),
+    Number(match[2]) - 1,
+    Number(match[3]),
+    Number(match[4]),
+    Number(match[5]) - minutes,
+  );
+  var pad = (value) => String(value).padStart(2, "0");
+  return `${alertDate.getFullYear()}-${pad(alertDate.getMonth() + 1)}-${pad(alertDate.getDate())} ${pad(alertDate.getHours())}:${pad(alertDate.getMinutes())}`;
+}
+
 async function upsertSimpleAlert(dt, task_id, text, user_id) {
   var cron_string = toSimpleTaskCron(dt);
 
@@ -84,6 +103,12 @@ async function insertStandaloneAlert(cron_string, text, user_id) {
   return result.insertId;
 }
 
+async function insertEventAlert(dt, minutes_before, text, user_id) {
+  var alertDate = subtractMinutes(dt, minutes_before);
+  var cron_string = toSimpleTaskCron(alertDate);
+  return insertStandaloneAlert(cron_string, text, user_id);
+}
+
 async function updateAlert(id, cron_string, text, user_id) {
   var sql =
     "UPDATE alerts SET cron_string = ?, text = ? WHERE id = ? AND user_id = ?";
@@ -107,6 +132,7 @@ module.exports = {
   deleteSimpleAlert,
   listAlerts,
   insertStandaloneAlert,
+  insertEventAlert,
   updateAlert,
   deleteAlert,
   default: {
@@ -117,6 +143,7 @@ module.exports = {
     deleteSimpleAlert,
     listAlerts,
     insertStandaloneAlert,
+    insertEventAlert,
     updateAlert,
     deleteAlert
   },
