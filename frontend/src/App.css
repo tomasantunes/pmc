@@ -363,6 +363,44 @@ a.dropdown-item {
     background-color: black;
 }
 
+.daily-todos-toolbar {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.daily-todos-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.daily-todos-actions .btn {
+  margin: 0 !important;
+}
+
+.eisenhower-dropzone {
+  min-height: 200px;
+}
+
+.eisenhower-drag-handle {
+  align-items: center;
+  color: #5d6874;
+  cursor: grab;
+  display: inline-flex;
+  flex: 0 0 36px;
+  height: 36px;
+  justify-content: center;
+  margin: -6px 4px -6px -6px;
+  touch-action: none;
+}
+
+.eisenhower-drag-handle:active {
+  cursor: grabbing;
+}
+
 .set-language-btn {
   padding: 15px;
   cursor: pointer;
@@ -466,5 +504,134 @@ a.dropdown-item {
   .workflow-layout {
     grid-template-columns: 1fr;
     padding: 0 12px 16px;
+  }
+
+  .daily-todos-page {
+    margin-top: 0 !important;
+    padding: 0;
+  }
+
+  .daily-todos-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .daily-todos-date > div,
+  .daily-todos-date input {
+    max-width: none;
+    width: 100%;
+  }
+
+  .daily-todos-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .daily-todos-actions > .btn:first-child {
+    grid-column: 1 / -1;
+  }
+
+  .daily-todos-actions .btn,
+  .daily-todos-actions .dropdown,
+  .daily-todos-actions .dropdown-toggle {
+    width: 100%;
+  }
+
+  .daily-todos-table,
+  .daily-todos-table tbody,
+  .daily-todos-table tfoot,
+  .daily-todos-table tr,
+  .daily-todos-table td {
+    display: block;
+    width: 100%;
+  }
+
+  .daily-todos-table thead {
+    display: none;
+  }
+
+  .daily-todos-table {
+    border: 0;
+  }
+
+  .daily-todos-table tbody tr,
+  .daily-todos-table tfoot tr {
+    background: #fff;
+    border: 1px solid #d8dee6;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    margin-bottom: 12px;
+    overflow: hidden;
+    padding: 10px;
+    position: relative;
+  }
+
+  .daily-todos-table td {
+    border: 0;
+    padding: 8px 8px 8px 86px;
+    position: relative;
+    white-space: normal;
+  }
+
+  .daily-todos-table td[data-label]::before {
+    color: #65717d;
+    content: attr(data-label);
+    font-size: 0.75rem;
+    font-weight: 700;
+    left: 8px;
+    position: absolute;
+    text-transform: uppercase;
+    top: 10px;
+  }
+
+  .daily-todos-table .daily-todo-complete {
+    padding: 4px 8px;
+  }
+
+  .daily-todos-table .daily-todo-actions > div {
+    display: flex;
+    gap: 8px;
+  }
+
+  .daily-todos-table .daily-todo-actions .btn {
+    min-height: 40px;
+    min-width: 44px;
+  }
+
+  .eisenhower-grid {
+    --bs-gutter-x: 8px;
+  }
+
+  .eisenhower-column {
+    margin-bottom: 8px !important;
+  }
+
+  .eisenhower-card .card-header {
+    align-items: center;
+    display: flex;
+    font-size: 0.78rem;
+    justify-content: center;
+    line-height: 1.2;
+    min-height: 52px;
+    padding: 6px;
+  }
+
+  .eisenhower-dropzone {
+    min-height: 150px;
+    padding: 5px !important;
+  }
+
+  .eisenhower-task {
+    font-size: 0.82rem;
+    overflow-wrap: anywhere;
+    padding: 7px !important;
+  }
+
+  .eisenhower-drag-handle {
+    background: #eef3f8;
+    border-radius: 6px;
+    flex-basis: 40px;
+    height: 42px;
+    margin: -4px 4px -4px -4px;
   }
 }

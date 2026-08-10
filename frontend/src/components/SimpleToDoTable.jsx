@@ -182,7 +182,7 @@ export default function SimpleToDoTable({title, tasks, setTasks, folder_id, sele
   return (
     <>
       <h2>{title}</h2>
-      <table className="table table-striped table-bordered">
+      <table className="table table-striped table-bordered daily-todos-table">
         <thead className="table-dark">
           <tr>
             <th></th>
@@ -194,8 +194,8 @@ export default function SimpleToDoTable({title, tasks, setTasks, folder_id, sele
         <tbody>
           {tasks.map((t) => (
             <tr key={t.id}>
-              <td><input type="checkbox" checked={t.is_done} onChange={(e) => { updateTaskDone(e, t.id) }} /></td>
-              <td>
+              <td className="daily-todo-complete"><input type="checkbox" aria-label={i18n("Complete task")} checked={t.is_done} onChange={(e) => { updateTaskDone(e, t.id) }} /></td>
+              <td data-label={i18n("Task")}>
                 {editingTaskId === t.id ? (
                   <>
                     <textarea
@@ -218,7 +218,7 @@ export default function SimpleToDoTable({title, tasks, setTasks, folder_id, sele
                   <span onDoubleClick={() => startEditingTask(t)}>{t.description}</span>
                 )}
               </td>
-              <td className="text-nowrap">
+              <td className="daily-todo-time" data-label={i18n("Time")}>
                 {editingTaskId === t.id ? (
                   <>
                     <div className="mb-2">
@@ -263,7 +263,7 @@ export default function SimpleToDoTable({title, tasks, setTasks, folder_id, sele
                   </>
                 )}
               </td>
-              <td>
+              <td className="daily-todo-actions" data-label={i18n("Actions")}>
                 {editingTaskId === t.id ? (
                   <div>
                     <button 
@@ -301,11 +301,11 @@ export default function SimpleToDoTable({title, tasks, setTasks, folder_id, sele
         </tbody>
         <tfoot>
           <tr>
-            <td></td>
-            <td>
+            <td className="daily-todo-complete"></td>
+            <td data-label={i18n("New task")}>
               <textarea className="form-control mt-2" rows="2" placeholder={i18n("Enter task description...")} value={newTaskDescription} onChange={changeNewTaskDescription}></textarea>
             </td>
-            <td className="text-nowrap">
+            <td className="daily-todo-time" data-label={i18n("Time")}>
               <div className="mb-2">
                 <label className="d-block">
                   <input
@@ -341,7 +341,7 @@ export default function SimpleToDoTable({title, tasks, setTasks, folder_id, sele
                 )}
               </div>
             </td>
-            <td><button className="btn btn-success" onClick={addTask}><i className="fas fa-plus" /></button></td>
+            <td className="daily-todo-actions" data-label={i18n("Actions")}><button className="btn btn-success" onClick={addTask}><i className="fas fa-plus" /></button></td>
           </tr>
         </tfoot>
       </table>

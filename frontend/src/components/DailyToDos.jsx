@@ -156,9 +156,9 @@ export default function DailyToDos({ folder_id, folder }) {
   }
 
   return (
-    <div className="container mt-3">
-      <div className="d-flex justify-content-between align-items-center mb-3">
-        <div>
+    <div className="container mt-3 daily-todos-page">
+      <div className="daily-todos-toolbar mb-3">
+        <div className="daily-todos-date">
           <DateTimePicker
             value={selectedDate}
             defaultValue={defaultDate}
@@ -167,7 +167,7 @@ export default function DailyToDos({ folder_id, folder }) {
             options={datePickerOptions}
           />
         </div>
-        <div className="text-end d-block">
+        <div className="daily-todos-actions">
           <button
             className="btn btn-primary me-2 d-inline-block"
             onClick={copyTodayToTomorrow}
@@ -181,12 +181,12 @@ export default function DailyToDos({ folder_id, folder }) {
           >
             {eisenhowerMode ? i18n("Normal View") : i18n("Eisenhower View")}
           </button>
-          <div class="dropdown d-inline-block">
-            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+          <div className="dropdown d-inline-block">
+            <button className="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
               {i18n("Options")}
             </button>
-            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-              <li><a class="dropdown-item" href="#" onClick={deleteFolder}>{i18n("Delete folder")}</a></li>
+            <ul className="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+              <li><a className="dropdown-item" href="#" onClick={deleteFolder}>{i18n("Delete folder")}</a></li>
             </ul>
           </div>
         </div>
@@ -208,14 +208,14 @@ export default function DailyToDos({ folder_id, folder }) {
         </div>
       ) : (
         <DragDropContext onDragEnd={handleDragEnd}>
-          <div className="row">
+          <div className="row eisenhower-grid">
             {categories.map((cat) => {
               const filteredTasks = tasks.filter(
                 (t) => t.eisenhower_category === cat.key
               );
               return (
-                <div key={cat.key} className="col-md-6 mb-3">
-                  <div className="card shadow-sm h-100">
+                <div key={cat.key} className="col-6 col-md-6 mb-3 eisenhower-column">
+                  <div className="card shadow-sm h-100 eisenhower-card">
                     <div className="card-header bg-light fw-bold text-center">
                       {cat.label}
                     </div>
@@ -224,8 +224,7 @@ export default function DailyToDos({ folder_id, folder }) {
                         <div
                           ref={provided.innerRef}
                           {...provided.droppableProps}
-                          className="p-2"
-                          style={{ minHeight: "200px" }}
+                          className="p-2 eisenhower-dropzone"
                         >
                           {filteredTasks.map((task, index) => (
                             <Draggable
@@ -237,8 +236,7 @@ export default function DailyToDos({ folder_id, folder }) {
                                 <div
                                   ref={provided.innerRef}
                                   {...provided.draggableProps}
-                                  {...provided.dragHandleProps}
-                                  className="card mb-2 shadow-sm p-2"
+                                  className="card mb-2 shadow-sm p-2 eisenhower-task"
                                   style={{
                                     ...provided.draggableProps.style,
                                     borderLeft: "4px solid #0d6efd",
@@ -246,6 +244,13 @@ export default function DailyToDos({ folder_id, folder }) {
                                     background: "white",
                                   }}
                                 >
+                                  <span
+                                    {...provided.dragHandleProps}
+                                    className="eisenhower-drag-handle"
+                                    aria-label={i18n("Drag task")}
+                                  >
+                                    <i className="fas fa-grip-vertical" />
+                                  </span>
                                   <span>{task.is_done ? "✔" : ""}{task.description}</span>
                                 </div>
                               )}
