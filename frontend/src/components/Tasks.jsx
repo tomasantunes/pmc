@@ -105,6 +105,7 @@ export default function Tasks({folder_id, folder}) {
   const [voiceOverview, setVoiceOverview] = useState(false);
   const [voiceOverviewTimer, setVoiceOverviewTimer] = useState(null);
   const [audioSource, setAudioSource] = useState("");
+  const [voiceOverviewLoading, setVoiceOverviewLoading] = useState(false);
   const audioRef = useRef();
   var navigate = useNavigate();
 
@@ -497,7 +498,11 @@ export default function Tasks({folder_id, folder}) {
     setHideStrikethrough(!hideStrikethrough);
   }
 
-  function playVoiceOverview() {
+  function playVoiceOverview(e) {
+    if (e) e.preventDefault();
+    if (voiceOverviewLoading) return;
+
+    setVoiceOverviewLoading(true);
     axios.get("/get-folder-tts", {
       params: {
         folder_id: folder_id
@@ -514,6 +519,9 @@ export default function Tasks({folder_id, folder}) {
     })
     .catch(function(err) {
       console.log(err);
+    })
+    .finally(function() {
+      setVoiceOverviewLoading(false);
     });
   }
 
@@ -556,6 +564,14 @@ export default function Tasks({folder_id, folder}) {
   }, []);
   return (
     <>
+      {voiceOverviewLoading && (
+        <div className="voice-overview-loading" role="status" aria-live="polite">
+          <div className="voice-overview-loading-content">
+            <div className="spinner-border text-light" aria-hidden="true"></div>
+            <span>{i18n("Preparing voice overview...")}</span>
+          </div>
+        </div>
+      )}
       <div className="row">
         <div className="col-md-8"></div>
         <div className="col-md-4">
