@@ -7,6 +7,7 @@ import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 import moment from "moment";
 import {i18n} from "../libs/translations";
+import TaskAssignees from './TaskAssignees';
 
 const MySwal = withReactContent(Swal);
 
@@ -129,11 +130,13 @@ export default function MonthlyTasks({ folder_id, folder }) {
   const navigate = useNavigate();
   const [tasks, setTasks] = useState([]);
   const [newTaskDescription, setNewTaskDescription] = useState("");
+  const [newTaskAssignees, setNewTaskAssignees] = useState([]);
   const [selectedMonths, setSelectedMonths] = useState([]);
   const [showNew, setShowNew] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
   const [editTaskId, setEditTaskId] = useState(null);
   const [editTaskDescription, setEditTaskDescription] = useState("");
+  const [editTaskAssignees, setEditTaskAssignees] = useState([]);
   const [editTaskMonths, setEditTaskMonths] = useState([]);
   const [totalTasks, setTotalTasks] = useState(0);
   const [nrTasksDone, setNrTasksDone] = useState(0);
@@ -281,6 +284,7 @@ export default function MonthlyTasks({ folder_id, folder }) {
       task_id: editTaskId,
       description: editTaskDescription,
       months: editTaskMonths.map((m) => m.value).join(","),
+      assignee_ids: editTaskAssignees.map((u) => u.value),
     })
     .then(function(response) {
       if (response.data.status == "OK") {
@@ -303,6 +307,7 @@ export default function MonthlyTasks({ folder_id, folder }) {
       .post(config.BASE_URL + "/api/add-monthly-task", {
         folder_id,
         description: newTaskDescription,
+        assignee_ids: newTaskAssignees.map((u) => u.value),
         months: selectedMonths.map((m) => m.value).join(","),
         sort_index: tasks.length,
       })
@@ -529,6 +534,7 @@ export default function MonthlyTasks({ folder_id, folder }) {
                     ))}
                   </div>
                 </div>
+                <TaskAssignees value={newTaskAssignees} onChange={setNewTaskAssignees} />
               </div>
               <div className="modal-footer">
                 <button className="btn btn-secondary" onClick={closeAddTask}>
@@ -596,6 +602,7 @@ export default function MonthlyTasks({ folder_id, folder }) {
                     ))}
                   </div>
                 </div>
+                <TaskAssignees value={editTaskAssignees} onChange={setEditTaskAssignees} taskId={editTaskId} />
               </div>
               <div className="modal-footer">
                 <button className="btn btn-secondary" onClick={closeEditTask}>

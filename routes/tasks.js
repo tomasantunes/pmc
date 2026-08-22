@@ -4,9 +4,34 @@ var utils = require("../libs/utils");
 var tasks = require("../libs/tasks");
 var { upsertSimpleAlert, deleteSimpleAlert } = require("../libs/alerts");
 var { getOpenAIInstance, getTaskSuggestion } = require("../libs/openai");
+var { setTaskAssignees, canAccessTask } = require("../libs/collaboration");
 var router = express.Router();
 
 var { con, con2 } = database.getMySQLConnections();
+
+router.use(async (req, res, next) => {
+  req.dataUserId = req.session.userId;
+  if (!req.session.isLoggedIn) return next();
+  try {
+    const folderId = req.body.folder_id || req.body.target_folder_id || req.query.folder_id;
+    const taskId = req.body.task_id || req.query.task_id;
+    let access = folderId
+      ? await require('../libs/collaboration').canAccessFolder(con2, folderId, req.session.userId)
+      : taskId ? await canAccessTask(con2, taskId, req.session.userId) : null;
+    if ((folderId || taskId) && !access) return res.json({status: "NOK", error: "Folder or task not found."});
+    if (access) req.dataUserId = access.owner_id;
+  } catch (err) { console.log(err); }
+  next();
+});
+
+router.get("/api/task-assignees", async (req, res) => {
+  if (!req.session.isLoggedIn) return res.json({status: "NOK", error: "Invalid Authorization."});
+  try {
+    if (!await canAccessTask(con2, req.query.task_id, req.dataUserId)) return res.json({status: "NOK", error: "Task not found."});
+    const [rows] = await con2.query("SELECT u.id, u.username, u.email FROM task_assignees ta JOIN users u ON u.id = ta.user_id WHERE ta.task_id = ? ORDER BY u.username", [req.query.task_id]);
+    res.json({status: "OK", data: rows});
+  } catch (err) { res.json({status: "NOK", error: err.message}); }
+});
 
 function parsePriority(value) {
   var priority = Number(value);
@@ -18,7 +43,7 @@ router.get("/api/get-task-list", async (req, res) => {
     res.json({ status: "NOK", error: "Invalid Authorization." });
     return;
   }
-  var task_list = await tasks.getTaskList(req.session.userId);
+  var task_list = await tasks.getTaskList(req.dataUserId);
   res.json({ status: "OK", data: task_list });
 });
 
@@ -32,7 +57,7 @@ router.post("/api/suggest-task", async (req, res) => {
     var folder_id = req.body.folder_id;
     const [folders] = await con2.query(
       "SELECT id, name FROM folders WHERE id = ? AND user_id = ? AND type = 'simple'",
-      [folder_id, req.session.userId],
+      [folder_id, req.dataUserId],
     );
     if (folders.length < 1) {
       res.json({ status: "NOK", error: "Simple tasks folder not found." });
@@ -41,7 +66,7 @@ router.post("/api/suggest-task", async (req, res) => {
 
     const [unfinishedTasks] = await con2.query(
       "SELECT description FROM tasks WHERE folder_id = ? AND user_id = ? AND is_done = 0 ORDER BY COALESCE(priority, 0) DESC, sort_index ASC, id ASC",
-      [folder_id, req.session.userId],
+      [folder_id, req.dataUserId],
     );
     if (unfinishedTasks.length < 1) {
       res.json({ status: "NOK", error: "This folder has no unfinished tasks." });
@@ -80,11 +105,11 @@ router.get("/api/get-mindmap-overview", async (req, res) => {
     };
     const [folders] = await con2.query(
       "SELECT id, name, type FROM folders WHERE user_id = ? AND type IN (?, ?, ?, ?) ORDER BY type, created_at, id",
-      [req.session.userId, ...folderTypes],
+      [req.dataUserId, ...folderTypes],
     );
     const [taskRows] = await con2.query(
       "SELECT id, folder_id, description FROM tasks WHERE user_id = ? AND is_done = 0 ORDER BY sort_index ASC, id ASC",
-      [req.session.userId],
+      [req.dataUserId],
     );
     const tasksByFolder = taskRows.reduce((map, task) => {
       if (!map[task.folder_id]) map[task.folder_id] = [];
@@ -122,7 +147,7 @@ router.get("/api/get-tasks-from-folder", (req, res) => {
   var folder_id = req.query.folder_id;
   var sql =
     "SELECT *, CONCAT(start_time, ' - ', end_time) AS time FROM tasks WHERE folder_id = ? AND user_id = ? ORDER BY COALESCE(priority, 0) DESC, sort_index ASC, id ASC";
-  con.query(sql, [folder_id, req.session.userId], function (err, result) {
+  con.query(sql, [folder_id, req.dataUserId], function (err, result) {
     if (err) {
       console.log(err);
       res.json({ status: "NOK", error: err.message });
@@ -156,7 +181,7 @@ router.post("/api/update-task-done", (req, res) => {
     }
     if (is_done == true) {
       var sql2 = "UPDATE tasks SET date_done = ? WHERE id = ? AND user_id = ?";
-      con.query(sql2, [date_done, task_id, req.session.userId]);
+      con.query(sql2, [date_done, task_id, req.dataUserId]);
     }
     res.json({ status: "OK", data: "Task has been updated successfully." });
   });
@@ -170,7 +195,7 @@ router.post("/api/update-task-starred", (req, res) => {
   var task_id = req.body.task_id;
   var is_starred = req.body.is_starred;
   var sql = "UPDATE tasks SET starred = ? WHERE id = ? AND user_id = ?";
-  con.query(sql, [is_starred, task_id, req.session.userId], function (err, result) {
+  con.query(sql, [is_starred, task_id, req.dataUserId], function (err, result) {
     if (err) {
       console.log(err);
       res.json({ status: "NOK", error: err.message });
@@ -189,7 +214,7 @@ router.post("/api/update-all-tasks-done", (req, res) => {
   var is_done = req.body.is_done;
 
   var sql = "UPDATE tasks SET is_done = ? WHERE folder_id = ? AND user_id = ? AND starred = 0";
-  con.query(sql, [is_done, folder_id, req.session.userId], function (err, result) {
+  con.query(sql, [is_done, folder_id, req.dataUserId], function (err, result) {
     if (err) {
       console.log(err);
       res.json({ status: "NOK", error: err.message });
@@ -248,7 +273,7 @@ router.post("/api/add-task", (req, res) => {
     "INSERT INTO tasks (folder_id, description, start_time, end_time, expiration_date, priority, is_done, sort_index, type, user_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
   con.query(
     sql,
-    [folder_id, description, start_time, end_time, expiration_date, priority, 0, sort_index, type, req.session.userId],
+    [folder_id, description, start_time, end_time, expiration_date, priority, 0, sort_index, type, req.dataUserId],
     async function (err, result) {
       if (err) {
         console.log(err);
@@ -265,7 +290,7 @@ router.post("/api/add-task", (req, res) => {
             start_time,
             end_time,
             description,
-            req.session.userId,
+            req.dataUserId,
           ]);
         }
 
@@ -274,9 +299,12 @@ router.post("/api/add-task", (req, res) => {
             start_time,
             result.insertId,
             alert_text,
-            req.session.userId,
+            req.dataUserId,
           );
         }
+
+        const [[currentUser]] = await con2.query("SELECT organization_id FROM users WHERE id = ?", [req.dataUserId]);
+        await setTaskAssignees(con2, result.insertId, req.body.assignee_ids, currentUser && currentUser.organization_id);
 
         res.json({ status: "OK", data: "Task has been added successfully." });
       } catch (relatedErr) {
@@ -295,7 +323,7 @@ router.post("/api/handle-sort", (req, res) => {
   var task_id = req.body.task_id;
   var sort_index = req.body.sort_index;
   var sql = "UPDATE tasks SET sort_index = ? WHERE id = ? AND user_id = ?";
-  con.query(sql, [sort_index, task_id, req.session.userId], function (err, result) {
+  con.query(sql, [sort_index, task_id, req.dataUserId], function (err, result) {
     if (err) {
       console.log(err);
       res.json({ status: "NOK", error: err.message });
@@ -315,7 +343,7 @@ router.get("/api/get-task", (req, res) => {
     "COALESCE(alerts.text, '') AS alert_text " +
     "FROM tasks LEFT JOIN alerts ON alerts.task_id = tasks.id " +
     "AND alerts.user_id = tasks.user_id WHERE tasks.id = ? AND tasks.user_id = ?";
-  con.query(sql, [task_id, req.session.userId], function (err, result) {
+  con.query(sql, [task_id, req.dataUserId], function (err, result) {
     if (err) {
       console.log(err);
       res.json({ status: "NOK", error: err.message });
@@ -384,8 +412,8 @@ router.post("/api/edit-task", (req, res) => {
     ? "UPDATE tasks SET description = ?, start_time = ?, end_time = ?, expiration_date = ?, priority = ? WHERE id = ? AND user_id = ?"
     : "UPDATE tasks SET description = ?, start_time = ?, end_time = ?, expiration_date = ? WHERE id = ? AND user_id = ?";
   var params = hasPriority
-    ? [description, start_time, end_time, expiration_date, priority, task_id, req.session.userId]
-    : [description, start_time, end_time, expiration_date, task_id, req.session.userId];
+    ? [description, start_time, end_time, expiration_date, priority, task_id, req.dataUserId]
+    : [description, start_time, end_time, expiration_date, task_id, req.dataUserId];
   con.query(
     sql,
     params,
@@ -405,18 +433,18 @@ router.post("/api/edit-task", (req, res) => {
           end_time,
           description,
           task_id,
-          req.session.userId,
+          req.dataUserId,
         ]);
         if (eventResult.affectedRows < 1) {
           await con2.query(
             "INSERT INTO events (task_id, start_date, end_date, description, user_id) VALUES (?, ?, ?, ?, ?)",
-            [task_id, start_time, end_time, description, req.session.userId],
+            [task_id, start_time, end_time, description, req.dataUserId],
           );
         }
       } else {
         await con2.query(
           "DELETE FROM events WHERE task_id = ? AND user_id = ?",
-          [task_id, req.session.userId],
+          [task_id, req.dataUserId],
         );
       }
 
@@ -425,11 +453,14 @@ router.post("/api/edit-task", (req, res) => {
           start_time,
           task_id,
           alert_text,
-          req.session.userId,
+          req.dataUserId,
         );
       } else {
-        await deleteSimpleAlert(task_id, req.session.userId);
+        await deleteSimpleAlert(task_id, req.dataUserId);
       }
+
+      const [[currentUser]] = await con2.query("SELECT organization_id FROM users WHERE id = ?", [req.dataUserId]);
+      await setTaskAssignees(con2, task_id, req.body.assignee_ids, currentUser && currentUser.organization_id);
 
       res.json({ status: "OK", data: "Task has been updated successfully." });
       } catch (relatedErr) {
@@ -447,26 +478,26 @@ router.post("/api/delete-task", (req, res) => {
   }
   var task_id = req.body.task_id;
   var sql = "DELETE FROM tasks WHERE id = ? AND user_id = ?";
-  con.query(sql, [task_id, req.session.userId], function (err, result) {
+  con.query(sql, [task_id, req.dataUserId], function (err, result) {
     if (err) {
       console.log(err);
       res.json({ status: "NOK", error: err.message });
     }
     var sql2 = "DELETE FROM recurrent_checks WHERE task_id = ? AND user_id = ?";
-    con.query(sql2, [task_id, req.session.userId], function (err2, result2) {
+    con.query(sql2, [task_id, req.dataUserId], function (err2, result2) {
       if (err2) {
         console.log(err2);
         res.json({ status: "NOK", error: err2.message });
       }
 
       var sql3 = "DELETE FROM events WHERE task_id = ? AND user_id = ?";
-      con.query(sql3, [task_id, req.session.userId], function (err3, result3) {
+      con.query(sql3, [task_id, req.dataUserId], function (err3, result3) {
         if (err3) {
           console.log(err3);
           res.json({ status: "NOK", error: err3.message });
         }
 
-        deleteSimpleAlert(task_id, req.session.userId)
+        deleteSimpleAlert(task_id, req.dataUserId)
           .then(function () {
           res.json({
             status: "OK",
@@ -485,7 +516,7 @@ router.post("/api/delete-task", (req, res) => {
 router.get("/api/get-random-task", (req, res) => {
   var sql =
     "SELECT description FROM tasks WHERE is_done = 0 AND user_id = ? ORDER BY RAND() LIMIT 1";
-  con.query(sql, [req.session.userId], function (err, result) {
+  con.query(sql, [req.dataUserId], function (err, result) {
     if (err) {
       console.log(err);
       res.json({ status: "NOK", error: err });
@@ -504,7 +535,7 @@ router.post("/api/move-simple-task", (req, res) => {
   var target_folder_id = req.body.target_folder_id;
 
   var sql = "UPDATE tasks SET folder_id = ? WHERE id = ? AND user_id = ?";
-  con.query(sql, [target_folder_id, task_id, req.session.userId], function (err, result) {
+  con.query(sql, [target_folder_id, task_id, req.dataUserId], function (err, result) {
     if (err) {
       console.log(err);
       res.json({ status: "NOK", error: err.message });

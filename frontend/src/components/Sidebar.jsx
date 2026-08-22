@@ -17,6 +17,8 @@ export default function Sidebar() {
     type: "",
   });
   const [selectedFolderType, setSelectedFolderType] = useState();
+  const [organizationUsers, setOrganizationUsers] = useState([]);
+  const [selectedCollaborators, setSelectedCollaborators] = useState([]);
   const [collapseSidebarMobile, setCollapseSidebarMobile] = useState(true);
   const [showGithubPage, setShowGithubPage] = useState(false);
   const [languages, setLanguages] = useState(languages_arr);
@@ -52,7 +54,7 @@ export default function Sidebar() {
 
   function submitAddFolder(e) {
     e.preventDefault();
-    axios.post(config.BASE_URL + "/api/add-folder", newFolder)
+    axios.post(config.BASE_URL + "/api/add-folder", {...newFolder, collaborator_ids: selectedCollaborators.map((user) => user.value)})
     .then(function(response) {
       if (response.data.status == "OK") {
         loadFolders();
@@ -82,6 +84,7 @@ export default function Sidebar() {
       type: "",
     });
     setSelectedFolderType({});
+    setSelectedCollaborators([]);
   }
 
   function changeNewFolderType(item) {
@@ -153,6 +156,9 @@ export default function Sidebar() {
 
   useEffect(() => {
     loadFolders();
+    axios.get(config.BASE_URL + "/api/organization-users").then((response) => {
+      if (response.data.status === "OK") setOrganizationUsers(response.data.data.map((user) => ({value: user.id, label: `${user.username} (${user.email})`})));
+    });
 
     const observer = new ResizeObserver(updateHeight);
     observer.observe(document.body);
@@ -226,6 +232,10 @@ export default function Sidebar() {
                 <div className="form-group py-2">
                   <label className="control-label">{i18n("Type")}</label>
                   <Select value={selectedFolderType} options={folderTypes} onChange={changeNewFolderType} />
+                </div>
+                <div className="form-group py-2">
+                  <label className="control-label">{i18n("Share read and write access with")}</label>
+                  <Select isMulti value={selectedCollaborators} options={organizationUsers} onChange={setSelectedCollaborators} />
                 </div>
                 <div className="form-group">
                     <div style={{textAlign: "right"}}>

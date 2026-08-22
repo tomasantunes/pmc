@@ -106,26 +106,45 @@ router.post("/api/sign-up", async (req, res) => {
 
     const license = licenses[0];
 
-    if (license.used_at) {
-      throw new Error("License already used.");
-    }
-
     if (new Date(license.expires_at) < new Date()) {
       throw new Error("License expired.");
+    }
+
+    const [organizationRows] = await conn.execute(
+      "SELECT id FROM organizations WHERE license_id = ? FOR UPDATE",
+      [license.id]
+    );
+    let organizationId;
+    if (organizationRows.length) {
+      organizationId = organizationRows[0].id;
+    } else {
+      const [organization] = await conn.execute(
+        "INSERT INTO organizations (license_id, name) VALUES (?, ?)",
+        [license.id, `${user}'s organization`]
+      );
+      organizationId = organization.insertId;
+    }
+    const [[membership]] = await conn.execute(
+      "SELECT COUNT(*) AS total FROM users WHERE organization_id = ?",
+      [organizationId]
+    );
+    if (membership.total >= license.max_users) {
+      throw new Error("This license has reached its user limit.");
     }
 
     const hashedPassword = await bcrypt.hash(pass, SALT_ROUNDS);
 
     const [result] = await conn.execute(
       `INSERT INTO users
-       (username, email, password_hash, license_key, license_expires)
-       VALUES (?, ?, ?, ?, ?)`,
+       (username, email, password_hash, license_key, license_expires, organization_id)
+       VALUES (?, ?, ?, ?, ?, ?)`,
       [
         user,
         email,
         hashedPassword,
         licenseKey,
-        license.expires_at
+        license.expires_at,
+        organizationId
       ]
     );
 
@@ -133,7 +152,7 @@ router.post("/api/sign-up", async (req, res) => {
 
     await conn.execute(
       `UPDATE licenses
-       SET used_at = NOW(), used_by_user_id = ?
+       SET used_at = COALESCE(used_at, NOW()), used_by_user_id = COALESCE(used_by_user_id, ?)
        WHERE id = ?`,
       [userId, license.id]
     );

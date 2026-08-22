@@ -9,6 +9,7 @@ import Select from "react-select";
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
 import {i18n, getCurrentLanguage} from '../libs/translations';
+import TaskAssignees from './TaskAssignees';
 const MySwal = withReactContent(Swal);
 
 var lang = getCurrentLanguage();
@@ -83,10 +84,12 @@ export default function Tasks({folder_id, folder}) {
   const [selectedEditEndTime, setSelectedEditEndTime] = useState(null);
   const [selectedEditExpirationDate, setSelectedEditExpirationDate] = useState(null);
   const [newTaskDescription, setNewTaskDescription] = useState("");
+  const [newTaskAssignees, setNewTaskAssignees] = useState([]);
   const [newTaskPriority, setNewTaskPriority] = useState("0");
   const [newAlertActive, setNewAlertActive] = useState(false);
   const [newAlertText, setNewAlertText] = useState("");
   const [editTaskDescription, setEditTaskDescription] = useState("");
+  const [editTaskAssignees, setEditTaskAssignees] = useState([]);
   const [editTaskPriority, setEditTaskPriority] = useState("0");
   const [editAlertActive, setEditAlertActive] = useState(false);
   const [editAlertText, setEditAlertText] = useState("");
@@ -240,7 +243,7 @@ export default function Tasks({folder_id, folder}) {
       st = "";
       et = "";
     }
-    axios.post(config.BASE_URL + "/api/add-task", {folder_id: folder_id, description: newTaskDescription, start_time: st, end_time: et, expiration_date: selectedNewExpirationDate || "", priority: parsePriority(newTaskPriority), sort_index: totalTasks, type: "single", alert_active: newAlertActive, alert_text: newAlertText})
+    axios.post(config.BASE_URL + "/api/add-task", {folder_id: folder_id, description: newTaskDescription, start_time: st, end_time: et, expiration_date: selectedNewExpirationDate || "", priority: parsePriority(newTaskPriority), sort_index: totalTasks, type: "single", alert_active: newAlertActive, alert_text: newAlertText, assignee_ids: newTaskAssignees.map((u) => u.value)})
     .then(function(response) {
       if (response.data.status == "OK") {
         loadTasks();
@@ -271,7 +274,7 @@ export default function Tasks({folder_id, folder}) {
       st = "";
       et = "";
     }
-    axios.post(config.BASE_URL + "/api/edit-task", {task_id: editTaskId, description: editTaskDescription, start_time: st, end_time: et, expiration_date: selectedEditExpirationDate || "", priority: parsePriority(editTaskPriority), alert_active: editAlertActive, alert_text: editAlertText})
+    axios.post(config.BASE_URL + "/api/edit-task", {task_id: editTaskId, description: editTaskDescription, start_time: st, end_time: et, expiration_date: selectedEditExpirationDate || "", priority: parsePriority(editTaskPriority), alert_active: editAlertActive, alert_text: editAlertText, assignee_ids: editTaskAssignees.map((u) => u.value)})
     .then(function(response) {
       if (response.data.status == "OK") {
         loadTasks();
@@ -719,6 +722,7 @@ export default function Tasks({folder_id, folder}) {
                     <DateTimePicker key={showNew ? "new-expiration-open" : "new-expiration-closed"} value={selectedNewExpirationDate} defaultValue={selectedNewExpirationDate} onChange={setSelectedNewExpirationDate} locale={lang} />
                   </div>
                 </div>
+                <TaskAssignees value={newTaskAssignees} onChange={setNewTaskAssignees} />
                 <div className="form-group py-2">
                   <input type="checkbox" checked={newAlertActive} onChange={(e) => setNewAlertActive(e.target.checked)} />{" "}
                   <label>{i18n("Alert")}</label>
@@ -778,6 +782,7 @@ export default function Tasks({folder_id, folder}) {
                     <DateTimePicker key={editTaskId || "edit-expiration-empty"} value={selectedEditExpirationDate} defaultValue={selectedEditExpirationDate} onChange={setSelectedEditExpirationDate} locale={lang} />
                   </div>
                 </div>
+                <TaskAssignees value={editTaskAssignees} onChange={setEditTaskAssignees} taskId={editTaskId} />
                 <div className="form-group py-2">
                   <input type="checkbox" checked={editAlertActive} onChange={(e) => setEditAlertActive(e.target.checked)} />{" "}
                   <label>{i18n("Alert")}</label>

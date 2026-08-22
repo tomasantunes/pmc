@@ -24,7 +24,7 @@ export default function LandingPage() {
             className="btn btn-primary btn-lg px-4"
             onClick={() => window.location.href = 'mailto:general@paken.xyz'}
           >
-            {i18n("Get Access – 50€ / Year")}
+            {i18n("Choose your PMC plan")}
           </button>
         </div>
       </section>
@@ -90,25 +90,32 @@ export default function LandingPage() {
       {/* PRICING */}
       <section className="bg-light py-5">
         <div className="container text-center">
-          <div className="d-inline-block bg-white p-4 rounded shadow-sm">
-            <h3 className="fw-bold">{i18n("50€ / Year")}</h3>
-            <p className="text-muted mb-3">
-              {i18n("Full access to all current and future features.")}
-            </p>
-            <button
-              className="btn btn-success btn-lg mb-5"
-              onClick={() => window.location.href = 'mailto:general@paken.xyz'}
-              style={{width: "350px"}}
-            >
-              {i18n("Contact to Subscribe")}
-            </button>
+          <h2 className="fw-bold mb-4">{i18n("Licenses")}</h2>
+          <div className="row g-4 justify-content-center mb-5">
+            {[
+              { name: "Individual", price: "50€", users: "1 user" },
+              { name: "Small Teams", price: "200€", users: "Up to 10 users" },
+              { name: "Enterprise", price: "500€", users: "Up to 100 users" }
+            ].map((plan) => <div className="col-md-4" key={plan.name}>
+              <div className="card h-100 shadow-sm"><div className="card-body d-flex flex-column">
+                <h3 className="fw-bold">{i18n(plan.name)}</h3>
+                <div className="display-6 my-2">{i18n(plan.price + " / Year")}</div>
+                <p className="text-muted">{i18n(plan.users)}</p>
+                <p>{i18n("Full access to all current and future features.")}</p>
+                <button className="btn btn-success btn-lg mt-auto" onClick={() => window.location.href = `mailto:general@paken.xyz?subject=PMC ${plan.name} license`}>
+                  {i18n("Contact to Subscribe")}
+                </button>
+              </div></div>
+            </div>)}
+          </div>
+          <div>
             <p className="text-muted mb-3">
               {i18n("Already have an account?")}
             </p>
             <button
               className="btn btn-primary btn-lg"
               onClick={() => navigate('/login')}
-              style={{width: "350px"}}
+              style={{maxWidth: "350px", width: "100%"}}
             >
               {i18n("Login")}
             </button>

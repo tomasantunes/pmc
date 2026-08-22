@@ -2,6 +2,7 @@ var express = require("express");
 var database = require("../libs/database");
 var utils = require("../libs/utils");
 var recurrentTasks = require("../libs/recurrent-tasks");
+var { setTaskAssignees } = require("../libs/collaboration");
 var {
   upsertRecurrentAlert,
   insertRecurrentAlert,
@@ -11,6 +12,21 @@ var {
 var router = express.Router();
 
 var { con, con2 } = database.getMySQLConnections();
+
+router.use(async (req, res, next) => {
+  req.dataUserId = req.session.userId;
+  if (!req.session.isLoggedIn) return next();
+  try {
+    const collaboration = require('../libs/collaboration');
+    const folderId = req.body.folder_id || req.query.folder_id;
+    const taskId = req.body.task_id || req.query.task_id;
+    const access = folderId ? await collaboration.canAccessFolder(con2, folderId, req.session.userId)
+      : taskId ? await collaboration.canAccessTask(con2, taskId, req.session.userId) : null;
+    if ((folderId || taskId) && !access) return res.json({status: "NOK", error: "Folder or task not found."});
+    if (access) req.dataUserId = access.owner_id;
+  } catch (err) { console.log(err); }
+  next();
+});
 
 router.get("/api/get-recurrent-tasks", (req, res) => {
   if (!req.session.isLoggedIn) {
@@ -22,7 +38,7 @@ router.get("/api/get-recurrent-tasks", (req, res) => {
   var dtf = req.query.dtf;
   var sql =
     "SELECT *, CONCAT(DATE_FORMAT(start_time, '%H:%i'), ' - ', DATE_FORMAT(end_time, '%H:%i')) AS time FROM tasks WHERE folder_id = ? AND user_id = ? ORDER BY sort_index ASC";
-  con.query(sql, [folder_id, req.session.userId], async function (err, result) {
+  con.query(sql, [folder_id, req.dataUserId], async function (err, result) {
     if (err) {
       console.log(err);
       res.json({ status: "NOK", error: err.message });
@@ -31,7 +47,7 @@ router.get("/api/get-recurrent-tasks", (req, res) => {
 
     for (var i in result) {
       var task_id = result[i].id;
-      var checks = await recurrentTasks.getTaskChecks(task_id, req.session.userId, dti, dtf);
+      var checks = await recurrentTasks.getTaskChecks(task_id, req.dataUserId, dti, dtf);
       result[i].checks = checks;
 
       var dt_range = utils.getRangeOfDates(new Date(dti), new Date(dtf));
@@ -40,7 +56,7 @@ router.get("/api/get-recurrent-tasks", (req, res) => {
         var wd = dt.getDay();
         var is_cancelled = await recurrentTasks.checkIfTaskIsCancelled(
           task_id,
-          req.session.userId,
+          req.dataUserId,
           utils.toLocaleISOString(dt).slice(0, 10),
         );
         if (is_cancelled) {
@@ -75,7 +91,7 @@ router.get("/api/get-recurrent-task", (req, res) => {
   }
   var task_id = req.query.task_id;
   var sql = "SELECT * FROM tasks WHERE id = ? AND type = 'recurrent' AND user_id = ?";
-  con.query(sql, [task_id, req.session.userId], function (err, result) {
+  con.query(sql, [task_id, req.dataUserId], function (err, result) {
     if (err) {
       console.log(err);
       res.json({ status: "NOK", error: err.message });
@@ -83,7 +99,7 @@ router.get("/api/get-recurrent-task", (req, res) => {
 
     if (result.length > 0) {
       var sql2 = "SELECT * FROM alerts WHERE task_id = ? AND user_id = ?";
-      con.query(sql2, [task_id, req.session.userId], function (err2, result2) {
+      con.query(sql2, [task_id, req.dataUserId], function (err2, result2) {
         if (err2) {
           console.log(err2);
           res.json({ status: "NOK", error: err2.message });
@@ -160,7 +176,7 @@ router.post("/api/add-recurrent-task", (req, res) => {
       days,
       sort_index,
       0,
-      req.session.userId,
+      req.dataUserId,
     ],
     async function (err, result) {
       if (err) {
@@ -178,7 +194,7 @@ router.post("/api/add-recurrent-task", (req, res) => {
           result.insertId,
           dates[i].toISOString().slice(0, 10),
           0,
-          req.session.userId,
+          req.dataUserId,
         ]);
 
         if (has_time) {
@@ -197,14 +213,16 @@ router.post("/api/add-recurrent-task", (req, res) => {
             start_date,
             end_date,
             description,
-            req.session.userId,
+            req.dataUserId,
           ]);
         }
       }
 
       if (alert_active && has_time) {
-        await insertRecurrentAlert(start_time, days, result.insertId, alert_text, req.session.userId);
+        await insertRecurrentAlert(start_time, days, result.insertId, alert_text, req.dataUserId);
       }
+      const [[currentUser]] = await con2.query("SELECT organization_id FROM users WHERE id = ?", [req.dataUserId]);
+      await setTaskAssignees(con2, result.insertId, req.body.assignee_ids, currentUser && currentUser.organization_id);
       res.json({ status: "OK", data: "Task has been added successfully." });
     },
   );
@@ -219,7 +237,7 @@ router.post("/api/update-recurrent-task-done", (req, res) => {
   var is_done = req.body.is_done;
   var date = req.body.date;
   var sql = "SELECT * FROM recurrent_checks WHERE task_id = ? AND date = ? AND user_id = ?";
-  con.query(sql, [task_id, date, req.session.userId], function (err, result) {
+  con.query(sql, [task_id, date, req.dataUserId], function (err, result) {
     if (err) {
       console.log(err);
       res.json({ status: "NOK", error: err.message });
@@ -228,7 +246,7 @@ router.post("/api/update-recurrent-task-done", (req, res) => {
     if (result.length > 0) {
       var sql2 =
         "UPDATE recurrent_checks SET is_done = ? WHERE task_id = ? AND date = ? AND user_id = ?";
-      con.query(sql2, [is_done, task_id, date, req.session.userId], function (err, result) {
+      con.query(sql2, [is_done, task_id, date, req.dataUserId], function (err, result) {
         if (err) {
           console.log(err);
           res.json({ status: "NOK", error: err.message });
@@ -239,7 +257,7 @@ router.post("/api/update-recurrent-task-done", (req, res) => {
     } else {
       var sql2 =
         "INSERT INTO recurrent_checks (task_id, date, is_done, user_id) VALUES (?, ?, ?, ?)";
-      con.query(sql2, [task_id, date, is_done, req.session.userId], function (err, result) {
+      con.query(sql2, [task_id, date, is_done, req.dataUserId], function (err, result) {
         if (err) {
           console.log(err);
           res.json({ status: "NOK", error: err.message });
@@ -291,7 +309,7 @@ router.post("/api/edit-recurrent-task", (req, res) => {
     "UPDATE tasks SET description = ?, start_time = ?, end_time = ?, days = ? WHERE id = ? AND user_id = ?";
   con.query(
     sql,
-    [description, start_time2, end_time2, days, task_id, req.session.userId],
+    [description, start_time2, end_time2, days, task_id, req.dataUserId],
     async function (err, result) {
       if (err) {
         console.log(err);
@@ -301,16 +319,16 @@ router.post("/api/edit-recurrent-task", (req, res) => {
 
       var sql2 =
         "DELETE FROM recurrent_checks WHERE task_id = ? AND date > DATE(NOW()) AND user_id = ?";
-      await con2.query(sql2, [task_id, req.session.userId]);
+      await con2.query(sql2, [task_id, req.dataUserId]);
       var sql3 =
         "DELETE FROM events WHERE task_id = ? AND start_date > DATE(NOW()) AND user_id = ?";
-      await con2.query(sql3, [task_id, req.session.userId]);
+      await con2.query(sql3, [task_id, req.dataUserId]);
       var dates = utils.getDatesUntilNextYear(days);
 
       for (var i in dates) {
         var sql2 =
           "INSERT INTO recurrent_checks (task_id, date, is_done, user_id) VALUES (?, ?, 0, ?)";
-        await con2.query(sql2, [task_id, dates[i].toISOString().slice(0, 10), req.session.userId]);
+        await con2.query(sql2, [task_id, dates[i].toISOString().slice(0, 10), req.dataUserId]);
 
         if (has_time) {
           var start_date = dates[i];
@@ -323,17 +341,20 @@ router.post("/api/edit-recurrent-task", (req, res) => {
           end_date = end_date.toISOString().slice(0, 19).replace("T", " ");
           var sql3 =
             "INSERT INTO events (task_id, start_date, end_date, description, user_id) VALUES (?, ?, ?, ?, ?)";
-          await con2.query(sql3, [task_id, start_date, end_date, description, req.session.userId]);
+          await con2.query(sql3, [task_id, start_date, end_date, description, req.dataUserId]);
         }
       }
 
       if (alert_active && has_time) {
-        await upsertRecurrentAlert(start_time, days, task_id, alert_text, req.session.userId);
+        await upsertRecurrentAlert(start_time, days, task_id, alert_text, req.dataUserId);
       }
 
       if (!alert_active) {
-        await deleteRecurrentAlert(task_id, req.session.userId);
+        await deleteRecurrentAlert(task_id, req.dataUserId);
       }
+
+      const [[currentUser]] = await con2.query("SELECT organization_id FROM users WHERE id = ?", [req.dataUserId]);
+      await setTaskAssignees(con2, task_id, req.body.assignee_ids, currentUser && currentUser.organization_id);
 
       res.json({ status: "OK", data: "Task has been updated successfully." });
     },
@@ -352,14 +373,14 @@ router.post("/api/restart-recurrent-task", async (req, res) => {
   var now_datetime = utils.toLocaleISOString(now);
 
   var sql = "DELETE FROM recurrent_checks WHERE task_id = ? AND date < ? AND user_id = ?";
-  await con2.query(sql, [task_id, now_date, req.session.userId]);
+  await con2.query(sql, [task_id, now_date, req.dataUserId]);
 
   var sql2 =
     "DELETE FROM events WHERE task_id = ? AND start_date < DATE(NOW()) AND user_id = ?";
-  await con2.query(sql2, [task_id, req.session.userId]);
+  await con2.query(sql2, [task_id, req.dataUserId]);
 
   var sql3 = "UPDATE tasks SET created_at = ? WHERE id = ? AND user_id = ?";
-  await con2.query(sql3, [now_datetime, task_id, req.session.userId]);
+  await con2.query(sql3, [now_datetime, task_id, req.dataUserId]);
 
   res.json({ status: "OK", data: "Recurrent task has been restarted." });
 });
@@ -405,7 +426,7 @@ router.post("/api/cancel-task", async (req, res) => {
   try {
     var [taskRows] = await con2.query(
       "SELECT id, days FROM tasks WHERE id = ? AND type = 'recurrent' AND user_id = ?",
-      [task_id, req.session.userId],
+      [task_id, req.dataUserId],
     );
     if (taskRows.length < 1) {
       res.json({ status: "NOK", error: "Task not found." });
@@ -429,7 +450,7 @@ router.post("/api/cancel-task", async (req, res) => {
     connection = await con2.getConnection();
     await connection.beginTransaction();
     var placeholders = selectedDates.map(() => "?").join(", ");
-    var params = [task_id, req.session.userId, ...selectedDates];
+    var params = [task_id, req.dataUserId, ...selectedDates];
 
     await connection.query(
       `UPDATE recurrent_checks SET is_cancelled = 1 WHERE task_id = ? AND user_id = ? AND date IN (${placeholders})`,
@@ -442,12 +463,12 @@ router.post("/api/cancel-task", async (req, res) => {
     for (var selectedDate of selectedDates) {
       var [checkRows] = await connection.query(
         "SELECT id FROM recurrent_checks WHERE task_id = ? AND user_id = ? AND date = ? LIMIT 1",
-        [task_id, req.session.userId, selectedDate],
+        [task_id, req.dataUserId, selectedDate],
       );
       if (checkRows.length < 1) {
         await connection.query(
           "INSERT INTO recurrent_checks (task_id, date, is_cancelled, is_done, user_id) VALUES (?, ?, 1, 0, ?)",
-          [task_id, selectedDate, req.session.userId],
+          [task_id, selectedDate, req.dataUserId],
         );
       }
     }
@@ -480,7 +501,7 @@ router.post("/api/uncancel-task", (req, res) => {
   var dt = req.body.date;
 
   var sql = "SELECT * FROM recurrent_checks WHERE task_id = ? AND date = ? AND user_id = ?";
-  con.query(sql, [task_id, dt, req.session.userId], function (err, result) {
+  con.query(sql, [task_id, dt, req.dataUserId], function (err, result) {
     if (err) {
       console.log(err);
       res.json({ status: "NOK", error: err.message });
@@ -493,7 +514,7 @@ router.post("/api/uncancel-task", (req, res) => {
       } else {
         var sql2 =
           "UPDATE recurrent_checks SET is_cancelled = 0 WHERE task_id = ? AND date = ? AND user_id = ?";
-        con.query(sql2, [task_id, dt, req.session.userId], function (err2, result2) {
+        con.query(sql2, [task_id, dt, req.dataUserId], function (err2, result2) {
           if (err2) {
             console.log(err2);
             res.json({ status: "NOK", error: err2.message });
@@ -508,7 +529,7 @@ router.post("/api/uncancel-task", (req, res) => {
     } else {
       var sql2 =
         "INSERT INTO recurrent_checks (task_id, date, is_cancelled, is_done, user_id) VALUES (?, ?, 0, 0, ?)";
-      con.query(sql2, [task_id, dt, req.session.userId], function (err2, result2) {
+      con.query(sql2, [task_id, dt, req.dataUserId], function (err2, result2) {
         if (err2) {
           console.log(err2);
           res.json({ status: "NOK", error: err2.message });

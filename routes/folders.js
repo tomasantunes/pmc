@@ -4,13 +4,29 @@ var router = express.Router();
 
 var {con, con2 } = database.getMySQLConnections();
 
+router.get("/api/organization-users", async (req, res) => {
+  if (!req.session.isLoggedIn) return res.json({status: "NOK", error: "Invalid Authorization."});
+  try {
+    const [rows] = await con2.query(
+      `SELECT colleague.id, colleague.username, colleague.email
+         FROM users current_user
+         JOIN users colleague ON colleague.organization_id = current_user.organization_id
+        WHERE current_user.id = ? ORDER BY colleague.username`,
+      [req.session.userId]
+    );
+    res.json({status: "OK", data: rows});
+  } catch (err) { res.json({status: "NOK", error: err.message}); }
+});
+
 router.get("/api/get-folders", (req, res) => {
   if (!req.session.isLoggedIn) {
     res.json({status: "NOK", error: "Invalid Authorization."});
     return;
   }
-  var sql = "SELECT * FROM folders WHERE user_id = ?";
-  con.query(sql, [req.session.userId], function (err, result) {
+  var sql = `SELECT DISTINCT f.*, (f.user_id = ?) AS is_owner
+    FROM folders f LEFT JOIN folder_collaborators fc ON fc.folder_id = f.id
+    WHERE f.user_id = ? OR fc.user_id = ?`;
+  con.query(sql, [req.session.userId, req.session.userId, req.session.userId], function (err, result) {
     if (err) {
       console.log(err);
       res.json({status: "NOK", error: err.message});
@@ -25,8 +41,10 @@ router.get("/api/get-folder", (req, res) => {
     return;
   }
   var folder_id = req.query.folder_id;
-  var sql = "SELECT * FROM folders WHERE id = ? AND user_id = ?";
-  con.query(sql, [folder_id, req.session.userId], function (err, result) {
+  var sql = `SELECT DISTINCT f.*, (f.user_id = ?) AS is_owner
+    FROM folders f LEFT JOIN folder_collaborators fc ON fc.folder_id = f.id
+    WHERE f.id = ? AND (f.user_id = ? OR fc.user_id = ?)`;
+  con.query(sql, [req.session.userId, folder_id, req.session.userId, req.session.userId], function (err, result) {
     if (err) {
       console.log(err);
       res.json({status: "NOK", error: err.message});
@@ -42,8 +60,9 @@ router.post("/api/edit-folder-name", (req, res) => {
   }
   var folder_id = req.body.folder_id;
   var name = req.body.name;
-  var sql = "UPDATE folders SET name = ? WHERE id = ? AND user_id = ?";
-  con.query(sql, [name, folder_id, req.session.userId], function (err, result) {
+  var sql = `UPDATE folders SET name = ? WHERE id = ? AND (user_id = ? OR EXISTS
+    (SELECT 1 FROM folder_collaborators fc WHERE fc.folder_id = folders.id AND fc.user_id = ?))`;
+  con.query(sql, [name, folder_id, req.session.userId, req.session.userId], function (err, result) {
     if (err) {
       console.log(err);
       res.json({status: "NOK", error: err.message});
@@ -106,8 +125,9 @@ router.post("/api/set-hide-done", (req, res) => {
   }
   var folder_id = req.body.folder_id;
   var hide_done = req.body.hide_done;
-  var sql = "UPDATE folders SET hide_done = ? WHERE id = ? AND user_id = ?";
-  con.query(sql, [hide_done, folder_id, req.session.userId], function (err, result) {
+  var sql = `UPDATE folders SET hide_done = ? WHERE id = ? AND (user_id = ? OR EXISTS
+    (SELECT 1 FROM folder_collaborators fc WHERE fc.folder_id = folders.id AND fc.user_id = ?))`;
+  con.query(sql, [hide_done, folder_id, req.session.userId, req.session.userId], function (err, result) {
     if (err) {
       console.log(err);
       res.json({status: "NOK", error: err.message});
@@ -117,21 +137,26 @@ router.post("/api/set-hide-done", (req, res) => {
   });
 });
 
-router.post("/api/add-folder", (req, res) => {
+router.post("/api/add-folder", async (req, res) => {
   if (!req.session.isLoggedIn) {
     res.json({status: "NOK", error: "Invalid Authorization."});
     return;
   }
   var name = req.body.name;
   var type = req.body.type;
-  var sql = "INSERT INTO folders (name, type, user_id) VALUES (?, ?, ?)";
-  con.query(sql, [name, type, req.session.userId], function (err, result) {
-    if (err) {
-      console.log(err);
-      res.json({status: "NOK", error: err.message});
+  const collaboratorIds = Array.isArray(req.body.collaborator_ids) ? req.body.collaborator_ids.map(Number) : [];
+  try {
+    const [result] = await con2.query("INSERT INTO folders (name, type, user_id) VALUES (?, ?, ?)", [name, type, req.session.userId]);
+    if (collaboratorIds.length) {
+      const [members] = await con2.query(
+        `SELECT colleague.id FROM users owner JOIN users colleague ON colleague.organization_id = owner.organization_id
+         WHERE owner.id = ? AND colleague.id IN (?) AND colleague.id <> owner.id`,
+        [req.session.userId, collaboratorIds]
+      );
+      for (const member of members) await con2.query("INSERT INTO folder_collaborators (folder_id, user_id) VALUES (?, ?)", [result.insertId, member.id]);
     }
     res.json({status: "OK", data: {message: "Folder has been added successfully.", insertId: result.insertId}});
-  });
+  } catch (err) { res.json({status: "NOK", error: err.message}); }
 });
 
 router.get("/api/list-simple-folders", (req, res) => {
@@ -140,8 +165,9 @@ router.get("/api/list-simple-folders", (req, res) => {
     return;
   }
 
-  var sql = "SELECT id, name FROM folders WHERE type = 'simple' AND user_id = ?";
-  con.query(sql, [req.session.userId], function (err, result) {
+  var sql = `SELECT DISTINCT f.id, f.name FROM folders f LEFT JOIN folder_collaborators fc ON fc.folder_id = f.id
+    WHERE f.type = 'simple' AND (f.user_id = ? OR fc.user_id = ?)`;
+  con.query(sql, [req.session.userId, req.session.userId], function (err, result) {
     if (err) {
       console.log(err);
       res.json({status: "NOK", error: err.message});

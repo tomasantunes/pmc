@@ -108,7 +108,36 @@ CREATE TABLE licenses (
     expires_at DATETIME NOT NULL,
     used_at DATETIME DEFAULT NULL,
     used_by_user_id INT DEFAULT NULL,
+    tier ENUM('individual', 'small_teams', 'enterprise') NOT NULL DEFAULT 'individual',
+    max_users INT NOT NULL DEFAULT 1,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE organizations (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    license_id INT NOT NULL UNIQUE,
+    name VARCHAR(512) NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (license_id) REFERENCES licenses(id)
+);
+
+CREATE TABLE folder_collaborators (
+    folder_id INT NOT NULL,
+    user_id INT NOT NULL,
+    permission ENUM('read_write') NOT NULL DEFAULT 'read_write',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (folder_id, user_id),
+    FOREIGN KEY (folder_id) REFERENCES folders(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE task_assignees (
+    task_id INT NOT NULL,
+    user_id INT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (task_id, user_id),
+    FOREIGN KEY (task_id) REFERENCES tasks(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 CREATE TABLE workflows (
@@ -142,6 +171,8 @@ ALTER TABLE users ADD COLUMN reset_password_token VARCHAR(512) DEFAULT NULL AFTE
 ALTER TABLE users ADD COLUMN reset_password_expires DATETIME DEFAULT NULL AFTER reset_password_token;
 ALTER TABLE users ADD COLUMN license_key CHAR(64) DEFAULT NULL AFTER reset_password_expires;
 ALTER TABLE users ADD COLUMN license_expires DATETIME DEFAULT NULL AFTER license_key;
+ALTER TABLE users ADD COLUMN organization_id INT DEFAULT NULL AFTER license_expires;
+ALTER TABLE users ADD CONSTRAINT fk_users_organization FOREIGN KEY (organization_id) REFERENCES organizations(id);
 ALTER TABLE tasks ADD COLUMN expiration_date DATETIME DEFAULT NULL AFTER end_time;
 ALTER TABLE tasks ADD COLUMN priority INT(11) DEFAULT NULL AFTER expiration_date;
 ALTER TABLE alerts MODIFY COLUMN task_id INT(11) NULL;

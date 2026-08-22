@@ -8,6 +8,7 @@ import { toLocaleISOString } from "../libs/utils";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 import {i18n} from '../libs/translations';
+import TaskAssignees from './TaskAssignees';
 const MySwal = withReactContent(Swal);
 
 const weekDays = [
@@ -265,6 +266,7 @@ export default function Tasks({ folder_id, folder }) {
   const [selectedNewStartTime, setSelectedNewStartTime] = useState("00:00");
   const [selectedNewEndTime, setSelectedNewEndTime] = useState("00:00");
   const [newTaskDescription, setNewTaskDescription] = useState("");
+  const [newTaskAssignees, setNewTaskAssignees] = useState([]);
   const [newTaskFolderId, setNewTaskFolderId] = useState(folder_id);
   const [newTaskSortIndex, setNewTaskSortIndex] = useState(0);
   const [newTaskType, setNewTaskType] = useState("daily");
@@ -273,6 +275,7 @@ export default function Tasks({ folder_id, folder }) {
   const [selectedEditEndTime, setSelectedEditEndTime] = useState("00:00");
   const [editTaskId, setEditTaskId] = useState(null);
   const [editTaskDescription, setEditTaskDescription] = useState("");
+  const [editTaskAssignees, setEditTaskAssignees] = useState([]);
   const [editTaskFolderId, setEditTaskFolderId] = useState(folder_id);
   const [editTaskSortIndex, setEditTaskSortIndex] = useState(null);
   const [editTaskType, setEditTaskType] = useState("daily");
@@ -473,6 +476,7 @@ export default function Tasks({ folder_id, folder }) {
           .set({ year: 1970, month: 0, date: 1 })
           .format("YYYY-MM-DD HH:mm"),
         description: newTaskDescription,
+        assignee_ids: newTaskAssignees.map((u) => u.value),
         folder_id: newTaskFolderId,
         alert_active: newAlertActive,
         alert_text: newAlertText,
@@ -677,6 +681,7 @@ export default function Tasks({ folder_id, folder }) {
           .set({ year: 1970, month: 0, date: 1 })
           .format("YYYY-MM-DD HH:mm"),
         description: editTaskDescription,
+        assignee_ids: editTaskAssignees.map((u) => u.value),
         folder_id: editTaskFolderId,
         sort_index: editTaskSortIndex,
         task_type: editTaskType,
@@ -1162,6 +1167,7 @@ export default function Tasks({ folder_id, folder }) {
                     ></textarea>
                   </div>
                 </div>
+                <TaskAssignees value={newTaskAssignees} onChange={setNewTaskAssignees} />
                 <div className="form-group py-2">
                   <label className="control-label">{i18n("Start Time")}</label>
                   <div>
@@ -1319,6 +1325,7 @@ export default function Tasks({ folder_id, folder }) {
                     ></textarea>
                   </div>
                 </div>
+                <TaskAssignees value={editTaskAssignees} onChange={setEditTaskAssignees} taskId={editTaskId} />
                 <div className="form-group py-2">
                   <label className="control-label">{i18n("Start Time")}</label>
                   <div>
