@@ -13,8 +13,8 @@ router.use(async (req, res, next) => {
   if (!req.session.isLoggedIn) return next();
   try {
     const collaboration = require('../libs/collaboration');
-    const folderId = req.body.folder_id || req.query.folder_id;
-    const taskId = req.body.task_id || req.query.task_id;
+    const folderId = req.body?.folder_id || req.query.folder_id;
+    const taskId = req.body?.task_id || req.query.task_id;
     const access = folderId ? await collaboration.canAccessFolder(con2, folderId, req.session.userId)
       : taskId ? await collaboration.canAccessTask(con2, taskId, req.session.userId) : null;
     if ((folderId || taskId) && !access) return res.json({status: "NOK", error: "Folder or task not found."});

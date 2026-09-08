@@ -1,6 +1,11 @@
 var createError = require("http-errors");
-var express = require("express");
+var fs = require("fs");
 var path = require("path");
+
+var envPath = path.join(__dirname, ".env");
+if (fs.existsSync(envPath)) process.loadEnvFile(envPath);
+
+var express = require("express");
 var cookieParser = require("cookie-parser");
 var logger = require("morgan");
 var secretConfig = require("./secret-config");
@@ -25,6 +30,7 @@ var alertsRouter = require("./routes/alerts");
 var staticFilesRouter = require("./routes/static-files");
 var voiceOverviewRouter = require("./routes/voice-overview");
 var workflowsRouter = require("./routes/workflows");
+var externalRouter = require("./routes/external");
 
 var app = express();
 
@@ -85,6 +91,7 @@ app.use("/", timetrackerRouter);
 app.use("/", alertsRouter);
 app.use("/", voiceOverviewRouter);
 app.use("/", workflowsRouter);
+app.use("/", externalRouter);
 
 app.use("/static", staticFilesRouter);
 app.use(express.static(path.join(__dirname, "public")));
