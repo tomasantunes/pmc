@@ -23,12 +23,11 @@ export default function Login() {
     setPass(event.target.value);
   }
 
-  function requestLogin(e) {
-    e.preventDefault();
+  function requestLogin() {
     axios.post(config.BASE_URL + "/api/check-login", {user, pass})
     .then(async res => {
       if (res.data.status == "OK") {
-        if ("credentials" in navigator) {
+        if ("credentials" in navigator && typeof PasswordCredential !== "undefined") {
           const cred = new PasswordCredential({
             id: user,
             password: pass,
@@ -46,19 +45,9 @@ export default function Login() {
     });
   }
 
-  const handleKeyDown = e => {
-    if (e.keyCode === 13) {
-      e.preventDefault();
-      e.target.form.dispatchEvent(new Event("submit", {cancelable: true, bubbles: true}));
-    }
-  };
-
   return (
     <>
-      <form
-        onSubmit={requestLogin}
-        method="POST"
-        action="/login"
+      <div
         autoComplete="on"
         className="card shadow-sm p-4 mx-auto mt-5"
         style={{ maxWidth: "420px" }}
@@ -80,7 +69,6 @@ export default function Login() {
             autoComplete="username"
             value={user}
             onChange={changeUser}
-            onKeyDown={handleKeyDown}
             className="form-control"
             placeholder={i18n("Username")}
             required
@@ -97,7 +85,6 @@ export default function Login() {
             autoComplete="current-password"
             value={pass}
             onChange={changePass}
-            onKeyDown={handleKeyDown}
             className="form-control"
             placeholder={i18n("Password")}
             required
@@ -106,7 +93,7 @@ export default function Login() {
         </div>
 
         {/* Submit */}
-        <button className="btn btn-primary w-100 py-2" type="submit">
+        <button className="btn btn-primary w-100 py-2" type="button" onClick={requestLogin}>
           {i18n("Login")}
         </button>
 
@@ -122,7 +109,7 @@ export default function Login() {
             {i18n("User Manual")}
           </a>
         </div>
-      </form>
+      </div>
 
     </>
   )

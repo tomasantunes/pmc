@@ -8,9 +8,13 @@ router.get("/api/generate-motivational-text", async (req, res) => {
     res.json({status: "NOK", error: "Invalid Authorization."});
     return;
   }
-  var motivational_text = await getMotivationalText();
-  motivational_text = motivational_text.replace(/(?:\r\n|\r|\n)/g, '<br>');
-  res.json({status: "OK", data: motivational_text});
+  try {
+    var motivational_text = await getMotivationalText();
+    res.json({status: "OK", data: motivational_text});
+  } catch (err) {
+    console.error("Unable to generate motivational text:", err);
+    res.status(500).json({status: "NOK", error: "Unable to generate motivational text."});
+  }
 });
 
 module.exports = router;

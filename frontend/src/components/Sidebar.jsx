@@ -211,7 +211,7 @@ export default function Sidebar() {
                 <li key={folder.id}><a href="#" onClick={() => goToLink("/folder/" + folder.id)}>{folder.name}</a></li>
               )
             })}
-            <li><a href="/api/logout">{i18n("Logout")}</a></li>
+            <li><button className="btn btn-link nav-link" onClick={async () => { await axios.post(config.BASE_URL + "/api/logout"); window.location.assign("/"); }}>{i18n("Logout")}</button></li>
         </ul>
       </div>
       <div class="modal addFolderModal" tabindex="-1">

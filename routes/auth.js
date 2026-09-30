@@ -9,11 +9,80 @@ var router = express.Router();
 
 var {con, con2 } = database.getMySQLConnections();
 const SALT_ROUNDS = 12;
+const MAX_USERNAME_LENGTH = 64;
+const MAX_EMAIL_LENGTH = 254;
+const MAX_PASSWORD_LENGTH = 128;
+const failedAttemptsByIp = new Map();
+
+function isBoundedString(value, maxLength) {
+  return typeof value === "string" && value.length > 0 && value.length <= maxLength;
+}
+
+function isValidPassword(value) {
+  return isBoundedString(value, MAX_PASSWORD_LENGTH) && value.length >= 12;
+}
+
+function getAttemptKey(req, bucket) {
+  return `${bucket}:${req.ip}`;
+}
+
+function isRateLimited(req, bucket, limit, windowMs) {
+  const now = Date.now();
+  const key = getAttemptKey(req, bucket);
+  const attempts = (failedAttemptsByIp.get(key) || []).filter((time) => now - time < windowMs);
+  failedAttemptsByIp.set(key, attempts);
+  return attempts.length >= limit;
+}
+
+function recordFailedAttempt(req, bucket, windowMs) {
+  const now = Date.now();
+  const key = getAttemptKey(req, bucket);
+  const attempts = (failedAttemptsByIp.get(key) || []).filter((time) => now - time < windowMs);
+  attempts.push(now);
+  failedAttemptsByIp.set(key, attempts);
+}
+
+function clearFailedAttempts(req, bucket) {
+  failedAttemptsByIp.delete(getAttemptKey(req, bucket));
+}
+
+function establishSession(req, userId, isAdmin, res) {
+  req.session.regenerate((err) => {
+    if (err) {
+      console.error("Unable to regenerate session:", err);
+      return res.status(500).json({status: "NOK", error: "Unable to sign in."});
+    }
+    req.session.isLoggedIn = true;
+    req.session.isAdmin = isAdmin;
+    req.session.userId = userId;
+    req.session.csrfToken = crypto.randomBytes(32).toString("hex");
+    res.cookie("XSRF-TOKEN", req.session.csrfToken, {
+      httpOnly: false,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+    });
+    req.session.save((saveErr) => {
+      if (saveErr) {
+        console.error("Unable to save session:", saveErr);
+        return res.status(500).json({status: "NOK", error: "Unable to sign in."});
+      }
+      return res.json({ status: "OK", data: "Login successful." });
+    });
+  });
+}
 
 router.post("/api/check-login", async (req, res) => {
   var user = req.body.user;
   var pass = req.body.pass;
   var user_id = null;
+
+  if (!isBoundedString(user, MAX_EMAIL_LENGTH) || !isBoundedString(pass, MAX_PASSWORD_LENGTH)) {
+    return res.status(400).json({status: "NOK", error: "Invalid credentials."});
+  }
+  if (isRateLimited(req, "login", 10, 15 * 60 * 1000)) {
+    return res.status(429).json({status: "NOK", error: "Too many attempts. Try again later."});
+  }
 
   if (user == secretConfig.USER && pass == secretConfig.PASS) {
     user_id = 0;
@@ -24,7 +93,11 @@ router.post("/api/check-login", async (req, res) => {
     var [rows, fields] = await con2.execute(sql1, [user, user]);
 
     if (rows.length === 0) {
-      res.json({status: "NOK", error: "User not found."});
+      // Avoid revealing whether an account exists.  The IP throttle above also
+      // bounds work for unknown accounts.
+      await bcrypt.compare(pass, "$2b$12$invalidinvalidinvalidinvalidinvalidinvalidinvalidinvalidinv");
+      recordFailedAttempt(req, "login", 15 * 60 * 1000);
+      res.json({status: "NOK", error: "Invalid credentials."});
       return;
     }
     user_id = rows[0].id;
@@ -35,19 +108,15 @@ router.post("/api/check-login", async (req, res) => {
   con.query(sql2, [user_id], async function (err, result) {
     if (err) {
       console.log(err);
-      res.json({status: "NOK", error: err.message});
+      res.status(500).json({status: "NOK", error: "Unable to sign in."});
       return;
     }
     if (result.length <= 5) {
       if (user_id === 0) {
-        req.session.isLoggedIn = true;
-        req.session.isAdmin = true;
-        req.session.userId = 0;
         var sql2 = "INSERT INTO logins (is_valid, user_id) VALUES (1, ?);";
         con.query(sql2, [user_id]);
-        req.session.save(() => {
-          res.json({ status: "OK", data: "Login successful." });
-        });
+        clearFailedAttempts(req, "login");
+        establishSession(req, user_id, true, res);
       }
       else {
         // check login for regular users here
@@ -60,28 +129,32 @@ router.post("/api/check-login", async (req, res) => {
           }
           var sql2 = "INSERT INTO logins (is_valid, user_id) VALUES (1, ?);";
           con.query(sql2, [user_id]);
-          req.session.isLoggedIn = true;
-          req.session.isAdmin = false;
-          req.session.userId = user_id;
-          req.session.save(() => {
-            res.json({ status: "OK", data: "Login successful." });
-          });
+          clearFailedAttempts(req, "login");
+          establishSession(req, user_id, false, res);
         }
         else {
           var sql2 = "INSERT INTO logins (is_valid, user_id) VALUES (0, ?);";
           con.query(sql2, [user_id]);
-          res.json({status: "NOK", error: "Invalid password."});
+          recordFailedAttempt(req, "login", 15 * 60 * 1000);
+          res.json({status: "NOK", error: "Invalid credentials."});
         }
       }
     }
     else {
-      res.json({status: "NOK", error: "Too many login attempts."});
+      res.json({status: "NOK", error: "Invalid credentials or too many attempts."});
     }
   });
 });
 
 router.post("/api/sign-up", async (req, res) => {
   const { user, email, pass, confirmPass, licenseKey } = req.body;
+
+  if (isRateLimited(req, "signup", 5, 60 * 60 * 1000)
+    || !isBoundedString(user, MAX_USERNAME_LENGTH)
+    || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email || "") || email.length > MAX_EMAIL_LENGTH
+    || !isValidPassword(pass) || !isBoundedString(licenseKey, 128)) {
+    return res.status(400).json({ status: "NOK", error: "Invalid sign-up details." });
+  }
 
   if (pass !== confirmPass) {
     return res.json({ status: "NOK", error: "Passwords do not match." });
@@ -166,7 +239,7 @@ router.post("/api/sign-up", async (req, res) => {
 
     console.error(err);
 
-    let msg = err.message;
+    let msg = "Unable to create account.";
     if (err.code === 'ER_DUP_ENTRY') {
       msg = "Username or email already exists.";
     }
@@ -182,17 +255,14 @@ router.post("/api/sign-up", async (req, res) => {
 router.post("/api/reset-password", async (req, res) => {
   var emailUsername = req.body.emailUsername;
 
-  if (!emailUsername) {
-    res.json({status: "NOK", error: "Email/Username is required."});
-    return;
-  }
+  const resetResponse = {status: "OK", data: "If the account exists, an email has been sent."};
+  if (!isBoundedString(emailUsername, MAX_EMAIL_LENGTH) || isRateLimited(req, "password-reset", 5, 60 * 60 * 1000)) return res.json(resetResponse);
 
   var sql1 = "SELECT * FROM users WHERE username = ? OR email = ? LIMIT 1";
 
   var [rows, fields] = await con2.execute(sql1, [emailUsername, emailUsername]);
   if (rows.length === 0) {
-    res.json({status: "NOK", error: "User not found."});
-    return;
+    return res.json(resetResponse);
   }
 
   var resetPasswordToken = crypto.randomBytes(32).toString('hex');
@@ -209,26 +279,21 @@ router.post("/api/reset-password", async (req, res) => {
     sendEmail(subject, emailText, rows[0].email);
   } catch (err) {
     console.log(err);
-    res.json({status: "NOK", error: "Error setting reset token."});
-    return;
+    return res.json(resetResponse);
   }
 
-  res.json({status: "OK", data: "Password reset initiated."});
+  res.json(resetResponse);
 });
 
-router.get("/api/logout", (req, res) => {
-  req.session.isLoggedIn = false;
-  req.session.isAdmin = false;
-  req.session.userId = null;
-  req.session.save(() => {
-    res.redirect("/");
-  });
-});
-
-router.get("/debug-session", (req, res) => {
-  res.json({
-    sessionId: req.sessionID,
-    session: req.session
+router.post("/api/logout", (req, res) => {
+  req.session.destroy((err) => {
+    if (err) {
+      console.error("Unable to destroy session:", err);
+      return res.status(500).json({status: "NOK", error: "Unable to sign out."});
+    }
+    res.clearCookie(process.env.NODE_ENV === "production" ? "__Host-pmc.sid" : "pmc.sid", {path: "/"});
+    res.clearCookie("XSRF-TOKEN", {path: "/"});
+    return res.json({status: "OK"});
   });
 });
 
@@ -238,8 +303,8 @@ router.post("/api/set-new-password", async (req, res) => {
   var pass = req.body.pass;
   var confirmPass = req.body.confirmPass;
 
-  if (pass !== confirmPass) {
-    res.json({status: "NOK", error: "Passwords do not match."});
+  if (pass !== confirmPass || !isValidPassword(pass) || !/^\d+$/.test(String(resetPasswordUserId || "")) || !/^[a-f0-9]{64}$/.test(resetPasswordToken || "")) {
+    res.json({status: "NOK", error: "Invalid password reset request."});
     return;
   }
 

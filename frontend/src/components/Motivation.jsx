@@ -56,7 +56,7 @@ export default function Motivation() {
               </div>
             </div>
           }
-          <div dangerouslySetInnerHTML={{__html: motivationalText}}></div>
+          <div style={{whiteSpace: 'pre-line'}}>{motivationalText}</div>
         </div>
       </>
     )

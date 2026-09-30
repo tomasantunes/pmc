@@ -39,8 +39,8 @@ router.post("/api/add-event", async (req, res) => {
     }
     res.json({status: "OK", data: {message: "Event has been added successfully.", id: result.insertId}});
   } catch (err) {
-    console.log(err);
-    res.json({status: "NOK", error: err.message || err});
+    console.error("Unable to add event:", err);
+    res.status(500).json({status: "NOK", error: "Unable to add event."});
   }
 });
 
@@ -58,8 +58,8 @@ router.post("/api/edit-event", (req, res) => {
   var sql = "UPDATE events SET start_date = ?, end_date = ?, description = ? WHERE id = ? AND user_id = ?";
   con.query(sql, [start_date, end_date, description, id, req.session.userId], function (err, result) {
     if (err) {
-      console.log(err);
-      res.json({status: "NOK", error: err});
+      console.error("Unable to update event:", err);
+      return res.status(500).json({status: "NOK", error: "Unable to update event."});
     }
     res.json({status: "OK", data: {message: "Event has been updated successfully."}});
   });
@@ -74,8 +74,8 @@ router.post("/api/delete-event", (req, res) => {
   var sql = "DELETE FROM events WHERE id = ? AND user_id = ?";
   con.query(sql, [id, req.session.userId], function (err, result) {
     if (err) {
-      console.log(err);
-      res.json({status: "NOK", error: err});
+      console.error("Unable to delete event:", err);
+      return res.status(500).json({status: "NOK", error: "Unable to delete event."});
     }
     res.json({status: "OK", data: {message: "Event has been deleted successfully."}});
   });
@@ -90,8 +90,8 @@ router.get("/api/get-events", (req, res) => {
   var sql = "SELECT id, description AS value, start_date AS start, end_date AS end FROM events WHERE user_id = ?";
   con.query(sql, [req.session.userId], function (err, result) {
     if (err) {
-      console.log(err);
-      res.json({status: "NOK", error: err});
+      console.error("Unable to retrieve events:", err);
+      return res.status(500).json({status: "NOK", error: "Unable to retrieve events."});
     }
     res.json({status: "OK", data: result});
   });
